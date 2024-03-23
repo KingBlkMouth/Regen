@@ -1,5 +1,5 @@
 ---
-title: "Regen_Notes_2"
+title: "Regen_Notes"
 ---
 
 This is a Quarto website.
