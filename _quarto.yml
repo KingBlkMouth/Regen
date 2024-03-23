@@ -2,7 +2,7 @@ project:
   type: website
 
 website:
-  title: "Regen_Notes_2"
+  title: "Regen_Notes"
   navbar:
     left:
       - href: index.qmd
