@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Regen_Notes</title>
+<title>Regen_Notes - Imputation</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -82,7 +82,7 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" rel="" target="" aria-current="page">
+    <a class="nav-link" href="./index.html" rel="" target="">
  <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
@@ -101,22 +101,14 @@ ul.task-list li input[type="checkbox"] {
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#these-are-git-commands-that-i-need" id="toc-these-are-git-commands-that-i-need" class="nav-link active" data-scroll-target="#these-are-git-commands-that-i-need">These are git commands that I need:</a></li>
-  <li><a href="#plot-selection" id="toc-plot-selection" class="nav-link" data-scroll-target="#plot-selection">Plot Selection</a></li>
-  <li><a href="#imputation" id="toc-imputation" class="nav-link" data-scroll-target="#imputation">Imputation</a></li>
-  </ul>
-</nav>
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Regen_Notes</h1>
+<h1 class="title">Imputation</h1>
 </div>
 
 
@@ -131,30 +123,9 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<section id="these-are-git-commands-that-i-need" class="level2">
-<h2 class="anchored" data-anchor-id="these-are-git-commands-that-i-need">These are git commands that I need:</h2>
-<ul>
-<li><p>git add .</p></li>
-<li><p>git commit -m “comment”</p></li>
-<li><p>git push origin main</p></li>
-<li><p>quarto publish gh-pages</p></li>
-<li><p>git remote set-url origin https://github.com/KingBlkMouth/Regen.git</p></li>
-<li><p>git remote -v</p></li>
-</ul>
-</section>
-<section id="plot-selection" class="level2">
-<h2 class="anchored" data-anchor-id="plot-selection">Plot Selection</h2>
-<p><strong>Plot Selection</strong>, Starting from a set of stands clipped from the study area in Arc Pro, Pull all of the ecoregions in the study area, then pull all stands with those ecoregions from the WA fia database.</p>
-<p><strong>Ch4,</strong> Pull the plot and condition tables from FIA. Control for artificial regen, unsampled CNs, non-forest conditions, and periodic plot designs. Check the ecoregion codes for mistakes and unwanted codes. Remove the condition CNs that are there only to indicate a site condition.</p>
-<p><strong>Ch5,</strong> Pull in the subplot’s plot and condition tables. Select only those subplots that have the same conditions on the microplot and subplot. Join the sub conditions table to with those plots that have the same conditions. Select those subplots that are at least 97.5% covered by the same conditions. Remove and habitat types that are coded as admin, non-veg, or water. Manually correct any mislabeled habitat types.</p>
-<p><strong>FVS Prep,</strong> Pull in the FVS_Ready tables. Create a column for FPAG. Compare some stats with Kralicek. Write the FVS_Ready and FPAG tables to a .db. Write a standlist for FVS.</p>
-<p><strong>Ch6,</strong> Run the standlist and the new database in FVS to get Canopy Cover.</p>
-</section>
-<section id="imputation" class="level2">
-<h2 class="anchored" data-anchor-id="imputation">Imputation</h2>
+<p>Pull the FVS output and organize the data.</p>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
