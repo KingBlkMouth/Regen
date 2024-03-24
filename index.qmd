@@ -11,8 +11,12 @@ To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
 1 + 1
 ```
 
-git add .
+## These are git commands that I need:
 
-git commit -m "comment"
-
-git push origin main
+  - git add .
+  - git commit -m "comment"
+  - git push origin main
+  
+  - quarto publish gh-pages
+  - git remote set-url origin https://github.com/KingBlkMouth/Regen.git
+  - git remote -v
