@@ -4,7 +4,14 @@
     "href": "index.html",
     "title": "Regen_Notes",
     "section": "",
-    "text": "This is a Quarto website. I am checking to make sure it works after changing the name.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites.\n\n1 + 1\n\n[1] 2\n\n\ngit add .\ngit commit -m “comment”\ngit push origin main"
+    "text": "This is a Quarto website. I am checking to make sure it works after changing the name.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites.\n1 + 1\n\n[1] 2"
+  },
+  {
+    "objectID": "index.html#these-are-git-commands-that-i-need",
+    "href": "index.html#these-are-git-commands-that-i-need",
+    "title": "Regen_Notes",
+    "section": "These are git commands that I need:",
+    "text": "These are git commands that I need:\n\ngit add .\ngit commit -m “comment”\ngit push origin main\nquarto publish gh-pages\ngit remote set-url origin https://github.com/KingBlkMouth/Regen.git\ngit remote -v"
   },
   {
     "objectID": "1_Copied_Code.html",
