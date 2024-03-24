@@ -402,6 +402,9 @@ median(t4$n)
 s <- subs |> select(STANDPLOT_CN, FPAG)
 p <- left_join(plot, s, by = "STANDPLOT_CN")
 
+p$INV_YEAR <-  2020
+
+
 rm(t, t4)
 
  

@@ -2,14 +2,6 @@
 title: "Regen_Notes"
 ---
 
-This is a Quarto website.
-I am checking to make sure it works after changing the name. 
-
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
-
-```{r}
-1 + 1
-```
 
 ## These are git commands that I need:
 
@@ -20,3 +12,50 @@ To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
   - quarto publish gh-pages
   - git remote set-url origin https://github.com/KingBlkMouth/Regen.git
   - git remote -v
+  
+
+
+## Plot Selection
+
+**Plot Selection**, Starting from a set of stands clipped from the study area in 
+Arc Pro, Pull all of the ecoregions in the study area, then pull all stands with 
+those ecoregions from the WA fia database. 
+  
+
+**Ch4,** Pull the plot and condition tables from FIA. 
+Control for artificial regen, unsampled CNs, non-forest conditions, and periodic 
+plot designs. 
+Check the ecoregion codes for mistakes and unwanted codes. 
+Remove the condition CNs that are there only to indicate a site condition. 
+
+**Ch5,** Pull in the subplot's plot and condition tables. 
+Select only those subplots that have the same conditions on the microplot and subplot. 
+Join the sub conditions table to with those plots that have the same conditions. 
+Select those subplots that are at least 97.5% covered by the same conditions. 
+Remove and habitat types that are coded as admin, non-veg, or water. 
+Manually correct any mislabeled habitat types. 
+
+**FVS Prep,** Pull in the FVS_Ready tables. 
+Create a column for FPAG. 
+Compare some stats with Kralicek. 
+Write the FVS_Ready and FPAG tables to a .db. 
+Write a standlist for FVS. 
+
+**Ch6,** Run the standlist and the new database in FVS to get Canopy Cover. 
+
+
+
+## Imputation
+
+
+
+
+
+
+
+
+
+
+
+
+
