@@ -1,15 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://KingBlkMouth.github.io/Regen/index.html</loc>
-    <lastmod>2024-03-25T14:10:03.669Z</lastmod>
+    <loc>https://KingBlkMouth.github.io/Regen/scratch.html</loc>
+    <lastmod>2024-03-25T21:30:00.816Z</lastmod>
+  </url>
+  <url>
+    <loc>https://KingBlkMouth.github.io/Regen/3_Visualization.html</loc>
+    <lastmod>2024-03-25T21:29:53.666Z</lastmod>
   </url>
   <url>
     <loc>https://KingBlkMouth.github.io/Regen/1_Copied_Code.html</loc>
-    <lastmod>2024-03-25T14:10:03.081Z</lastmod>
+    <lastmod>2024-03-25T21:29:46.054Z</lastmod>
   </url>
   <url>
     <loc>https://KingBlkMouth.github.io/Regen/2_Imputation.html</loc>
-    <lastmod>2024-03-25T14:10:03.373Z</lastmod>
+    <lastmod>2024-03-25T21:29:53.326Z</lastmod>
+  </url>
+  <url>
+    <loc>https://KingBlkMouth.github.io/Regen/index.html</loc>
+    <lastmod>2024-03-25T21:29:54.046Z</lastmod>
   </url>
 </urlset>

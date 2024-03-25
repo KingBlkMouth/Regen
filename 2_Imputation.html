@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -89,10 +123,6 @@ ul.task-list li input[type="checkbox"] {
     <a class="nav-link" href="./1_Copied_Code.html" rel="" target="">
  <span class="menu-text">Plot Selection</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link active" href="./2_Imputation.html" rel="" target="" aria-current="page">
- <span class="menu-text">Imputation</span></a>
-  </li>  
 </ul>
             <div class="quarto-navbar-tools ms-auto">
 </div>
@@ -128,6 +158,320 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 <p>Pull the FVS output and organize the data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse, <span class="at">quietly =</span> T)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(esquisse)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(yaImpute)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(vegan)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">scipen =</span> <span class="dv">999</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Set k for knn. Get the compute and summary tables from the fvs run. Get the tree and plots tables from fvs_ready. Also adding the cond table for troubleshooting.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>k <span class="ot">=</span> <span class="dv">10</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Pulling my list of subplots with FPAGs that I used in FVS</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># "C:\RxFire\Regen\Regen_Notes\standlist03242024.csv"</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># getwd()</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>standlist <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"standlist03242024.csv"</span>, </span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>                      <span class="at">col_types =</span> <span class="fu">c</span>(<span class="st">"cccc"</span>)) </span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="do">## The FVS variables DB I created earlier by running these plots in FVS</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="do">## and extracting the first years estimates of CC, BA, &amp; SDI</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># "C:/RxFire/Regen/FVS/regen_020724_4n/regen_020724_4n.db"</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co"># "C:\RxFire\Regen\FVS\regen_032524_0919\regen_032524_0919.db"</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">"C:/RxFire/Regen/FVS/regen_032524_0919/regen_032524_0919.db"</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute has CC</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Summary2 has BA and SDI</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>comp <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"select CaseID, StandID, CC from FVS_Compute"</span>)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>summary <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  con, </span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">str_c</span>(<span class="st">"select CaseID, StandID, Tpa, BA, SDI from FVS_Summary2"</span>,</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        <span class="st">" where Year = 2020"</span>)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>pred <span class="ot">&lt;-</span> <span class="fu">left_join</span>(comp, summary, <span class="fu">join_by</span>(CaseID, StandID))</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="co"># rm(comp, summary, con)</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="co"># making a list for sql</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>db_list <span class="ot">&lt;-</span> <span class="cf">function</span>(df, CN_col){</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>  name <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>  name <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span> <span class="fu">select</span>({{CN_col}})</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>  name <span class="ot">&lt;-</span> name <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">CN_col =</span> <span class="fu">str_c</span>(<span class="st">"'"</span>, {{CN_col}}, <span class="st">"'"</span>)) </span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>  name <span class="ot">&lt;-</span> <span class="fu">str_flatten_comma</span>(name<span class="sc">$</span>CN_col)</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>  <span class="co"># name &lt;- str_flatten_comma(name[, CN_col])</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>  name</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>stplt_cn <span class="ot">&lt;-</span> <span class="fu">db_list</span>(<span class="at">df =</span> pred, <span class="at">CN_col =</span> StandID)</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="co"># connecting to the WA state FIA db</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">"C:/RxFire/Data/_FIADB_WA.db"</span>)</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="co"># collecting the trees</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>  con, </span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">str_c</span>(<span class="st">"select * from FVS_TREEINIT_PLOT where STANDPLOT_CN in ("</span>, </span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>        stplt_cn, <span class="st">")"</span>))</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="co"># collecting tne plots and subplots</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>plot <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>  con, </span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>  <span class="fu">str_c</span>(<span class="st">"select * from FVS_PLOTINIT_PLOT where STANDPLOT_CN in ("</span>, </span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>        stplt_cn, <span class="st">")"</span>))</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a><span class="co"># cond &lt;- dbGetQuery(</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="co">#   con, </span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="co">#   str_c("select * from cond where STANDPLOT_CN in (", </span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a><span class="co">#         stplt_cn, ")"))</span></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Clean the tables.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Cleaning out the NA columns</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>clean_na_cols <span class="ot">&lt;-</span> <span class="cf">function</span>(df){</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  df <span class="ot">&lt;-</span> df[, <span class="fu">colSums</span>(<span class="fu">is.na</span>(df)) <span class="sc">&lt;</span> <span class="fu">nrow</span>(df)]</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> <span class="fu">clean_na_cols</span>(tree)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>plot <span class="ot">&lt;-</span> <span class="fu">clean_na_cols</span>(plot)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Cleaning out the useless columns</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>plot <span class="ot">&lt;-</span> plot <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(GROUPS, STAND_ID, STANDPLOT_ID, INV_DAY, INV_MONTH, </span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>                          REGION, FOREST, SAM_WT, PHYSIO_REGION, STATE, COUNTY))</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> tree <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(STAND_ID, STANDPLOT_ID))</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>pred <span class="ot">&lt;-</span> pred <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(CaseID, Tpa))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Seedling densities are the trees per acre for each species’ seedlings. Adding the plant symbols for seedlings.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Separating the seedlings from the rest</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>seedling_densities <span class="ot">&lt;-</span> tree <span class="sc">|&gt;</span>  <span class="fu">filter</span>(<span class="fu">startsWith</span>(TREE_CN, <span class="st">"S"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(STANDPLOT_CN, SPECIES) <span class="sc">|&gt;</span> </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">TPA =</span> <span class="fu">sum</span>(TREE_COUNT))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'STANDPLOT_CN'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">"C:</span><span class="sc">\\</span><span class="st">RxFire</span><span class="sc">\\</span><span class="st">Data</span><span class="sc">\\</span><span class="st">_FIADB_WA.db"</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Pulling in the species reference table</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>plants_ref <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  con, <span class="st">"select SPECIES_SYMBOL, SPCD, COMMON_NAME, W_SPGRPCD from REF_SPECIES"</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>plant_gr_ref <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  con, <span class="st">"select SPGRPCD, NAME from REF_SPECIES_GROUP"</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Cleaning it up</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>plants_ref <span class="ot">&lt;-</span> plants_ref <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">SPGRPCD =</span> W_SPGRPCD, <span class="at">SYMBL =</span> SPECIES_SYMBOL)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>plants_ref <span class="ot">&lt;-</span> <span class="fu">left_join</span>(plants_ref, plant_gr_ref, <span class="at">by =</span> <span class="fu">join_by</span>(SPGRPCD))</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>plants <span class="ot">&lt;-</span> plants_ref <span class="sc">|&gt;</span> <span class="fu">select</span>(SYMBL, SPCD)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>seedling_densities <span class="ot">&lt;-</span> seedling_densities <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">SPECIES =</span> <span class="fu">as.numeric</span>(SPECIES))</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Getting plant codes for seedlings</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>seedling_densities <span class="ot">&lt;-</span> <span class="fu">left_join</span>(seedling_densities, plants, <span class="fu">join_by</span>(<span class="st">"SPECIES"</span> <span class="sc">==</span> <span class="st">"SPCD"</span>))</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Removing an extra col. </span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>seedling_densities <span class="ot">&lt;-</span> seedling_densities <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(SPECIES))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Widening the table to match the st Joe example. The value of each species TPA goes into a column for that species. Each row is a standplot_cn. If there were no species of a type in that stand, a zero is entered.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Matching the St. Joe data</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>seedling_response <span class="ot">&lt;-</span> seedling_densities <span class="sc">|&gt;</span> <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> SYMBL, </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">values_from =</span> TPA,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">values_fill =</span> <span class="dv">0</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">names_glue =</span> <span class="st">"{SYMBL}_{'TD'}"</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Un-grouping to avoid future messages</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>seedling_response <span class="ot">&lt;-</span> seedling_response <span class="sc">|&gt;</span> <span class="fu">ungroup</span>()</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>seedling_densities <span class="ot">&lt;-</span> seedling_densities <span class="sc">|&gt;</span> <span class="fu">ungroup</span>()</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co"># replacing all NAs with zero, just in case</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>nas_to_zeroes <span class="ot">&lt;-</span> <span class="cf">function</span>(df){</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  df <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span> <span class="fu">mutate_all</span>(<span class="sc">~</span><span class="fu">replace</span>(., <span class="fu">is.na</span>(.), <span class="dv">0</span>))</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  df</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>seedling_response <span class="ot">&lt;-</span> <span class="fu">nas_to_zeroes</span>(seedling_response) </span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="co"># clearing out the objects</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>X_predictors <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>Y_response <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="co"># creating lists of subplots</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>X_predictors <span class="ot">&lt;-</span> pred <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="at">STANDPLOT_CN =</span> StandID) <span class="sc">|&gt;</span> <span class="fu">unique</span>()</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>Y_response <span class="ot">&lt;-</span> seedling_response <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="at">STANDPLOT_CN =</span> STANDPLOT_CN)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>There is a mismatch in dims between the predictors and response variables.</p>
+<p>X has about 25k rows and Y has about 13k. This is looking at all possible plots with the value computed from FVS, vs those plots with seedlings.</p>
+<p>If I remove the extra 12k rows where no regeneration is occurring, that’s bad. If I don’t remove it, then I half of my data is zero.</p>
+<p>The current plan is to use a couple models, one for probability of regeneration. one for regen with and one one without disturbance. From what I understand, the probability of regen model is for post disturbance. So, this is more of an ingrowth model. We need the zeroes and I don’t like that.</p>
+<p>That is what I did last time, so at least the plots will be comparable.</p>
+<p>I think I can at least remove the subplots that are non-forested.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># finding the mismatch </span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>tt <span class="ot">&lt;-</span> <span class="fu">anti_join</span>(X_predictors, Y_response, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="fu">left_join</span>(tt, tree, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> t <span class="sc">|&gt;</span> <span class="fu">group_by</span>(STANDPLOT_CN) <span class="sc">|&gt;</span> </span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">seedling_records =</span> <span class="fu">sum</span>(<span class="fu">startsWith</span>(TREE_CN, <span class="st">"s"</span>)),</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">lt_records =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">startsWith</span>(TREE_CN, <span class="st">"s"</span>)))</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>t3 <span class="ot">&lt;-</span> t2 <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="fu">is.na</span>(seedling_records) <span class="sc">&amp;</span> <span class="fu">is.na</span>(lt_records)) <span class="sc">|&gt;</span> </span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(STANDPLOT_CN)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> t2 <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(lt_records) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(seedling_records))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Of those records where there is no regen, 12k at least had large trees. 1k had neither seedlings of large trees.</p>
+<p>I tried to find out why there were no trees on those subplots, but I couldn’t:</p>
+<pre><code># t3 &lt;- left_join(t3, plot, by = "STANDPLOT_CN")
+# 
+# standlist &lt;- t3 |&gt; select(STAND_CN)
+# standcn &lt;- db_list(standlist, STAND_CN)
+# 
+# con &lt;- dbConnect(RSQLite::SQLite(), "C:/RxFire/Data/_FIADB_WA.db")
+# 
+# cond &lt;- dbGetQuery(
+#   con, 
+#   str_c("select * from cond where PLT_CN in (", 
+#         standcn, ")"))
+# 
+# dbDisconnect(con)
+# 
+# cond &lt;- clean_na_cols(cond)
+# 
+# 
+# cond_status_cd &lt;- cond |&gt; 
+#   filter(COND_STATUS_CD == 1 | COND_STATUS_CD == 2 )
+# 
+# # hist(cond_status_cd$OWNGRPCD)
+# 
+# # Fire damage. 
+# hist(cond_status_cd[cond_status_cd$DSTRBCD1 &gt; 29 &amp; 
+#                       cond_status_cd$DSTRBCD1 &lt; 40, 
+#                     "DSTRBCD1"])
+# 
+# cond_presnfcd &lt;- cond_status_cd |&gt; 
+#   filter(is.na(PRESNFCD)) |&gt; clean_na_cols()
+# 
+# cond_presnfcd &lt;- cond_presnfcd |&gt; 
+#   select(-c(STATECD, INVYR, CN, COUNTYCD, PLOT,
+#             MAPDEN, PROP_BASIS, SLOPE, ASPECT, DSTRBYR1, DSTRBYR2, DSTRBYR3))
+# 
+# # names(cond_presnfcd)
+# 
+# cond_presnfcd &lt;- cond_presnfcd |&gt; 
+#   select(-c(CREATED_BY, CREATED_DATE, CREATED_IN_INSTANCE, MODIFIED_BY, MODIFIED_DATE, MODIFIED_IN_INSTANCE))
+# 
+# cond_presnfcd2 &lt;- cond_presnfcd[, c(1, 49:ncol(cond_presnfcd))]
+# 
+# # summary(as.factor(cond_presnfcd$STUMP_CD_PNWRS))
+# 
+# # hist(cond_presnfcd$BALIVE)</code></pre>
+<p>There are standplot_cns that do not have trees. I am not sure if I should count them. They might be NAs.</p>
+<p>Looking at an example:</p>
+<ul>
+<li>The subplot table says they are all the same.</li>
+<li>The Cond table doesn’t make distinctions for Subplots.</li>
+<li>There are tree records in the the other three plots.</li>
+</ul>
+<p>I am not sure what to do. There are some codes that should be controlled for, but I cannot get rid of all of them. Some of the codes that should be controlled for were probably brought in with the cond table, I couldn’t use standplot_cn. So it pulled in every condition.</p>
+<p>I found this field and it could be of use:</p>
+<p>PHYSCLCD Physiographic class code. A code indicating the general effect of land form, topographical position, and soil on moisture available to trees.</p>
+<hr>
+<p>Removing the no tree plots.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">anti_join</span>(X_predictors, t3, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(X_predictors) <span class="sc">-</span> <span class="fu">nrow</span>(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 895</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>X_predictors <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, X_predictors, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Adding the plots without regen. </span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>imp_response <span class="ot">&lt;-</span> <span class="fu">left_join</span>(X_predictors, seedling_response, <span class="fu">join_by</span>(STANDPLOT_CN))</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># removing the NAs</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>imp_response <span class="ot">&lt;-</span> <span class="fu">nas_to_zeroes</span>(imp_response) </span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co"># imp_data &lt;- imp_data[,1:35]</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co"># removing fields from standlist to join</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>FPAG <span class="ot">&lt;-</span> standlist <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN, FPAG)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co"># renaming the field</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>pred <span class="ot">&lt;-</span> pred <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">STANDPLOT_CN =</span> StandID)</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>pred <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, pred, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="co"># joining fpags to prediction list. </span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>imp_pred <span class="ot">&lt;-</span> <span class="fu">left_join</span>(pred, FPAG, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>imp_data <span class="ot">&lt;-</span> <span class="fu">left_join</span>(imp_pred, imp_response, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Making a set for the zeroes just in case.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>zx <span class="ot">&lt;-</span> Y_response <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Adding the plots without regen. </span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>zimp_response <span class="ot">&lt;-</span> <span class="fu">left_join</span>(zx, seedling_response, <span class="fu">join_by</span>(STANDPLOT_CN))</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co"># removing the NAs</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>zimp_response <span class="ot">&lt;-</span> <span class="fu">nas_to_zeroes</span>(zimp_response) </span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>zpred <span class="ot">&lt;-</span> <span class="fu">left_join</span>(zx, pred, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co"># joining fpags to prediction list. </span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>zimp_pred <span class="ot">&lt;-</span> <span class="fu">left_join</span>(zpred, FPAG, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>zimp_data <span class="ot">&lt;-</span> <span class="fu">left_join</span>(zimp_pred, zimp_response, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Cleaning up the other tables</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, tree, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>plot <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, plot, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># removing extra objects</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(con, X_predictors, Y_response, stplt_cn, t, plant_gr_ref, </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>   plants, standlist, FPAG, pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>name <span class="ot">&lt;-</span> <span class="fu">str_c</span>(<span class="st">"attempt_"</span>, </span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>              <span class="fu">strftime</span>(<span class="fu">Sys.Date</span>(),<span class="st">"%m%d%y"</span>))</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>              <span class="co"># , </span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>              <span class="co"># "_"</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>              <span class="co"># , </span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>              <span class="co"># strftime(Sys.Date(),"%H%M"))</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co"># con &lt;- dbConnect(RSQLite::SQLite(), str_c("./", name, ".db"))</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="co"># dbWriteTable(con, "imp_data", imp_data)</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="co"># dbWriteTable(con, "plants_ref", plants_ref)</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="co"># dbWriteTable(con, "FVS_PLOTINIT_PLOT", plot)</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="co"># dbWriteTable(con, "FVS_TREEINIT_PLOT", tree)</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="co"># dbWriteTable(con, "regen_only_imp_data", zimp_data)</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="co"># dbDisconnect(con)</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"clean_na_cols"</span>, <span class="st">"db_list"</span>, <span class="st">"nas_to_zeroes"</span>, <span class="st">"z_scores"</span>, <span class="st">"k"</span>)</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="co"># rm(list = ls()[!(ls() %in% keep)])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 
 
 

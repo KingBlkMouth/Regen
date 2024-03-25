@@ -123,10 +123,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="nav-link active" href="./1_Copied_Code.html" rel="" target="" aria-current="page">
  <span class="menu-text">Plot Selection</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./2_Imputation.html" rel="" target="">
- <span class="menu-text">Imputation</span></a>
-  </li>  
 </ul>
             <div class="quarto-navbar-tools ms-auto">
 </div>
@@ -150,6 +146,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#fvs-prep" id="toc-fvs-prep" class="nav-link" data-scroll-target="#fvs-prep">FVS prep</a></li>
   </ul></li>
   <li><a href="#ch-6-fvs" id="toc-ch-6-fvs" class="nav-link" data-scroll-target="#ch-6-fvs">CH 6 FVS</a></li>
+  <li><a href="#imputation-prep" id="toc-imputation-prep" class="nav-link" data-scroll-target="#imputation-prep">Imputation Prep</a></li>
   </ul>
 </nav>
     </div>
@@ -176,10 +173,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The following code is pulled from my last set of notes in the stated chapters. It has all been updated as of Mar 23 2024.</p>
 <p><strong>To do</strong></p>
 <hr>
-<p>Add selection code from AGP.</p>
-<p>This is chapter 15 from my last notebook. It is mostly a re-do of plot selection. I fixed a couple of errors that I made in the first run. This code is missing the part where I selected the plots within the NSA.</p>
-<p>I still need to pull in the extra plots from the rest of WA. After I do that, I will add a section that selects the plots to use. Then this will be everything that needs to be done to start looking at potential regen plots in one spot.</p>
-<hr>
+<p>The code on this page goes from a shapefile and FIA data to FVS’s computed variables. ___</p>
 <section id="plot-selection" class="level2">
 <h2 class="anchored" data-anchor-id="plot-selection">Plot selection</h2>
 <div class="cell">
@@ -193,7 +187,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Previous steps:</p>
 <ol type="1">
 <li>I pulled the lat and long from the FIA’s WA database.</li>
-<li>Created a point cloud from the coordinates table in Arc Prp.</li>
+<li>Created a point cloud from the coordinates table in Arc Pro.</li>
 <li>Clipped the point cloud with POC3/OKWEN/OKWEN_shapefiles/OKWEN_AllFOAs_60km_buffer.shp</li>
 <li>Saved the clipped points to 60k_buffer_fiaplots.csv.</li>
 </ol>
@@ -633,18 +627,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(t, t4)</span>
 <span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span>
-<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a><span class="co"># con = dbConnect(RSQLite::SQLite(), dbname = 'C:/RxFire/Regen/Mar24_Regen_FVS.db')</span></span>
-<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a><span class="co"># dbWriteTable(conn = con, name = "FVS_STANDINIT_PLOT", value = stand, overwrite = T)</span></span>
-<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a><span class="co"># dbWriteTable(conn = con, name = "FVS_PLOTINIT_PLOT", value = p, overwrite = T)</span></span>
-<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a><span class="co"># dbWriteTable(conn = con, name = "FVS_TREEINIT_PLOT", value = tree, overwrite = T)</span></span>
-<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a><span class="co"># dbListTables(conn = con)</span></span>
-<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a><span class="co"># dbDisconnect(con)</span></span>
-<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>standlist <span class="ot">&lt;-</span> p <span class="sc">|&gt;</span> <span class="fu">select</span>(STAND_CN, STANDPLOT_CN, VARIANT, FPAG)</span>
-<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(standlist<span class="sc">$</span>VARIANT)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>name <span class="ot">&lt;-</span> <span class="fu">str_c</span>(<span class="st">"FVS_inputDB_"</span>, </span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>              <span class="fu">strftime</span>(<span class="fu">Sys.Date</span>(),<span class="st">"%m%d%y"</span>), </span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>              <span class="st">"_"</span>, </span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>              <span class="fu">strftime</span>(<span class="fu">Sys.time</span>(),<span class="st">"%H%M"</span>),</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>              <span class="st">".db"</span>)</span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a><span class="co"># con = dbConnect(RSQLite::SQLite(), dbname = str_c("../", name)</span></span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a><span class="co"># dbWriteTable(conn = con, name = "FVS_STANDINIT_PLOT", value = stand, overwrite = T)</span></span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a><span class="co"># dbWriteTable(conn = con, name = "FVS_PLOTINIT_PLOT", value = p, overwrite = T)</span></span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a><span class="co"># dbWriteTable(conn = con, name = "FVS_TREEINIT_PLOT", value = tree, overwrite = T)</span></span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a><span class="co"># dbListTables(conn = con)</span></span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a><span class="co"># dbDisconnect(con)</span></span>
+<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a>standlist <span class="ot">&lt;-</span> p <span class="sc">|&gt;</span> <span class="fu">select</span>(STAND_CN, STANDPLOT_CN, VARIANT, FPAG)</span>
+<span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-26"><a href="#cb35-26" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(standlist<span class="sc">$</span>VARIANT)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "EC" "WC" "PN" "IE"</code></pre>
 </div>
@@ -656,13 +656,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "EC" "WC"</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># write_csv(standlist, "./standlist03242024.csv")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>name <span class="ot">&lt;-</span> <span class="fu">str_c</span>(<span class="st">"standlist_"</span>, </span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>              <span class="fu">strftime</span>(<span class="fu">Sys.Date</span>(),<span class="st">"%m%d%y"</span>), </span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>              <span class="st">"_"</span>, </span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>              <span class="fu">strftime</span>(<span class="fu">Sys.time</span>(),<span class="st">"%H%M"</span>),</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>              <span class="st">".csv"</span>)</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a><span class="co"># write_csv(standlist, str_c("./", name))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
 <section id="ch-6-fvs" class="level2">
 <h2 class="anchored" data-anchor-id="ch-6-fvs">CH 6 FVS</h2>
-<p>This code chunk runs FVS to get CC.</p>
+<p>This code chunk runs FVS to get CC, BA, and SDI.</p>
+<p>Set FVS bin to the FVS executable.</p>
+<p>This time consuming step might be avoided using the p2veg_spp table. There is a canopy cover by species variable there. It could be summed. Also, perhaps using percent CC by species could be a better predictor than just CC.</p>
+<p>FVS has been running for 20 minutes with these 25,516 subplots.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>())</span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -677,183 +686,504 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a><span class="do">## Set all the file paths and names in this section. Then, run the rest of the script in sections 2. </span></span>
 <span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a><span class="do">## Set the working directory here.</span></span>
-<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a><span class="fu">setwd</span>(<span class="st">"C:</span><span class="sc">\\</span><span class="st">RxFire</span><span class="sc">\\</span><span class="st">Regen</span><span class="sc">\\</span><span class="st">FVS"</span>)</span>
-<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a><span class="do">## Where are the FVS executables? FVSbin? </span></span>
-<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a><span class="co">#  Include the \\FVS prefix to variant.exe. </span></span>
-<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a>FVSbin <span class="ot">&lt;-</span>  <span class="st">"C:</span><span class="sc">\\</span><span class="st">FVSbin_v3.1</span><span class="sc">\\</span><span class="st">FVS"</span></span>
-<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a><span class="do">## Name this Run</span></span>
-<span id="cb40-22"><a href="#cb40-22" aria-hidden="true" tabindex="-1"></a>name <span class="ot">&lt;-</span> <span class="st">"regen_03242024_1"</span></span>
-<span id="cb40-23"><a href="#cb40-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-24"><a href="#cb40-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-25"><a href="#cb40-25" aria-hidden="true" tabindex="-1"></a><span class="do">## Set the path to the stand input database here, aka the output db from 3_CNs_to_FVS:</span></span>
-<span id="cb40-26"><a href="#cb40-26" aria-hidden="true" tabindex="-1"></a>inputDatabase <span class="ot">&lt;-</span> <span class="st">'C:/RxFire/Regen/Mar24_Regen_FVS.db'</span></span>
-<span id="cb40-27"><a href="#cb40-27" aria-hidden="true" tabindex="-1"></a><span class="co"># C:\\RxFire\\Data\\FIADB_WA.db</span></span>
-<span id="cb40-28"><a href="#cb40-28" aria-hidden="true" tabindex="-1"></a><span class="co"># C:\\RxFire\\Regen\\FVS\\Feb6_Regen_FVS_1.db</span></span>
-<span id="cb40-29"><a href="#cb40-29" aria-hidden="true" tabindex="-1"></a><span class="co"># C:\\RxFire\\Regen\\Feb7_Regen_FVS_1.db</span></span>
-<span id="cb40-30"><a href="#cb40-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-31"><a href="#cb40-31" aria-hidden="true" tabindex="-1"></a><span class="co"># 1.2 Standlist from xlsx -------------------------------------------------</span></span>
-<span id="cb40-32"><a href="#cb40-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-33"><a href="#cb40-33" aria-hidden="true" tabindex="-1"></a>standlist <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"C:/RxFire/Regen/Regen_Notes/standlist03242024.csv"</span>, </span>
-<span id="cb40-34"><a href="#cb40-34" aria-hidden="true" tabindex="-1"></a>                      <span class="at">col_types =</span> <span class="fu">c</span>(<span class="st">"cccc"</span>)) <span class="sc">|&gt;</span> <span class="fu">select</span>(</span>
-<span id="cb40-35"><a href="#cb40-35" aria-hidden="true" tabindex="-1"></a>                        <span class="at">CN =</span> STANDPLOT_CN, <span class="at">FVSVariant =</span> VARIANT</span>
-<span id="cb40-36"><a href="#cb40-36" aria-hidden="true" tabindex="-1"></a>                      ) </span>
-<span id="cb40-37"><a href="#cb40-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-38"><a href="#cb40-38" aria-hidden="true" tabindex="-1"></a><span class="co"># This is to speed up the testing</span></span>
-<span id="cb40-39"><a href="#cb40-39" aria-hidden="true" tabindex="-1"></a><span class="co"># standlist &lt;- standlist[1:1000, ]</span></span>
-<span id="cb40-40"><a href="#cb40-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a><span class="co"># setwd("C:\\RxFire\\Regen\\FVS")</span></span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>fvs_wd <span class="ot">&lt;-</span> <span class="st">"C:</span><span class="sc">\\</span><span class="st">RxFire</span><span class="sc">\\</span><span class="st">Regen</span><span class="sc">\\</span><span class="st">FVS"</span></span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a><span class="do">## Where are the FVS executables? FVSbin? </span></span>
+<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a><span class="co">#  Include the \\FVS prefix to variant.exe. </span></span>
+<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>FVSbin <span class="ot">&lt;-</span>  <span class="st">"C:</span><span class="sc">\\</span><span class="st">FVSbin_v3.1</span><span class="sc">\\</span><span class="st">FVS"</span></span>
+<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Test</span></span>
+<span id="cb40-22"><a href="#cb40-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-23"><a href="#cb40-23" aria-hidden="true" tabindex="-1"></a>name <span class="ot">&lt;-</span> <span class="fu">str_c</span>(<span class="st">"regen_"</span>, </span>
+<span id="cb40-24"><a href="#cb40-24" aria-hidden="true" tabindex="-1"></a>              <span class="fu">strftime</span>(<span class="fu">Sys.Date</span>(),<span class="st">"%m%d%y"</span>), </span>
+<span id="cb40-25"><a href="#cb40-25" aria-hidden="true" tabindex="-1"></a>              <span class="st">"_"</span>, </span>
+<span id="cb40-26"><a href="#cb40-26" aria-hidden="true" tabindex="-1"></a>              <span class="fu">strftime</span>(<span class="fu">Sys.time</span>(),<span class="st">"%H%M"</span>))</span>
+<span id="cb40-27"><a href="#cb40-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-28"><a href="#cb40-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-29"><a href="#cb40-29" aria-hidden="true" tabindex="-1"></a><span class="do">## Set the path to the stand input database here, aka the output db from 3_CNs_to_FVS:</span></span>
+<span id="cb40-30"><a href="#cb40-30" aria-hidden="true" tabindex="-1"></a>inputDatabase <span class="ot">&lt;-</span> <span class="st">'C:/RxFire/Regen/Mar24_Regen_FVS.db'</span></span>
+<span id="cb40-31"><a href="#cb40-31" aria-hidden="true" tabindex="-1"></a><span class="co"># C:\\RxFire\\Data\\FIADB_WA.db</span></span>
+<span id="cb40-32"><a href="#cb40-32" aria-hidden="true" tabindex="-1"></a><span class="co"># C:\\RxFire\\Regen\\FVS\\Feb6_Regen_FVS_1.db</span></span>
+<span id="cb40-33"><a href="#cb40-33" aria-hidden="true" tabindex="-1"></a><span class="co"># C:\\RxFire\\Regen\\Feb7_Regen_FVS_1.db</span></span>
+<span id="cb40-34"><a href="#cb40-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-35"><a href="#cb40-35" aria-hidden="true" tabindex="-1"></a><span class="co"># 1.2 Standlist from xlsx -------------------------------------------------</span></span>
+<span id="cb40-36"><a href="#cb40-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-37"><a href="#cb40-37" aria-hidden="true" tabindex="-1"></a>standlist <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"C:/RxFire/Regen/Regen_Notes/standlist03242024.csv"</span>, </span>
+<span id="cb40-38"><a href="#cb40-38" aria-hidden="true" tabindex="-1"></a>                      <span class="at">col_types =</span> <span class="fu">c</span>(<span class="st">"cccc"</span>)) <span class="sc">|&gt;</span> <span class="fu">select</span>(</span>
+<span id="cb40-39"><a href="#cb40-39" aria-hidden="true" tabindex="-1"></a>                        <span class="at">CN =</span> STANDPLOT_CN, <span class="at">FVSVariant =</span> VARIANT</span>
+<span id="cb40-40"><a href="#cb40-40" aria-hidden="true" tabindex="-1"></a>                      ) </span>
 <span id="cb40-41"><a href="#cb40-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-42"><a href="#cb40-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-43"><a href="#cb40-43" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Batch file Creation -----------------------------------------------------</span></span>
-<span id="cb40-44"><a href="#cb40-44" aria-hidden="true" tabindex="-1"></a><span class="do">## Run everything in section 2. There shouldn't be anything to change.</span></span>
-<span id="cb40-45"><a href="#cb40-45" aria-hidden="true" tabindex="-1"></a><span class="co">#  Except, maybe createInputFile(group_stands$CN[s], if CN was read in as Stand_CN. </span></span>
+<span id="cb40-42"><a href="#cb40-42" aria-hidden="true" tabindex="-1"></a><span class="co"># This is to speed up the testing</span></span>
+<span id="cb40-43"><a href="#cb40-43" aria-hidden="true" tabindex="-1"></a><span class="co"># standlist &lt;- standlist[1:1000, ]</span></span>
+<span id="cb40-44"><a href="#cb40-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-45"><a href="#cb40-45" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb40-46"><a href="#cb40-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-47"><a href="#cb40-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-48"><a href="#cb40-48" aria-hidden="true" tabindex="-1"></a>int <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>()</span>
-<span id="cb40-49"><a href="#cb40-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-50"><a href="#cb40-50" aria-hidden="true" tabindex="-1"></a><span class="co"># Create directory where FVS runs will be sent:</span></span>
-<span id="cb40-51"><a href="#cb40-51" aria-hidden="true" tabindex="-1"></a>RunDirectory <span class="ot">&lt;-</span> <span class="fu">str_c</span>(<span class="fu">getwd</span>(), <span class="st">'/'</span>, name)</span>
-<span id="cb40-52"><a href="#cb40-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-53"><a href="#cb40-53" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(RunDirectory)) {</span>
-<span id="cb40-54"><a href="#cb40-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"Making Run directory: "</span>, RunDirectory))</span>
-<span id="cb40-55"><a href="#cb40-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(RunDirectory)</span>
-<span id="cb40-56"><a href="#cb40-56" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span>(</span>
-<span id="cb40-57"><a href="#cb40-57" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">str_c</span>(RunDirectory, <span class="st">", already exists"</span>))</span>
-<span id="cb40-58"><a href="#cb40-58" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb40-59"><a href="#cb40-59" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-60"><a href="#cb40-60" aria-hidden="true" tabindex="-1"></a><span class="co"># Create input Directory</span></span>
-<span id="cb40-61"><a href="#cb40-61" aria-hidden="true" tabindex="-1"></a>inputDirectory <span class="ot">&lt;-</span> <span class="fu">str_c</span>(RunDirectory, <span class="st">"/In"</span>)</span>
-<span id="cb40-62"><a href="#cb40-62" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-63"><a href="#cb40-63" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(inputDirectory)) {</span>
-<span id="cb40-64"><a href="#cb40-64" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"Making input directory: "</span>, inputDirectory))</span>
-<span id="cb40-65"><a href="#cb40-65" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(inputDirectory)</span>
-<span id="cb40-66"><a href="#cb40-66" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span>(</span>
-<span id="cb40-67"><a href="#cb40-67" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">str_c</span>(inputDirectory, <span class="st">", already exists"</span>))</span>
-<span id="cb40-68"><a href="#cb40-68" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb40-69"><a href="#cb40-69" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-70"><a href="#cb40-70" aria-hidden="true" tabindex="-1"></a><span class="co"># Create Cmd Directory</span></span>
-<span id="cb40-71"><a href="#cb40-71" aria-hidden="true" tabindex="-1"></a>CmdDirectory <span class="ot">&lt;-</span> <span class="fu">str_c</span>(RunDirectory, <span class="st">"/Cmd"</span>)</span>
-<span id="cb40-72"><a href="#cb40-72" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-73"><a href="#cb40-73" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(CmdDirectory)) {</span>
-<span id="cb40-74"><a href="#cb40-74" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"Making input directory: "</span>, CmdDirectory))</span>
-<span id="cb40-75"><a href="#cb40-75" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(CmdDirectory)</span>
-<span id="cb40-76"><a href="#cb40-76" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span>(</span>
-<span id="cb40-77"><a href="#cb40-77" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">str_c</span>(CmdDirectory, <span class="st">", already exists"</span>))</span>
-<span id="cb40-78"><a href="#cb40-78" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb40-79"><a href="#cb40-79" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-80"><a href="#cb40-80" aria-hidden="true" tabindex="-1"></a><span class="do">## The path to the FVS output database is set here:</span></span>
-<span id="cb40-81"><a href="#cb40-81" aria-hidden="true" tabindex="-1"></a>outputDatabase <span class="ot">&lt;-</span> <span class="fu">str_c</span>(RunDirectory, <span class="st">"/"</span>, name, <span class="st">".db"</span>)</span>
-<span id="cb40-82"><a href="#cb40-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-47"><a href="#cb40-47" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Batch file Creation -----------------------------------------------------</span></span>
+<span id="cb40-48"><a href="#cb40-48" aria-hidden="true" tabindex="-1"></a><span class="do">## Run everything in section 2. There shouldn't be anything to change.</span></span>
+<span id="cb40-49"><a href="#cb40-49" aria-hidden="true" tabindex="-1"></a><span class="co">#  Except, maybe createInputFile(group_stands$CN[s], if CN was read in as Stand_CN. </span></span>
+<span id="cb40-50"><a href="#cb40-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-51"><a href="#cb40-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-52"><a href="#cb40-52" aria-hidden="true" tabindex="-1"></a>int <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>()</span>
+<span id="cb40-53"><a href="#cb40-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-54"><a href="#cb40-54" aria-hidden="true" tabindex="-1"></a><span class="co"># Create directory where FVS runs will be sent:</span></span>
+<span id="cb40-55"><a href="#cb40-55" aria-hidden="true" tabindex="-1"></a>RunDirectory <span class="ot">&lt;-</span> <span class="fu">str_c</span>(fvs_wd, <span class="st">'/'</span>, name)</span>
+<span id="cb40-56"><a href="#cb40-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-57"><a href="#cb40-57" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(RunDirectory)) {</span>
+<span id="cb40-58"><a href="#cb40-58" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"Making Run directory: "</span>, RunDirectory))</span>
+<span id="cb40-59"><a href="#cb40-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(RunDirectory)</span>
+<span id="cb40-60"><a href="#cb40-60" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span>(</span>
+<span id="cb40-61"><a href="#cb40-61" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">str_c</span>(RunDirectory, <span class="st">", already exists"</span>))</span>
+<span id="cb40-62"><a href="#cb40-62" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-63"><a href="#cb40-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-64"><a href="#cb40-64" aria-hidden="true" tabindex="-1"></a><span class="co"># Create input Directory</span></span>
+<span id="cb40-65"><a href="#cb40-65" aria-hidden="true" tabindex="-1"></a>inputDirectory <span class="ot">&lt;-</span> <span class="fu">str_c</span>(RunDirectory, <span class="st">"/In"</span>)</span>
+<span id="cb40-66"><a href="#cb40-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-67"><a href="#cb40-67" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(inputDirectory)) {</span>
+<span id="cb40-68"><a href="#cb40-68" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"Making input directory: "</span>, inputDirectory))</span>
+<span id="cb40-69"><a href="#cb40-69" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(inputDirectory)</span>
+<span id="cb40-70"><a href="#cb40-70" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span>(</span>
+<span id="cb40-71"><a href="#cb40-71" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">str_c</span>(inputDirectory, <span class="st">", already exists"</span>))</span>
+<span id="cb40-72"><a href="#cb40-72" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-73"><a href="#cb40-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-74"><a href="#cb40-74" aria-hidden="true" tabindex="-1"></a><span class="co"># Create Cmd Directory</span></span>
+<span id="cb40-75"><a href="#cb40-75" aria-hidden="true" tabindex="-1"></a>CmdDirectory <span class="ot">&lt;-</span> <span class="fu">str_c</span>(RunDirectory, <span class="st">"/Cmd"</span>)</span>
+<span id="cb40-76"><a href="#cb40-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-77"><a href="#cb40-77" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(CmdDirectory)) {</span>
+<span id="cb40-78"><a href="#cb40-78" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"Making input directory: "</span>, CmdDirectory))</span>
+<span id="cb40-79"><a href="#cb40-79" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(CmdDirectory)</span>
+<span id="cb40-80"><a href="#cb40-80" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span>(</span>
+<span id="cb40-81"><a href="#cb40-81" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">str_c</span>(CmdDirectory, <span class="st">", already exists"</span>))</span>
+<span id="cb40-82"><a href="#cb40-82" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb40-83"><a href="#cb40-83" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-84"><a href="#cb40-84" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-85"><a href="#cb40-85" aria-hidden="true" tabindex="-1"></a><span class="do">## This function creates the string for a single stand in FVS.</span></span>
-<span id="cb40-86"><a href="#cb40-86" aria-hidden="true" tabindex="-1"></a>createInputFile <span class="ot">&lt;-</span> <span class="cf">function</span>(stand, managementID, inputDatabase, outputDatabase, areaSpecificKcp, FL){</span>
-<span id="cb40-87"><a href="#cb40-87" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Create .key file</span></span>
-<span id="cb40-88"><a href="#cb40-88" aria-hidden="true" tabindex="-1"></a>  input <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">'STDIDENT</span><span class="sc">\n</span><span class="st">'</span>,                     </span>
-<span id="cb40-89"><a href="#cb40-89" aria-hidden="true" tabindex="-1"></a>                  stand, <span class="st">'</span><span class="sc">\n</span><span class="st">'</span>,                     </span>
-<span id="cb40-90"><a href="#cb40-90" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'STANDCN</span><span class="sc">\n</span><span class="st">'</span>,                     </span>
-<span id="cb40-91"><a href="#cb40-91" aria-hidden="true" tabindex="-1"></a>                  stand, <span class="st">'</span><span class="sc">\n</span><span class="st">'</span>,                     </span>
-<span id="cb40-92"><a href="#cb40-92" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'MGMTID</span><span class="sc">\n</span><span class="st">'</span>,                     </span>
-<span id="cb40-93"><a href="#cb40-93" aria-hidden="true" tabindex="-1"></a>                  managementID,                     </span>
-<span id="cb40-94"><a href="#cb40-94" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'</span><span class="sc">\n</span><span class="st">'</span>,                             </span>
-<span id="cb40-95"><a href="#cb40-95" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'NUMCYCLE          1</span><span class="sc">\n</span><span class="st">'</span>, <span class="co"># Set time intervals. </span></span>
-<span id="cb40-96"><a href="#cb40-96" aria-hidden="true" tabindex="-1"></a>                  <span class="co"># 0 = Change all cycles | Cycle length to one year</span></span>
-<span id="cb40-97"><a href="#cb40-97" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'TIMEINT           0         1</span><span class="sc">\n</span><span class="st">'</span>,</span>
-<span id="cb40-98"><a href="#cb40-98" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'SCREEN</span><span class="sc">\n</span><span class="st">'</span>,               </span>
-<span id="cb40-99"><a href="#cb40-99" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'DATABASE</span><span class="sc">\n</span><span class="st">'</span>,                                                                                     <span class="co"># Databases in       </span></span>
-<span id="cb40-100"><a href="#cb40-100" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'DSNIN</span><span class="sc">\n</span><span class="st">'</span>,                                                </span>
-<span id="cb40-101"><a href="#cb40-101" aria-hidden="true" tabindex="-1"></a>                  inputDatabase, <span class="st">'</span><span class="sc">\n</span><span class="st">'</span>,                                        </span>
-<span id="cb40-102"><a href="#cb40-102" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'StandSQL</span><span class="sc">\n</span><span class="st">'</span>,                                             </span>
-<span id="cb40-103"><a href="#cb40-103" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'SELECT * FROM FVS_PLOTINIT_PLOT</span><span class="sc">\n</span><span class="st">'</span>,</span>
-<span id="cb40-104"><a href="#cb40-104" aria-hidden="true" tabindex="-1"></a>                  <span class="co"># 'SELECT * FROM FVS_PlotInit\n',  # For a different spelling                   </span></span>
-<span id="cb40-105"><a href="#cb40-105" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"WHERE  Standplot_CN  = '%stand_cn%'</span><span class="sc">\n</span><span class="st">"</span>,                     </span>
-<span id="cb40-106"><a href="#cb40-106" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'EndSQL</span><span class="sc">\n</span><span class="st">'</span>,                                                    </span>
-<span id="cb40-107"><a href="#cb40-107" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'DSNIN</span><span class="sc">\n</span><span class="st">'</span>,                                          </span>
-<span id="cb40-108"><a href="#cb40-108" aria-hidden="true" tabindex="-1"></a>                  inputDatabase, <span class="st">'</span><span class="sc">\n</span><span class="st">'</span>,                                             </span>
-<span id="cb40-109"><a href="#cb40-109" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'TreeSQL</span><span class="sc">\n</span><span class="st">'</span>,</span>
-<span id="cb40-110"><a href="#cb40-110" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'SELECT * FROM FVS_TREEINIT_PLOT</span><span class="sc">\n</span><span class="st">'</span>,</span>
-<span id="cb40-111"><a href="#cb40-111" aria-hidden="true" tabindex="-1"></a>                  <span class="co"># 'SELECT * FROM FVS_TreeInit\n',                              </span></span>
-<span id="cb40-112"><a href="#cb40-112" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"WHERE  Standplot_CN  = '%stand_cn%'</span><span class="sc">\n</span><span class="st">"</span>,                            </span>
-<span id="cb40-113"><a href="#cb40-113" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'EndSQL</span><span class="sc">\n</span><span class="st">'</span>,                                                          </span>
-<span id="cb40-114"><a href="#cb40-114" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'END</span><span class="sc">\n</span><span class="st">'</span>,   <span class="co"># Database ends here</span></span>
-<span id="cb40-115"><a href="#cb40-115" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'STRCLASS</span><span class="sc">\n</span><span class="st">'</span>,</span>
-<span id="cb40-116"><a href="#cb40-116" aria-hidden="true" tabindex="-1"></a>                  <span class="co"># year of compute 0 = Every cycle</span></span>
-<span id="cb40-117"><a href="#cb40-117" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'COMPUTE           0</span><span class="sc">\n</span><span class="st">'</span>,                                                                        <span class="co"># Compute below here</span></span>
-<span id="cb40-118"><a href="#cb40-118" aria-hidden="true" tabindex="-1"></a>                  <span class="co"># # acancov defined when str_class is used, after thin Canopy</span></span>
-<span id="cb40-119"><a href="#cb40-119" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'CC = bcancov</span><span class="sc">\n</span><span class="st">'</span>,</span>
-<span id="cb40-120"><a href="#cb40-120" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'END</span><span class="sc">\n</span><span class="st">'</span>,                                                                                            <span class="co"># Compute ends</span></span>
-<span id="cb40-121"><a href="#cb40-121" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'DATABASE</span><span class="sc">\n</span><span class="st">'</span>,                                                                                     <span class="co"># DB Out Starts</span></span>
-<span id="cb40-122"><a href="#cb40-122" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'DSNOUT</span><span class="sc">\n</span><span class="st">'</span>,                                      </span>
-<span id="cb40-123"><a href="#cb40-123" aria-hidden="true" tabindex="-1"></a>                  outputDatabase, <span class="st">'</span><span class="sc">\n</span><span class="st">'</span>,</span>
-<span id="cb40-124"><a href="#cb40-124" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'SUMMARY           2</span><span class="sc">\n</span><span class="st">'</span>,</span>
-<span id="cb40-125"><a href="#cb40-125" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'StrClsDB</span><span class="sc">\n</span><span class="st">'</span>,</span>
-<span id="cb40-126"><a href="#cb40-126" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'COMPUTDB</span><span class="sc">\n</span><span class="st">'</span>,</span>
-<span id="cb40-127"><a href="#cb40-127" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'END</span><span class="sc">\n</span><span class="st">'</span>,</span>
-<span id="cb40-128"><a href="#cb40-128" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'Process</span><span class="sc">\n\n</span><span class="st">'</span>)                                    </span>
-<span id="cb40-129"><a href="#cb40-129" aria-hidden="true" tabindex="-1"></a>                   </span>
-<span id="cb40-130"><a href="#cb40-130" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb40-131"><a href="#cb40-131" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb40-132"><a href="#cb40-132" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-133"><a href="#cb40-133" aria-hidden="true" tabindex="-1"></a><span class="fu">write</span>(<span class="fu">str_c</span>(<span class="st">"set RScript="</span>, <span class="st">" </span><span class="sc">\"</span><span class="st">"</span>, <span class="st">"C:/Program Files/R/R-4.3.1/bin/Rscript.exe"</span>, <span class="st">"</span><span class="sc">\"</span><span class="st">"</span>,</span>
-<span id="cb40-134"><a href="#cb40-134" aria-hidden="true" tabindex="-1"></a>            <span class="st">"</span><span class="sc">\n</span><span class="st"> </span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb40-135"><a href="#cb40-135" aria-hidden="true" tabindex="-1"></a>            <span class="st">"cd "</span>, inputDirectory, <span class="st">"</span><span class="sc">\n\n</span><span class="st">"</span>), <span class="fu">paste0</span>(RunDirectory, <span class="st">'</span><span class="sc">\\</span><span class="st">test.bat'</span>), <span class="at">append =</span> <span class="st">"TRUE"</span>)</span>
+<span id="cb40-84"><a href="#cb40-84" aria-hidden="true" tabindex="-1"></a><span class="do">## The path to the FVS output database is set here:</span></span>
+<span id="cb40-85"><a href="#cb40-85" aria-hidden="true" tabindex="-1"></a>outputDatabase <span class="ot">&lt;-</span> <span class="fu">str_c</span>(RunDirectory, <span class="st">"/"</span>, name, <span class="st">".db"</span>)</span>
+<span id="cb40-86"><a href="#cb40-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-87"><a href="#cb40-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-88"><a href="#cb40-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-89"><a href="#cb40-89" aria-hidden="true" tabindex="-1"></a><span class="do">## This function creates the string for a single stand in FVS.</span></span>
+<span id="cb40-90"><a href="#cb40-90" aria-hidden="true" tabindex="-1"></a>createInputFile <span class="ot">&lt;-</span> <span class="cf">function</span>(stand, managementID, inputDatabase, outputDatabase){</span>
+<span id="cb40-91"><a href="#cb40-91" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Create .key file</span></span>
+<span id="cb40-92"><a href="#cb40-92" aria-hidden="true" tabindex="-1"></a>  input <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">'STDIDENT</span><span class="sc">\n</span><span class="st">'</span>,                     </span>
+<span id="cb40-93"><a href="#cb40-93" aria-hidden="true" tabindex="-1"></a>                  stand, <span class="st">'</span><span class="sc">\n</span><span class="st">'</span>,                     </span>
+<span id="cb40-94"><a href="#cb40-94" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'STANDCN</span><span class="sc">\n</span><span class="st">'</span>,                     </span>
+<span id="cb40-95"><a href="#cb40-95" aria-hidden="true" tabindex="-1"></a>                  stand, <span class="st">'</span><span class="sc">\n</span><span class="st">'</span>,                     </span>
+<span id="cb40-96"><a href="#cb40-96" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'MGMTID</span><span class="sc">\n</span><span class="st">'</span>,                     </span>
+<span id="cb40-97"><a href="#cb40-97" aria-hidden="true" tabindex="-1"></a>                  managementID,                     </span>
+<span id="cb40-98"><a href="#cb40-98" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'</span><span class="sc">\n</span><span class="st">'</span>,                             </span>
+<span id="cb40-99"><a href="#cb40-99" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'NUMCYCLE          1</span><span class="sc">\n</span><span class="st">'</span>, <span class="co"># Set time intervals. </span></span>
+<span id="cb40-100"><a href="#cb40-100" aria-hidden="true" tabindex="-1"></a>                  <span class="co"># 0 = Change all cycles | Cycle length to one year</span></span>
+<span id="cb40-101"><a href="#cb40-101" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'TIMEINT           0         1</span><span class="sc">\n</span><span class="st">'</span>,</span>
+<span id="cb40-102"><a href="#cb40-102" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'SCREEN</span><span class="sc">\n</span><span class="st">'</span>,               </span>
+<span id="cb40-103"><a href="#cb40-103" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'DATABASE</span><span class="sc">\n</span><span class="st">'</span>,                                                                                     <span class="co"># Databases in    </span></span>
+<span id="cb40-104"><a href="#cb40-104" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'DSNIN</span><span class="sc">\n</span><span class="st">'</span>,                                                </span>
+<span id="cb40-105"><a href="#cb40-105" aria-hidden="true" tabindex="-1"></a>                  inputDatabase, <span class="st">'</span><span class="sc">\n</span><span class="st">'</span>,                                        </span>
+<span id="cb40-106"><a href="#cb40-106" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'StandSQL</span><span class="sc">\n</span><span class="st">'</span>,                                             </span>
+<span id="cb40-107"><a href="#cb40-107" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'SELECT * FROM FVS_PLOTINIT_PLOT</span><span class="sc">\n</span><span class="st">'</span>,</span>
+<span id="cb40-108"><a href="#cb40-108" aria-hidden="true" tabindex="-1"></a>                  <span class="co"># 'SELECT * FROM FVS_PlotInit\n',  # For a different table name                   </span></span>
+<span id="cb40-109"><a href="#cb40-109" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"WHERE  Standplot_CN  = '%stand_cn%'</span><span class="sc">\n</span><span class="st">"</span>,                     </span>
+<span id="cb40-110"><a href="#cb40-110" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'EndSQL</span><span class="sc">\n</span><span class="st">'</span>,                                                    </span>
+<span id="cb40-111"><a href="#cb40-111" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'DSNIN</span><span class="sc">\n</span><span class="st">'</span>,                                          </span>
+<span id="cb40-112"><a href="#cb40-112" aria-hidden="true" tabindex="-1"></a>                  inputDatabase, <span class="st">'</span><span class="sc">\n</span><span class="st">'</span>,                                             </span>
+<span id="cb40-113"><a href="#cb40-113" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'TreeSQL</span><span class="sc">\n</span><span class="st">'</span>,</span>
+<span id="cb40-114"><a href="#cb40-114" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'SELECT * FROM FVS_TREEINIT_PLOT</span><span class="sc">\n</span><span class="st">'</span>,</span>
+<span id="cb40-115"><a href="#cb40-115" aria-hidden="true" tabindex="-1"></a>                  <span class="co"># 'SELECT * FROM FVS_TreeInit\n',                              </span></span>
+<span id="cb40-116"><a href="#cb40-116" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"WHERE  Standplot_CN  = '%stand_cn%'</span><span class="sc">\n</span><span class="st">"</span>,                            </span>
+<span id="cb40-117"><a href="#cb40-117" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'EndSQL</span><span class="sc">\n</span><span class="st">'</span>,                                                          </span>
+<span id="cb40-118"><a href="#cb40-118" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'END</span><span class="sc">\n</span><span class="st">'</span>,   <span class="co"># Database ends here</span></span>
+<span id="cb40-119"><a href="#cb40-119" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'STRCLASS</span><span class="sc">\n</span><span class="st">'</span>,</span>
+<span id="cb40-120"><a href="#cb40-120" aria-hidden="true" tabindex="-1"></a>                  <span class="co"># year of compute 0 = Every cycle</span></span>
+<span id="cb40-121"><a href="#cb40-121" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'COMPUTE           0</span><span class="sc">\n</span><span class="st">'</span>,                                                                        <span class="co"># Compute below here</span></span>
+<span id="cb40-122"><a href="#cb40-122" aria-hidden="true" tabindex="-1"></a>                  <span class="co"># # acancov defined when str_class is used, after thin Canopy</span></span>
+<span id="cb40-123"><a href="#cb40-123" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'CC = bcancov</span><span class="sc">\n</span><span class="st">'</span>,</span>
+<span id="cb40-124"><a href="#cb40-124" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'END</span><span class="sc">\n</span><span class="st">'</span>,                                                                                            <span class="co"># Compute ends</span></span>
+<span id="cb40-125"><a href="#cb40-125" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'DATABASE</span><span class="sc">\n</span><span class="st">'</span>,                                                                                     <span class="co"># DB Out Starts</span></span>
+<span id="cb40-126"><a href="#cb40-126" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'DSNOUT</span><span class="sc">\n</span><span class="st">'</span>,                                      </span>
+<span id="cb40-127"><a href="#cb40-127" aria-hidden="true" tabindex="-1"></a>                  outputDatabase, <span class="st">'</span><span class="sc">\n</span><span class="st">'</span>,</span>
+<span id="cb40-128"><a href="#cb40-128" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'SUMMARY           2</span><span class="sc">\n</span><span class="st">'</span>,</span>
+<span id="cb40-129"><a href="#cb40-129" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'StrClsDB</span><span class="sc">\n</span><span class="st">'</span>,</span>
+<span id="cb40-130"><a href="#cb40-130" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'COMPUTDB</span><span class="sc">\n</span><span class="st">'</span>,</span>
+<span id="cb40-131"><a href="#cb40-131" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'END</span><span class="sc">\n</span><span class="st">'</span>,</span>
+<span id="cb40-132"><a href="#cb40-132" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'Process</span><span class="sc">\n\n</span><span class="st">'</span>)                                    </span>
+<span id="cb40-133"><a href="#cb40-133" aria-hidden="true" tabindex="-1"></a>                   </span>
+<span id="cb40-134"><a href="#cb40-134" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb40-135"><a href="#cb40-135" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb40-136"><a href="#cb40-136" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-137"><a href="#cb40-137" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-138"><a href="#cb40-138" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-139"><a href="#cb40-139" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (g <span class="cf">in</span> <span class="fu">unique</span>(standlist<span class="sc">$</span>FVSVariant)) {</span>
-<span id="cb40-140"><a href="#cb40-140" aria-hidden="true" tabindex="-1"></a>  masterkeys <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb40-141"><a href="#cb40-141" aria-hidden="true" tabindex="-1"></a>  group_stands <span class="ot">&lt;-</span> <span class="fu">subset</span>(standlist, FVSVariant <span class="sc">==</span> g)</span>
-<span id="cb40-142"><a href="#cb40-142" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(group_stands)) {</span>
-<span id="cb40-143"><a href="#cb40-143" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb40-144"><a href="#cb40-144" aria-hidden="true" tabindex="-1"></a>    keywords <span class="ot">&lt;-</span> <span class="fu">createInputFile</span>(<span class="at">stand =</span> group_stands<span class="sc">$</span>CN[s], <span class="at">managementID =</span> group_stands<span class="sc">$</span>CN[s], </span>
-<span id="cb40-145"><a href="#cb40-145" aria-hidden="true" tabindex="-1"></a>                                <span class="at">inputDatabase =</span> inputDatabase,</span>
-<span id="cb40-146"><a href="#cb40-146" aria-hidden="true" tabindex="-1"></a>                                <span class="at">outputDatabase =</span> outputDatabase, </span>
-<span id="cb40-147"><a href="#cb40-147" aria-hidden="true" tabindex="-1"></a>                                <span class="at">areaSpecificKcp =</span> (<span class="fu">paste0</span>(kcp_dir, <span class="st">"/"</span>, group_stands<span class="sc">$</span>kcp[s])), </span>
-<span id="cb40-148"><a href="#cb40-148" aria-hidden="true" tabindex="-1"></a>                                <span class="at">FL =</span> FL[a])</span>
-<span id="cb40-149"><a href="#cb40-149" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb40-150"><a href="#cb40-150" aria-hidden="true" tabindex="-1"></a>    masterkeys <span class="ot">&lt;-</span> <span class="fu">paste0</span>(masterkeys, keywords)</span>
-<span id="cb40-151"><a href="#cb40-151" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb40-152"><a href="#cb40-152" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Print to the key file</span></span>
-<span id="cb40-153"><a href="#cb40-153" aria-hidden="true" tabindex="-1"></a>  masterkeys <span class="ot">&lt;-</span> <span class="fu">paste0</span>(masterkeys, <span class="st">"</span><span class="sc">\n</span><span class="st">STOP</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb40-154"><a href="#cb40-154" aria-hidden="true" tabindex="-1"></a>  <span class="co"># "\n STOP?\n" or "\nSTOP\n", outfile has errors 1 &amp; 2, invalid keyword &amp; no Stop</span></span>
-<span id="cb40-155"><a href="#cb40-155" aria-hidden="true" tabindex="-1"></a>  file_name <span class="ot">&lt;-</span> <span class="fu">str_sub</span>(g, <span class="at">end =</span> <span class="sc">-</span><span class="dv">5</span>)</span>
-<span id="cb40-156"><a href="#cb40-156" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write</span>(masterkeys, <span class="at">file =</span> <span class="fu">str_c</span>(inputDirectory, <span class="st">'</span><span class="sc">\\</span><span class="st">'</span>, g, <span class="st">'.key'</span>))</span>
-<span id="cb40-157"><a href="#cb40-157" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb40-158"><a href="#cb40-158" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Create the .in file ##</span></span>
-<span id="cb40-159"><a href="#cb40-159" aria-hidden="true" tabindex="-1"></a>  fvs_in <span class="ot">&lt;-</span> <span class="fu">paste0</span>(g, <span class="st">".key</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb40-160"><a href="#cb40-160" aria-hidden="true" tabindex="-1"></a>                   g, <span class="st">".fvs</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb40-161"><a href="#cb40-161" aria-hidden="true" tabindex="-1"></a>                   g, <span class="st">".out</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb40-162"><a href="#cb40-162" aria-hidden="true" tabindex="-1"></a>                   g, <span class="st">".trl</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb40-163"><a href="#cb40-163" aria-hidden="true" tabindex="-1"></a>                   g, <span class="st">".sum</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb40-164"><a href="#cb40-164" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb40-165"><a href="#cb40-165" aria-hidden="true" tabindex="-1"></a>  fvs_in_file <span class="ot">&lt;-</span> <span class="fu">paste0</span>(inputDirectory, <span class="st">'</span><span class="sc">\\</span><span class="st">'</span>, g, <span class="st">'.in'</span>)</span>
-<span id="cb40-166"><a href="#cb40-166" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write</span>(fvs_in, <span class="at">file =</span> fvs_in_file)</span>
-<span id="cb40-167"><a href="#cb40-167" aria-hidden="true" tabindex="-1"></a>  fvs_bat <span class="ot">&lt;-</span> <span class="fu">paste0</span>(FVSbin, <span class="fu">unique</span>(group_stands<span class="sc">$</span>FVSVariant), <span class="st">".exe &lt; "</span>, g, <span class="st">".in &gt;"</span>,</span>
-<span id="cb40-168"><a href="#cb40-168" aria-hidden="true" tabindex="-1"></a>                    RunDirectory, <span class="st">"/Cmd/"</span>, g, <span class="st">".txt"</span>, <span class="st">" 2&gt;&amp;1"</span>, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb40-169"><a href="#cb40-169" aria-hidden="true" tabindex="-1"></a>                    <span class="co"># Send each CMD file to this script</span></span>
-<span id="cb40-170"><a href="#cb40-170" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"%RScript%"</span>,<span class="st">" C:/RxFire/Scripts/ErrorProcessing/RcmdProcess.R "</span>,</span>
-<span id="cb40-171"><a href="#cb40-171" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"</span><span class="sc">\"</span><span class="st">"</span>, RunDirectory, <span class="st">"/Cmd/"</span>, g, <span class="st">".txt"</span>, <span class="st">"</span><span class="sc">\"</span><span class="st">"</span>, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb40-172"><a href="#cb40-172" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb40-173"><a href="#cb40-173" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write</span>(fvs_bat, <span class="fu">paste0</span>(RunDirectory, <span class="st">'</span><span class="sc">\\</span><span class="st">test.bat'</span>), <span class="at">append =</span> <span class="st">"TRUE"</span>)</span>
-<span id="cb40-174"><a href="#cb40-174" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb40-175"><a href="#cb40-175" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-176"><a href="#cb40-176" aria-hidden="true" tabindex="-1"></a><span class="co"># Summarize the OUT files</span></span>
-<span id="cb40-177"><a href="#cb40-177" aria-hidden="true" tabindex="-1"></a>fvs_errors <span class="ot">&lt;-</span> <span class="fu">str_c</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">REM This one cleans in extra files out and summarizes the output the Run Directory </span><span class="sc">\n</span><span class="st">"</span>,</span>
-<span id="cb40-178"><a href="#cb40-178" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"%RScript%"</span>,<span class="st">" C:/RxFire/Scripts/ErrorProcessing/RfvsProcess.R "</span>,</span>
-<span id="cb40-179"><a href="#cb40-179" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"</span><span class="sc">\"</span><span class="st">"</span>, RunDirectory, <span class="st">"/In"</span>, <span class="st">"</span><span class="sc">\"</span><span class="st">"</span>)</span>
-<span id="cb40-180"><a href="#cb40-180" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-181"><a href="#cb40-181" aria-hidden="true" tabindex="-1"></a><span class="fu">write</span>(fvs_errors, <span class="fu">paste0</span>(RunDirectory, <span class="st">'</span><span class="sc">\\</span><span class="st">test.bat'</span>), <span class="at">append =</span> <span class="st">"TRUE"</span>)</span>
-<span id="cb40-182"><a href="#cb40-182" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-183"><a href="#cb40-183" aria-hidden="true" tabindex="-1"></a><span class="co"># write("PAUSE", paste0(inputDirectory, '\\test.bat'), append = "TRUE")</span></span>
-<span id="cb40-184"><a href="#cb40-184" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-185"><a href="#cb40-185" aria-hidden="true" tabindex="-1"></a>out <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>()</span>
-<span id="cb40-186"><a href="#cb40-186" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-187"><a href="#cb40-187" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(out <span class="sc">-</span> int)</span>
-<span id="cb40-188"><a href="#cb40-188" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-189"><a href="#cb40-189" aria-hidden="true" tabindex="-1"></a><span class="co"># Run this Batch file</span></span>
-<span id="cb40-190"><a href="#cb40-190" aria-hidden="true" tabindex="-1"></a><span class="fu">shell.exec</span>(<span class="fu">str_c</span>(RunDirectory, <span class="st">'</span><span class="sc">\\</span><span class="st">test.bat'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb40-137"><a href="#cb40-137" aria-hidden="true" tabindex="-1"></a><span class="fu">write</span>(<span class="fu">str_c</span>(<span class="st">"set RScript="</span>, <span class="st">" </span><span class="sc">\"</span><span class="st">"</span>, <span class="st">"C:/Program Files/R/R-4.3.1/bin/Rscript.exe"</span>, <span class="st">"</span><span class="sc">\"</span><span class="st">"</span>,</span>
+<span id="cb40-138"><a href="#cb40-138" aria-hidden="true" tabindex="-1"></a>            <span class="st">"</span><span class="sc">\n</span><span class="st"> </span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb40-139"><a href="#cb40-139" aria-hidden="true" tabindex="-1"></a>            <span class="st">"cd "</span>, inputDirectory, <span class="st">"</span><span class="sc">\n\n</span><span class="st">"</span>), <span class="fu">paste0</span>(RunDirectory, <span class="st">'</span><span class="sc">\\</span><span class="st">test.bat'</span>), <span class="at">append =</span> <span class="st">"TRUE"</span>)</span>
+<span id="cb40-140"><a href="#cb40-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-141"><a href="#cb40-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-142"><a href="#cb40-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-143"><a href="#cb40-143" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (g <span class="cf">in</span> <span class="fu">unique</span>(standlist<span class="sc">$</span>FVSVariant)) {</span>
+<span id="cb40-144"><a href="#cb40-144" aria-hidden="true" tabindex="-1"></a>  masterkeys <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb40-145"><a href="#cb40-145" aria-hidden="true" tabindex="-1"></a>  group_stands <span class="ot">&lt;-</span> <span class="fu">subset</span>(standlist, FVSVariant <span class="sc">==</span> g)</span>
+<span id="cb40-146"><a href="#cb40-146" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(group_stands)) {</span>
+<span id="cb40-147"><a href="#cb40-147" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb40-148"><a href="#cb40-148" aria-hidden="true" tabindex="-1"></a>    keywords <span class="ot">&lt;-</span> <span class="fu">createInputFile</span>(<span class="at">stand =</span> group_stands<span class="sc">$</span>CN[s], <span class="at">managementID =</span> group_stands<span class="sc">$</span>CN[s], </span>
+<span id="cb40-149"><a href="#cb40-149" aria-hidden="true" tabindex="-1"></a>                                <span class="at">inputDatabase =</span> inputDatabase,</span>
+<span id="cb40-150"><a href="#cb40-150" aria-hidden="true" tabindex="-1"></a>                                <span class="at">outputDatabase =</span> outputDatabase</span>
+<span id="cb40-151"><a href="#cb40-151" aria-hidden="true" tabindex="-1"></a>                                )</span>
+<span id="cb40-152"><a href="#cb40-152" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb40-153"><a href="#cb40-153" aria-hidden="true" tabindex="-1"></a>    masterkeys <span class="ot">&lt;-</span> <span class="fu">paste0</span>(masterkeys, keywords)</span>
+<span id="cb40-154"><a href="#cb40-154" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb40-155"><a href="#cb40-155" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Print to the key file</span></span>
+<span id="cb40-156"><a href="#cb40-156" aria-hidden="true" tabindex="-1"></a>  masterkeys <span class="ot">&lt;-</span> <span class="fu">paste0</span>(masterkeys, <span class="st">"</span><span class="sc">\n</span><span class="st">STOP</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb40-157"><a href="#cb40-157" aria-hidden="true" tabindex="-1"></a>  <span class="co"># "\n STOP?\n" or "\nSTOP\n", outfile has errors 1 &amp; 2, invalid keyword &amp; no Stop</span></span>
+<span id="cb40-158"><a href="#cb40-158" aria-hidden="true" tabindex="-1"></a>  file_name <span class="ot">&lt;-</span> <span class="fu">str_sub</span>(g, <span class="at">end =</span> <span class="sc">-</span><span class="dv">5</span>)</span>
+<span id="cb40-159"><a href="#cb40-159" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write</span>(masterkeys, <span class="at">file =</span> <span class="fu">str_c</span>(inputDirectory, <span class="st">'</span><span class="sc">\\</span><span class="st">'</span>, g, <span class="st">'.key'</span>))</span>
+<span id="cb40-160"><a href="#cb40-160" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb40-161"><a href="#cb40-161" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Create the .in file ##</span></span>
+<span id="cb40-162"><a href="#cb40-162" aria-hidden="true" tabindex="-1"></a>  fvs_in <span class="ot">&lt;-</span> <span class="fu">paste0</span>(g, <span class="st">".key</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb40-163"><a href="#cb40-163" aria-hidden="true" tabindex="-1"></a>                   g, <span class="st">".fvs</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb40-164"><a href="#cb40-164" aria-hidden="true" tabindex="-1"></a>                   g, <span class="st">".out</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb40-165"><a href="#cb40-165" aria-hidden="true" tabindex="-1"></a>                   g, <span class="st">".trl</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb40-166"><a href="#cb40-166" aria-hidden="true" tabindex="-1"></a>                   g, <span class="st">".sum</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb40-167"><a href="#cb40-167" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb40-168"><a href="#cb40-168" aria-hidden="true" tabindex="-1"></a>  fvs_in_file <span class="ot">&lt;-</span> <span class="fu">paste0</span>(inputDirectory, <span class="st">'</span><span class="sc">\\</span><span class="st">'</span>, g, <span class="st">'.in'</span>)</span>
+<span id="cb40-169"><a href="#cb40-169" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write</span>(fvs_in, <span class="at">file =</span> fvs_in_file)</span>
+<span id="cb40-170"><a href="#cb40-170" aria-hidden="true" tabindex="-1"></a>  fvs_bat <span class="ot">&lt;-</span> <span class="fu">paste0</span>(FVSbin, <span class="fu">unique</span>(group_stands<span class="sc">$</span>FVSVariant), <span class="st">".exe &lt; "</span>, g, <span class="st">".in &gt;"</span>,</span>
+<span id="cb40-171"><a href="#cb40-171" aria-hidden="true" tabindex="-1"></a>                    RunDirectory, <span class="st">"/Cmd/"</span>, g, <span class="st">".txt"</span>, <span class="st">" 2&gt;&amp;1"</span>, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb40-172"><a href="#cb40-172" aria-hidden="true" tabindex="-1"></a>                    <span class="co"># Send each CMD file to this script</span></span>
+<span id="cb40-173"><a href="#cb40-173" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"%RScript%"</span>,<span class="st">" C:/RxFire/Scripts/ErrorProcessing/RcmdProcess.R "</span>,</span>
+<span id="cb40-174"><a href="#cb40-174" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"</span><span class="sc">\"</span><span class="st">"</span>, RunDirectory, <span class="st">"/Cmd/"</span>, g, <span class="st">".txt"</span>, <span class="st">"</span><span class="sc">\"</span><span class="st">"</span>, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb40-175"><a href="#cb40-175" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb40-176"><a href="#cb40-176" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write</span>(fvs_bat, <span class="fu">paste0</span>(RunDirectory, <span class="st">'</span><span class="sc">\\</span><span class="st">test.bat'</span>), <span class="at">append =</span> <span class="st">"TRUE"</span>)</span>
+<span id="cb40-177"><a href="#cb40-177" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb40-178"><a href="#cb40-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-179"><a href="#cb40-179" aria-hidden="true" tabindex="-1"></a><span class="co"># Summarize the OUT files</span></span>
+<span id="cb40-180"><a href="#cb40-180" aria-hidden="true" tabindex="-1"></a>fvs_errors <span class="ot">&lt;-</span> <span class="fu">str_c</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">REM This one cleans in extra files out and summarizes the output the Run Directory </span><span class="sc">\n</span><span class="st">"</span>,</span>
+<span id="cb40-181"><a href="#cb40-181" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"%RScript%"</span>,<span class="st">" C:/RxFire/Scripts/ErrorProcessing/RfvsProcess.R "</span>,</span>
+<span id="cb40-182"><a href="#cb40-182" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"</span><span class="sc">\"</span><span class="st">"</span>, RunDirectory, <span class="st">"/In"</span>, <span class="st">"</span><span class="sc">\"</span><span class="st">"</span>)</span>
+<span id="cb40-183"><a href="#cb40-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-184"><a href="#cb40-184" aria-hidden="true" tabindex="-1"></a><span class="fu">write</span>(fvs_errors, <span class="fu">paste0</span>(RunDirectory, <span class="st">'</span><span class="sc">\\</span><span class="st">test.bat'</span>), <span class="at">append =</span> <span class="st">"TRUE"</span>)</span>
+<span id="cb40-185"><a href="#cb40-185" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-186"><a href="#cb40-186" aria-hidden="true" tabindex="-1"></a><span class="co"># write("PAUSE", paste0(inputDirectory, '\\test.bat'), append = "TRUE")</span></span>
+<span id="cb40-187"><a href="#cb40-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-188"><a href="#cb40-188" aria-hidden="true" tabindex="-1"></a>out <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>()</span>
+<span id="cb40-189"><a href="#cb40-189" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-190"><a href="#cb40-190" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(out <span class="sc">-</span> int)</span>
+<span id="cb40-191"><a href="#cb40-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-192"><a href="#cb40-192" aria-hidden="true" tabindex="-1"></a><span class="co"># Run this Batch file</span></span>
+<span id="cb40-193"><a href="#cb40-193" aria-hidden="true" tabindex="-1"></a><span class="fu">shell.exec</span>(<span class="fu">str_c</span>(RunDirectory, <span class="st">'</span><span class="sc">\\</span><span class="st">test.bat'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="imputation-prep" class="level2">
+<h2 class="anchored" data-anchor-id="imputation-prep">Imputation Prep</h2>
+<p>Pull the FVS output and organize the data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse, <span class="at">quietly =</span> T)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(esquisse)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(yaImpute)</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(vegan)</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">scipen =</span> <span class="dv">999</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Set k for knn. Get the compute and summary tables from the fvs run. Get the tree and plots tables from fvs_ready. Also adding the cond table for troubleshooting.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>k <span class="ot">=</span> <span class="dv">10</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Pulling my list of subplots with FPAGs that I used in FVS</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a><span class="co"># "C:\RxFire\Regen\Regen_Notes\standlist03242024.csv"</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a><span class="co"># getwd()</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>standlist <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"standlist03242024.csv"</span>, </span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>                      <span class="at">col_types =</span> <span class="fu">c</span>(<span class="st">"cccc"</span>)) </span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a><span class="do">## The FVS variables DB I created earlier by running these plots in FVS</span></span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a><span class="do">## and extracting the first years estimates of CC, BA, &amp; SDI</span></span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a><span class="co"># "C:/RxFire/Regen/FVS/regen_020724_4n/regen_020724_4n.db"</span></span>
+<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a><span class="co"># "C:\RxFire\Regen\FVS\regen_032524_0919\regen_032524_0919.db"</span></span>
+<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(</span>
+<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a>  RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">"C:/RxFire/Regen/FVS/regen_032524_0919/regen_032524_0919.db"</span></span>
+<span id="cb42-17"><a href="#cb42-17" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb42-18"><a href="#cb42-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-19"><a href="#cb42-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute has CC</span></span>
+<span id="cb42-20"><a href="#cb42-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Summary2 has BA and SDI</span></span>
+<span id="cb42-21"><a href="#cb42-21" aria-hidden="true" tabindex="-1"></a>comp <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"select CaseID, StandID, CC from FVS_Compute"</span>)</span>
+<span id="cb42-22"><a href="#cb42-22" aria-hidden="true" tabindex="-1"></a>summary <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(</span>
+<span id="cb42-23"><a href="#cb42-23" aria-hidden="true" tabindex="-1"></a>  con, </span>
+<span id="cb42-24"><a href="#cb42-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">str_c</span>(<span class="st">"select CaseID, StandID, Tpa, BA, SDI from FVS_Summary2"</span>,</span>
+<span id="cb42-25"><a href="#cb42-25" aria-hidden="true" tabindex="-1"></a>        <span class="st">" where Year = 2020"</span>)</span>
+<span id="cb42-26"><a href="#cb42-26" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb42-27"><a href="#cb42-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-28"><a href="#cb42-28" aria-hidden="true" tabindex="-1"></a>pred <span class="ot">&lt;-</span> <span class="fu">left_join</span>(comp, summary, <span class="fu">join_by</span>(CaseID, StandID))</span>
+<span id="cb42-29"><a href="#cb42-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-30"><a href="#cb42-30" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span>
+<span id="cb42-31"><a href="#cb42-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-32"><a href="#cb42-32" aria-hidden="true" tabindex="-1"></a><span class="co"># rm(comp, summary, con)</span></span>
+<span id="cb42-33"><a href="#cb42-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-34"><a href="#cb42-34" aria-hidden="true" tabindex="-1"></a><span class="co"># making a list for sql</span></span>
+<span id="cb42-35"><a href="#cb42-35" aria-hidden="true" tabindex="-1"></a>db_list <span class="ot">&lt;-</span> <span class="cf">function</span>(df, CN_col){</span>
+<span id="cb42-36"><a href="#cb42-36" aria-hidden="true" tabindex="-1"></a>  name <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb42-37"><a href="#cb42-37" aria-hidden="true" tabindex="-1"></a>  name <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span> <span class="fu">select</span>({{CN_col}})</span>
+<span id="cb42-38"><a href="#cb42-38" aria-hidden="true" tabindex="-1"></a>  name <span class="ot">&lt;-</span> name <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">CN_col =</span> <span class="fu">str_c</span>(<span class="st">"'"</span>, {{CN_col}}, <span class="st">"'"</span>)) </span>
+<span id="cb42-39"><a href="#cb42-39" aria-hidden="true" tabindex="-1"></a>  name <span class="ot">&lt;-</span> <span class="fu">str_flatten_comma</span>(name<span class="sc">$</span>CN_col)</span>
+<span id="cb42-40"><a href="#cb42-40" aria-hidden="true" tabindex="-1"></a>  <span class="co"># name &lt;- str_flatten_comma(name[, CN_col])</span></span>
+<span id="cb42-41"><a href="#cb42-41" aria-hidden="true" tabindex="-1"></a>  name</span>
+<span id="cb42-42"><a href="#cb42-42" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb42-43"><a href="#cb42-43" aria-hidden="true" tabindex="-1"></a>stplt_cn <span class="ot">&lt;-</span> <span class="fu">db_list</span>(<span class="at">df =</span> pred, <span class="at">CN_col =</span> StandID)</span>
+<span id="cb42-44"><a href="#cb42-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-45"><a href="#cb42-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-46"><a href="#cb42-46" aria-hidden="true" tabindex="-1"></a><span class="co"># connecting to the WA state FIA db</span></span>
+<span id="cb42-47"><a href="#cb42-47" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">"C:/RxFire/Data/_FIADB_WA.db"</span>)</span>
+<span id="cb42-48"><a href="#cb42-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-49"><a href="#cb42-49" aria-hidden="true" tabindex="-1"></a><span class="co"># collecting the trees</span></span>
+<span id="cb42-50"><a href="#cb42-50" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(</span>
+<span id="cb42-51"><a href="#cb42-51" aria-hidden="true" tabindex="-1"></a>  con, </span>
+<span id="cb42-52"><a href="#cb42-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">str_c</span>(<span class="st">"select * from FVS_TREEINIT_PLOT where STANDPLOT_CN in ("</span>, </span>
+<span id="cb42-53"><a href="#cb42-53" aria-hidden="true" tabindex="-1"></a>        stplt_cn, <span class="st">")"</span>))</span>
+<span id="cb42-54"><a href="#cb42-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-55"><a href="#cb42-55" aria-hidden="true" tabindex="-1"></a><span class="co"># collecting tne plots and subplots</span></span>
+<span id="cb42-56"><a href="#cb42-56" aria-hidden="true" tabindex="-1"></a>plot <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(</span>
+<span id="cb42-57"><a href="#cb42-57" aria-hidden="true" tabindex="-1"></a>  con, </span>
+<span id="cb42-58"><a href="#cb42-58" aria-hidden="true" tabindex="-1"></a>  <span class="fu">str_c</span>(<span class="st">"select * from FVS_PLOTINIT_PLOT where STANDPLOT_CN in ("</span>, </span>
+<span id="cb42-59"><a href="#cb42-59" aria-hidden="true" tabindex="-1"></a>        stplt_cn, <span class="st">")"</span>))</span>
+<span id="cb42-60"><a href="#cb42-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-61"><a href="#cb42-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-62"><a href="#cb42-62" aria-hidden="true" tabindex="-1"></a><span class="co"># cond &lt;- dbGetQuery(</span></span>
+<span id="cb42-63"><a href="#cb42-63" aria-hidden="true" tabindex="-1"></a><span class="co">#   con, </span></span>
+<span id="cb42-64"><a href="#cb42-64" aria-hidden="true" tabindex="-1"></a><span class="co">#   str_c("select * from cond where STANDPLOT_CN in (", </span></span>
+<span id="cb42-65"><a href="#cb42-65" aria-hidden="true" tabindex="-1"></a><span class="co">#         stplt_cn, ")"))</span></span>
+<span id="cb42-66"><a href="#cb42-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-67"><a href="#cb42-67" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Clean the tables.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Cleaning out the NA columns</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>clean_na_cols <span class="ot">&lt;-</span> <span class="cf">function</span>(df){</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  df <span class="ot">&lt;-</span> df[, <span class="fu">colSums</span>(<span class="fu">is.na</span>(df)) <span class="sc">&lt;</span> <span class="fu">nrow</span>(df)]</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> <span class="fu">clean_na_cols</span>(tree)</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>plot <span class="ot">&lt;-</span> <span class="fu">clean_na_cols</span>(plot)</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Cleaning out the useless columns</span></span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>plot <span class="ot">&lt;-</span> plot <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(GROUPS, STAND_ID, STANDPLOT_ID, INV_DAY, INV_MONTH, </span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>                          REGION, FOREST, SAM_WT, PHYSIO_REGION, STATE, COUNTY))</span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> tree <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(STAND_ID, STANDPLOT_ID))</span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>pred <span class="ot">&lt;-</span> pred <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(CaseID, Tpa))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Seedling densities are the trees per acre for each species’ seedlings. Adding the plant symbols for seedlings.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Separating the seedlings from the rest</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>seedling_densities <span class="ot">&lt;-</span> tree <span class="sc">|&gt;</span>  <span class="fu">filter</span>(<span class="fu">startsWith</span>(TREE_CN, <span class="st">"S"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(STANDPLOT_CN, SPECIES) <span class="sc">|&gt;</span> </span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">TPA =</span> <span class="fu">sum</span>(TREE_COUNT))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'STANDPLOT_CN'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">"C:</span><span class="sc">\\</span><span class="st">RxFire</span><span class="sc">\\</span><span class="st">Data</span><span class="sc">\\</span><span class="st">_FIADB_WA.db"</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Pulling in the species reference table</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>plants_ref <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>  con, <span class="st">"select SPECIES_SYMBOL, SPCD, COMMON_NAME, W_SPGRPCD from REF_SPECIES"</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>plant_gr_ref <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>  con, <span class="st">"select SPGRPCD, NAME from REF_SPECIES_GROUP"</span></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Cleaning it up</span></span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a>plants_ref <span class="ot">&lt;-</span> plants_ref <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">SPGRPCD =</span> W_SPGRPCD, <span class="at">SYMBL =</span> SPECIES_SYMBOL)</span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a>plants_ref <span class="ot">&lt;-</span> <span class="fu">left_join</span>(plants_ref, plant_gr_ref, <span class="at">by =</span> <span class="fu">join_by</span>(SPGRPCD))</span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a>plants <span class="ot">&lt;-</span> plants_ref <span class="sc">|&gt;</span> <span class="fu">select</span>(SYMBL, SPCD)</span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a>seedling_densities <span class="ot">&lt;-</span> seedling_densities <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">SPECIES =</span> <span class="fu">as.numeric</span>(SPECIES))</span>
+<span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-19"><a href="#cb46-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Getting plant codes for seedlings</span></span>
+<span id="cb46-20"><a href="#cb46-20" aria-hidden="true" tabindex="-1"></a>seedling_densities <span class="ot">&lt;-</span> <span class="fu">left_join</span>(seedling_densities, plants, <span class="fu">join_by</span>(<span class="st">"SPECIES"</span> <span class="sc">==</span> <span class="st">"SPCD"</span>))</span>
+<span id="cb46-21"><a href="#cb46-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Removing an extra col. </span></span>
+<span id="cb46-22"><a href="#cb46-22" aria-hidden="true" tabindex="-1"></a>seedling_densities <span class="ot">&lt;-</span> seedling_densities <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(SPECIES))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Widening the table to match the st Joe example. The value of each species TPA goes into a column for that species. Each row is a standplot_cn. If there were no species of a type in that stand, a zero is entered.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Matching the St. Joe data</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>seedling_response <span class="ot">&lt;-</span> seedling_densities <span class="sc">|&gt;</span> <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> SYMBL, </span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">values_from =</span> TPA,</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">values_fill =</span> <span class="dv">0</span>,</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">names_glue =</span> <span class="st">"{SYMBL}_{'TD'}"</span>)</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Un-grouping to avoid future messages</span></span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>seedling_response <span class="ot">&lt;-</span> seedling_response <span class="sc">|&gt;</span> <span class="fu">ungroup</span>()</span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>seedling_densities <span class="ot">&lt;-</span> seedling_densities <span class="sc">|&gt;</span> <span class="fu">ungroup</span>()</span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-14"><a href="#cb47-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-15"><a href="#cb47-15" aria-hidden="true" tabindex="-1"></a><span class="co"># replacing all NAs with zero, just in case</span></span>
+<span id="cb47-16"><a href="#cb47-16" aria-hidden="true" tabindex="-1"></a>nas_to_zeroes <span class="ot">&lt;-</span> <span class="cf">function</span>(df){</span>
+<span id="cb47-17"><a href="#cb47-17" aria-hidden="true" tabindex="-1"></a>  df <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span> <span class="fu">mutate_all</span>(<span class="sc">~</span><span class="fu">replace</span>(., <span class="fu">is.na</span>(.), <span class="dv">0</span>))</span>
+<span id="cb47-18"><a href="#cb47-18" aria-hidden="true" tabindex="-1"></a>  df</span>
+<span id="cb47-19"><a href="#cb47-19" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb47-20"><a href="#cb47-20" aria-hidden="true" tabindex="-1"></a>seedling_response <span class="ot">&lt;-</span> <span class="fu">nas_to_zeroes</span>(seedling_response) </span>
+<span id="cb47-21"><a href="#cb47-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-22"><a href="#cb47-22" aria-hidden="true" tabindex="-1"></a><span class="co"># clearing out the objects</span></span>
+<span id="cb47-23"><a href="#cb47-23" aria-hidden="true" tabindex="-1"></a>X_predictors <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb47-24"><a href="#cb47-24" aria-hidden="true" tabindex="-1"></a>Y_response <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb47-25"><a href="#cb47-25" aria-hidden="true" tabindex="-1"></a><span class="co"># creating lists of subplots</span></span>
+<span id="cb47-26"><a href="#cb47-26" aria-hidden="true" tabindex="-1"></a>X_predictors <span class="ot">&lt;-</span> pred <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="at">STANDPLOT_CN =</span> StandID) <span class="sc">|&gt;</span> <span class="fu">unique</span>()</span>
+<span id="cb47-27"><a href="#cb47-27" aria-hidden="true" tabindex="-1"></a>Y_response <span class="ot">&lt;-</span> seedling_response <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="at">STANDPLOT_CN =</span> STANDPLOT_CN)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>There is a mismatch in dims between the predictors and response variables.</p>
+<p>X has about 25k rows and Y has about 13k. This is looking at all possible plots with the value computed from FVS, vs those plots with seedlings.</p>
+<p>If I remove the extra 12k rows where no regeneration is occurring, that’s bad. If I don’t remove it, then I half of my data is zero.</p>
+<p>The current plan is to use a couple models, one for probability of regeneration. one for regen with and one one without disturbance. From what I understand, the probability of regen model is for post disturbance. So, this is more of an ingrowth model. We need the zeroes and I don’t like that.</p>
+<p>That is what I did last time, so at least the plots will be comparable.</p>
+<p>I think I can at least remove the subplots that are non-forested.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># finding the mismatch </span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>tt <span class="ot">&lt;-</span> <span class="fu">anti_join</span>(X_predictors, Y_response, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="fu">left_join</span>(tt, tree, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> t <span class="sc">|&gt;</span> <span class="fu">group_by</span>(STANDPLOT_CN) <span class="sc">|&gt;</span> </span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">seedling_records =</span> <span class="fu">sum</span>(<span class="fu">startsWith</span>(TREE_CN, <span class="st">"s"</span>)),</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">lt_records =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">startsWith</span>(TREE_CN, <span class="st">"s"</span>)))</span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>t3 <span class="ot">&lt;-</span> t2 <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="fu">is.na</span>(seedling_records) <span class="sc">&amp;</span> <span class="fu">is.na</span>(lt_records)) <span class="sc">|&gt;</span> </span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(STANDPLOT_CN)</span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> t2 <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(lt_records) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(seedling_records))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Of those records where there is no regen, 12k at least had large trees. 1k had neither seedlings of large trees.</p>
+<p>I tried to find out why there were no trees on those subplots, but I couldn’t:</p>
+<pre><code># t3 &lt;- left_join(t3, plot, by = "STANDPLOT_CN")
+# 
+# standlist &lt;- t3 |&gt; select(STAND_CN)
+# standcn &lt;- db_list(standlist, STAND_CN)
+# 
+# con &lt;- dbConnect(RSQLite::SQLite(), "C:/RxFire/Data/_FIADB_WA.db")
+# 
+# cond &lt;- dbGetQuery(
+#   con, 
+#   str_c("select * from cond where PLT_CN in (", 
+#         standcn, ")"))
+# 
+# dbDisconnect(con)
+# 
+# cond &lt;- clean_na_cols(cond)
+# 
+# 
+# cond_status_cd &lt;- cond |&gt; 
+#   filter(COND_STATUS_CD == 1 | COND_STATUS_CD == 2 )
+# 
+# # hist(cond_status_cd$OWNGRPCD)
+# 
+# # Fire damage. 
+# hist(cond_status_cd[cond_status_cd$DSTRBCD1 &gt; 29 &amp; 
+#                       cond_status_cd$DSTRBCD1 &lt; 40, 
+#                     "DSTRBCD1"])
+# 
+# cond_presnfcd &lt;- cond_status_cd |&gt; 
+#   filter(is.na(PRESNFCD)) |&gt; clean_na_cols()
+# 
+# cond_presnfcd &lt;- cond_presnfcd |&gt; 
+#   select(-c(STATECD, INVYR, CN, COUNTYCD, PLOT,
+#             MAPDEN, PROP_BASIS, SLOPE, ASPECT, DSTRBYR1, DSTRBYR2, DSTRBYR3))
+# 
+# # names(cond_presnfcd)
+# 
+# cond_presnfcd &lt;- cond_presnfcd |&gt; 
+#   select(-c(CREATED_BY, CREATED_DATE, CREATED_IN_INSTANCE, MODIFIED_BY, MODIFIED_DATE, MODIFIED_IN_INSTANCE))
+# 
+# cond_presnfcd2 &lt;- cond_presnfcd[, c(1, 49:ncol(cond_presnfcd))]
+# 
+# # summary(as.factor(cond_presnfcd$STUMP_CD_PNWRS))
+# 
+# # hist(cond_presnfcd$BALIVE)</code></pre>
+<p>There are standplot_cns that do not have trees. I am not sure if I should count them. They might be NAs.</p>
+<p>Looking at an example:</p>
+<ul>
+<li>The subplot table says they are all the same.</li>
+<li>The Cond table doesn’t make distinctions for Subplots.</li>
+<li>There are tree records in the the other three plots.</li>
+</ul>
+<p>I am not sure what to do. There are some codes that should be controlled for, but I cannot get rid of all of them. Some of the codes that should be controlled for were probably brought in with the cond table, I couldn’t use standplot_cn. So it pulled in every condition.</p>
+<p>I found this field and it could be of use:</p>
+<p>PHYSCLCD Physiographic class code. A code indicating the general effect of land form, topographical position, and soil on moisture available to trees.</p>
+<hr>
+<p>Removing the no tree plots.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">anti_join</span>(X_predictors, t3, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(X_predictors) <span class="sc">-</span> <span class="fu">nrow</span>(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 895</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>X_predictors <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, X_predictors, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Adding the plots without regen. </span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>imp_response <span class="ot">&lt;-</span> <span class="fu">left_join</span>(X_predictors, seedling_response, <span class="fu">join_by</span>(STANDPLOT_CN))</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a><span class="co"># removing the NAs</span></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>imp_response <span class="ot">&lt;-</span> <span class="fu">nas_to_zeroes</span>(imp_response) </span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a><span class="co"># imp_data &lt;- imp_data[,1:35]</span></span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a><span class="co"># removing fields from standlist to join</span></span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>FPAG <span class="ot">&lt;-</span> standlist <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN, FPAG)</span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a><span class="co"># renaming the field</span></span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a>pred <span class="ot">&lt;-</span> pred <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">STANDPLOT_CN =</span> StandID)</span>
+<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-13"><a href="#cb53-13" aria-hidden="true" tabindex="-1"></a>pred <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, pred, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb53-14"><a href="#cb53-14" aria-hidden="true" tabindex="-1"></a><span class="co"># joining fpags to prediction list. </span></span>
+<span id="cb53-15"><a href="#cb53-15" aria-hidden="true" tabindex="-1"></a>imp_pred <span class="ot">&lt;-</span> <span class="fu">left_join</span>(pred, FPAG, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb53-16"><a href="#cb53-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-17"><a href="#cb53-17" aria-hidden="true" tabindex="-1"></a>imp_data <span class="ot">&lt;-</span> <span class="fu">left_join</span>(imp_pred, imp_response, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Making a set for the zeroes just in case.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>zx <span class="ot">&lt;-</span> Y_response <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN)</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Adding the plots without regen. </span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>zimp_response <span class="ot">&lt;-</span> <span class="fu">left_join</span>(zx, seedling_response, <span class="fu">join_by</span>(STANDPLOT_CN))</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a><span class="co"># removing the NAs</span></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>zimp_response <span class="ot">&lt;-</span> <span class="fu">nas_to_zeroes</span>(zimp_response) </span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>zpred <span class="ot">&lt;-</span> <span class="fu">left_join</span>(zx, pred, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a><span class="co"># joining fpags to prediction list. </span></span>
+<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a>zimp_pred <span class="ot">&lt;-</span> <span class="fu">left_join</span>(zpred, FPAG, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a>zimp_data <span class="ot">&lt;-</span> <span class="fu">left_join</span>(zimp_pred, zimp_response, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Cleaning up the other tables</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, tree, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>plot <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, plot, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co"># removing extra objects</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(con, X_predictors, Y_response, stplt_cn, t, plant_gr_ref, </span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>   plants, standlist, FPAG, pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>name <span class="ot">&lt;-</span> <span class="fu">str_c</span>(<span class="st">"attempt_"</span>, </span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>              <span class="fu">strftime</span>(<span class="fu">Sys.Date</span>(),<span class="st">"%m%d%y"</span>))</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>              <span class="co"># , </span></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>              <span class="co"># "_"</span></span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>              <span class="co"># , </span></span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>              <span class="co"># strftime(Sys.Date(),"%H%M"))</span></span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a><span class="co"># con &lt;- dbConnect(RSQLite::SQLite(), str_c("./", name, ".db"))</span></span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a><span class="co"># dbWriteTable(con, "imp_data", imp_data)</span></span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a><span class="co"># dbWriteTable(con, "plants_ref", plants_ref)</span></span>
+<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a><span class="co"># dbWriteTable(con, "FVS_PLOTINIT_PLOT", plot)</span></span>
+<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a><span class="co"># dbWriteTable(con, "FVS_TREEINIT_PLOT", tree)</span></span>
+<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a><span class="co"># dbWriteTable(con, "regen_only_imp_data", zimp_data)</span></span>
+<span id="cb57-14"><a href="#cb57-14" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb57-15"><a href="#cb57-15" aria-hidden="true" tabindex="-1"></a><span class="co"># dbDisconnect(con)</span></span>
+<span id="cb57-16"><a href="#cb57-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-17"><a href="#cb57-17" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"clean_na_cols"</span>, <span class="st">"db_list"</span>, <span class="st">"nas_to_zeroes"</span>, <span class="st">"z_scores"</span>, <span class="st">"k"</span>)</span>
+<span id="cb57-18"><a href="#cb57-18" aria-hidden="true" tabindex="-1"></a><span class="co"># rm(list = ls()[!(ls() %in% keep)])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 
