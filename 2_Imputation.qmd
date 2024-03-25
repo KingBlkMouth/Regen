@@ -22,354 +22,158 @@ library(RSQLite)
 options(scipen = 999)
 ```
 
-Set k for knn. 
-Get the compute and summary tables from the fvs run. 
-Get the tree and plots tables from fvs_ready. 
-Also adding the cond table for troubleshooting. 
+```{r}
+#| message: false
+
+# Pulling from my new interim save point
+con <- dbConnect(RSQLite::SQLite(), "./attempt_032524.db")
+imp_data <- dbGetQuery(con, "select * from imp_data")
+zimp_data <- dbGetQuery(con, "select * from regen_only_imp_data")
+plots <- dbGetQuery(con, "select * from fvs_plotinit_plot")
+plants_ref <- dbGetQuery(con, "select * from plants_ref")
+dbDisconnect(con)
+rm(con)
+
+pred_topo <- plots |> select(
+  STANDPLOT_CN, ELEVFT, SLOPE, ASPECT
+)
+pred_Kral <- imp_data |> select(
+  STANDPLOT_CN, CC, BA, SDI, FPAG
+)
+
+response <- imp_data |> select(
+  -c(CC, BA, SDI, FPAG)
+)
+
+predictors <- left_join(pred_Kral, pred_topo)|> 
+  relocate(FPAG, .after = STANDPLOT_CN)
+
+
+# Filtering for only CDS6
+cds6 <- predictors |> filter(
+  FPAG == "CDS6") |> 
+  select(-c(FPAG))
+
+
+cds_cns <- cds6 |> select(STANDPLOT_CN)
+zcds_cns <- zimp_data |> filter(FPAG == "CDS6") |> select(STANDPLOT_CN)
+zcds6 <- left_join(zcds_cns, cds6, by ="STANDPLOT_CN")
+
+# Joining the x and y
+imp_2 <- left_join(cds_cns, response, by = "STANDPLOT_CN")
+# Making CN into rownames
+imp_2 <- column_to_rownames(imp_2, "STANDPLOT_CN")
+# making sure it's not all zero
+imp_2 <- imp_2[, !colSums(imp_2) == 0]
+
+imp_2 <- left_join(cds6, response)
+zimp_2 <- left_join(zcds6, response)
+
+
+# form some test data, y's are defined only for reference observations.
+# refs  =  sample(x  =  rownames(imp_2), size  =  (nrow(imp_2)/4)*3)
+refs <- rownames(imp_2[1:(round(.75*nrow(imp_2))), ])
+# zrefs  =  sample(x  =  rownames(zimp_2), size  =  (nrow(zimp_2)/4)*3)
+zrefs <- rownames(zimp_2[1:(round(.75*nrow(zimp_2))), ])
+
+# x is every row and column of predictor variables.
+# CC, BA, SDI, ELEVFT, SLOPE, ASPECT
+X_predictors1 <- imp_2 |> select(CC, BA, SDI)
+X_predictors2 <- imp_2 |> select(CC, BA, SDI, ELEVFT, SLOPE, ASPECT)
+zX_predictors1 <- zimp_2 |> select(CC, BA, SDI)
+zX_predictors2 <- zimp_2 |> select(CC, BA, SDI, ELEVFT, SLOPE, ASPECT)
+
+# y is all other columns, seedling tree densities. 
+# row names are row numbers
+# y <- imp_df[refs,3:36], this was the example code. 
+Y_response <- imp_2[refs,] |> select(ends_with("TD")) 
+Y_response <- Y_response[, order(colSums(-Y_response))]
+
+zY_response <- zimp_2[zrefs,] |> select(ends_with("TD")) 
+zY_response <- zY_response[, order(colSums(-zY_response))]
+
+# remove zero columns
+Y_response <- Y_response[, !colSums(Y_response) == 0]
+zY_response <- zY_response[, !colSums(zY_response) == 0]
+```
+
 
 ```{r}
 k = 10
 
+# build yai objects using
+# most similar neighbor
+msn_dist_3 <- yai(x = X_predictors1, y = Y_response, method = "msn", k = k)
+# and mahalanobis
+mal_dist_3 <- yai(x = X_predictors1, y = Y_response, method = "mahalanobis", k = k)
 
-# Pulling my list of subplots with FPAGs that I used in FVS
-# "C:\RxFire\Regen\Regen_Notes\standlist03242024.csv"
-# getwd()
-standlist <- read_csv("standlist03242024.csv", 
-                      col_types = c("cccc")) 
+# For the expanded list of predictors
+msn_dist_6 <- yai(x = X_predictors2, y = Y_response, method = "msn", k = k)
+# and mahalanobis
+mal_dist_6 <- yai(x = X_predictors2, y = Y_response, method = "mahalanobis", k = k)
 
+# Small predictors but standarcized
+zmsn_dist_3 <- yai(x = zX_predictors1, y = zY_response, method = "msn", k = k)
+# and mahalanobis
+zmal_dist_3 <- yai(x = zX_predictors1, y = zY_response, method = "mahalanobis", k = k)
 
-## The FVS variables DB I created earlier by running these plots in FVS
-## and extracting the first years estimates of CC, BA, & SDI
-# "C:/RxFire/Regen/FVS/regen_020724_4n/regen_020724_4n.db"
-# "C:\RxFire\Regen\FVS\regen_032524_0919\regen_032524_0919.db"
-con <- dbConnect(
-  RSQLite::SQLite(), "C:/RxFire/Regen/FVS/regen_032524_0919/regen_032524_0919.db"
-  )
-
-# Compute has CC
-# Summary2 has BA and SDI
-comp <- dbGetQuery(con, "select CaseID, StandID, CC from FVS_Compute")
-summary <- dbGetQuery(
-  con, 
-  str_c("select CaseID, StandID, Tpa, BA, SDI from FVS_Summary2",
-        " where Year = 2020")
-  )
-
-pred <- left_join(comp, summary, join_by(CaseID, StandID))
-
-dbDisconnect(con)
-
-# rm(comp, summary, con)
-
-# making a list for sql
-db_list <- function(df, CN_col){
-  name <- NULL
-  name <- df |> select({{CN_col}})
-  name <- name |> mutate(CN_col = str_c("'", {{CN_col}}, "'")) 
-  name <- str_flatten_comma(name$CN_col)
-  # name <- str_flatten_comma(name[, CN_col])
-  name
-}
-stplt_cn <- db_list(df = pred, CN_col = StandID)
+# Standardized expanded
+zmsn_dist_6 <- yai(x = zX_predictors2, y = zY_response, method = "msn", k = k)
+# and mahalanobis
+zmal_dist_6 <- yai(x = zX_predictors2, y = zY_response, method = "mahalanobis", k = k)
 
 
-# connecting to the WA state FIA db
-con <- dbConnect(RSQLite::SQLite(), "C:/RxFire/Data/_FIADB_WA.db")
+imputed_msn_dist_3 <- impute(msn_dist_3)
+# imputed_mal_dist_1 <- impute(mal_dist_1)
+imputed_msn_dist_6 <- impute(msn_dist_6)
+# imputed_mal_dist_2 <- impute(mal_dist_2)
+imputed_zmsn_dist_3 <- impute(zmsn_dist_3)
+# imputed_zmal_dist_1 <- impute(zmal_dist_1)
+imputed_zmsn_dist_6 <- impute(zmsn_dist_6)
+# imputed_zmal_dist_2 <- impute(zmal_dist_2)
 
-# collecting the trees
-tree <- dbGetQuery(
-  con, 
-  str_c("select * from FVS_TREEINIT_PLOT where STANDPLOT_CN in (", 
-        stplt_cn, ")"))
+names <- c('PSME_TD', 'PICO_TD', 'PIPO_TD', 'PRVI_TD', 'ABGR_TD', 'PREM_TD', 
+           'PSME_TD.o', 'PICO_TD.o', 'PIPO_TD.o', 'PRVI_TD.o', 'ABGR_TD.o', 'PREM_TD.o')
 
-# collecting tne plots and subplots
-plot <- dbGetQuery(
-  con, 
-  str_c("select * from FVS_PLOTINIT_PLOT where STANDPLOT_CN in (", 
-        stplt_cn, ")"))
-
-
-# cond <- dbGetQuery(
-#   con, 
-#   str_c("select * from cond where STANDPLOT_CN in (", 
-#         stplt_cn, ")"))
-
-dbDisconnect(con)
+imp_msn_dist_3 <- imputed_msn_dist_3[, names(imputed_msn_dist_3) %in% names] |> 
+  filter(PSME_TD < 15000 & PSME_TD.o < 15000)
+imp_msn_dist_6 <- imputed_msn_dist_6[, names(imputed_msn_dist_6) %in% names]|> 
+  filter(PSME_TD < 15000 & PSME_TD.o < 15000)
+zimp_msn_dist_3 <- imputed_zmsn_dist_3[, names(imputed_zmsn_dist_3) %in% names]|> 
+  filter(PSME_TD < 15000 & PSME_TD.o < 15000)
+zimp_msn_dist_6 <- imputed_zmsn_dist_6[, names(imputed_zmsn_dist_6) %in% names]|> 
+  filter(PSME_TD < 15000 & PSME_TD.o < 15000)
 ```
-
-
-Clean the tables. 
 
 ```{r}
-# Cleaning out the NA columns
-clean_na_cols <- function(df){
-  df <- df[, colSums(is.na(df)) < nrow(df)]
-}
-
-tree <- clean_na_cols(tree)
-plot <- clean_na_cols(plot)
-
-# Cleaning out the useless columns
-plot <- plot |> select(-c(GROUPS, STAND_ID, STANDPLOT_ID, INV_DAY, INV_MONTH, 
-                          REGION, FOREST, SAM_WT, PHYSIO_REGION, STATE, COUNTY))
-
-tree <- tree |> select(-c(STAND_ID, STANDPLOT_ID))
-
-pred <- pred |> select(-c(CaseID, Tpa))
+#| column: page
+#| layout-ncol: 2
+#| message: false
+plot(imp_msn_dist_3)
+plot(imp_msn_dist_6)
 ```
-
-Seedling densities are the trees per acre for each species' seedlings. 
-Adding the plant symbols for seedlings. 
-
 
 ```{r}
-# Separating the seedlings from the rest
-seedling_densities <- tree |>  filter(startsWith(TREE_CN, "S")) |> 
-  group_by(STANDPLOT_CN, SPECIES) |> 
-  summarise(TPA = sum(TREE_COUNT))
-
-
-con <- dbConnect(
-  RSQLite::SQLite(), "C:\\RxFire\\Data\\_FIADB_WA.db"
-  )
-# Pulling in the species reference table
-plants_ref <- dbGetQuery(
-  con, "select SPECIES_SYMBOL, SPCD, COMMON_NAME, W_SPGRPCD from REF_SPECIES"
-  )
-plant_gr_ref <- dbGetQuery(
-  con, "select SPGRPCD, NAME from REF_SPECIES_GROUP"
-  )
-dbDisconnect(con)
-
-# Cleaning it up
-plants_ref <- plants_ref |> rename(SPGRPCD = W_SPGRPCD, SYMBL = SPECIES_SYMBOL)
-plants_ref <- left_join(plants_ref, plant_gr_ref, by = join_by(SPGRPCD))
-plants <- plants_ref |> select(SYMBL, SPCD)
-seedling_densities <- seedling_densities |> mutate(SPECIES = as.numeric(SPECIES))
-
-# Getting plant codes for seedlings
-seedling_densities <- left_join(seedling_densities, plants, join_by("SPECIES" == "SPCD"))
-# Removing an extra col. 
-seedling_densities <- seedling_densities |> select(-c(SPECIES))
+#| column: page
+#| layout-ncol: 2
+#| message: false
+plot(zimp_msn_dist_3)
+plot(zimp_msn_dist_6)
 ```
-
-Widening the table to match the st Joe example. 
-The value of each species TPA goes into a column for that species. 
-Each row is a standplot_cn. If there were no species of a type in that stand, a 
-zero is entered. 
-
 
 ```{r}
-# Matching the St. Joe data
-seedling_response <- seedling_densities |> pivot_wider(names_from = SYMBL, 
-                 values_from = TPA,
-                 values_fill = 0,
-                 names_glue = "{SYMBL}_{'TD'}")
-
-
-# Un-grouping to avoid future messages
-seedling_response <- seedling_response |> ungroup()
-seedling_densities <- seedling_densities |> ungroup()
-
-
-
-
-# replacing all NAs with zero, just in case
-nas_to_zeroes <- function(df){
-  df <- df |> mutate_all(~replace(., is.na(.), 0))
-  df
-}
-seedling_response <- nas_to_zeroes(seedling_response) 
-
-# clearing out the objects
-X_predictors <- NULL
-Y_response <- NULL
-# creating lists of subplots
-X_predictors <- pred |> select(STANDPLOT_CN = StandID) |> unique()
-Y_response <- seedling_response |> select(STANDPLOT_CN = STANDPLOT_CN)
+#| column: page
+#| layout-ncol: 2
+#| message: false
+plot(imp_msn_dist_3)
+plot(zimp_msn_dist_3)
 ```
-
-There is a mismatch in dims between the predictors and response variables. 
-
-X has about 25k rows and Y has about 13k. 
-This is looking at all possible plots with the value computed from FVS, vs
-those plots with seedlings. 
-
-If I remove the extra 12k rows where no regeneration is occurring, that's bad. 
-If I don't remove it, then I half of my data is zero. 
-
-The current plan is to use a couple models, one for probability of regeneration. 
-one for regen with and one one without disturbance. 
-From what I understand, the probability of regen model is for post disturbance. 
-So, this is more of an ingrowth model. We need the zeroes and I don't like that. 
-
-That is what I did last time, so at least the plots will be comparable. 
-
-I think I can at least remove the subplots that are non-forested. 
-
 
 ```{r}
-# finding the mismatch 
-tt <- anti_join(X_predictors, Y_response, by = "STANDPLOT_CN")
-
-t <- left_join(tt, tree, by = "STANDPLOT_CN")
-
-t2 <- t |> group_by(STANDPLOT_CN) |> 
-  summarize(seedling_records = sum(startsWith(TREE_CN, "s")),
-            lt_records = sum(!startsWith(TREE_CN, "s")))
-
-t3 <- t2 |> filter(is.na(seedling_records) & is.na(lt_records)) |> 
-  select(STANDPLOT_CN)
-
-
-t2 <- t2 |> filter(!is.na(lt_records) & !is.na(seedling_records))
+#| column: page
+#| layout-ncol: 2
+#| message: false
+plot(imp_msn_dist_6)
+plot(zimp_msn_dist_6)
 ```
-
-
-Of those records where there is no regen, 12k at least had large trees. 
-1k had neither seedlings of large trees.
-
-
-I tried to find out why there were no trees on those subplots, but I couldn't:
-
-```
-# t3 <- left_join(t3, plot, by = "STANDPLOT_CN")
-# 
-# standlist <- t3 |> select(STAND_CN)
-# standcn <- db_list(standlist, STAND_CN)
-# 
-# con <- dbConnect(RSQLite::SQLite(), "C:/RxFire/Data/_FIADB_WA.db")
-# 
-# cond <- dbGetQuery(
-#   con, 
-#   str_c("select * from cond where PLT_CN in (", 
-#         standcn, ")"))
-# 
-# dbDisconnect(con)
-# 
-# cond <- clean_na_cols(cond)
-# 
-# 
-# cond_status_cd <- cond |> 
-#   filter(COND_STATUS_CD == 1 | COND_STATUS_CD == 2 )
-# 
-# # hist(cond_status_cd$OWNGRPCD)
-# 
-# # Fire damage. 
-# hist(cond_status_cd[cond_status_cd$DSTRBCD1 > 29 & 
-#                       cond_status_cd$DSTRBCD1 < 40, 
-#                     "DSTRBCD1"])
-# 
-# cond_presnfcd <- cond_status_cd |> 
-#   filter(is.na(PRESNFCD)) |> clean_na_cols()
-# 
-# cond_presnfcd <- cond_presnfcd |> 
-#   select(-c(STATECD, INVYR, CN, COUNTYCD, PLOT,
-#             MAPDEN, PROP_BASIS, SLOPE, ASPECT, DSTRBYR1, DSTRBYR2, DSTRBYR3))
-# 
-# # names(cond_presnfcd)
-# 
-# cond_presnfcd <- cond_presnfcd |> 
-#   select(-c(CREATED_BY, CREATED_DATE, CREATED_IN_INSTANCE, MODIFIED_BY, MODIFIED_DATE, MODIFIED_IN_INSTANCE))
-# 
-# cond_presnfcd2 <- cond_presnfcd[, c(1, 49:ncol(cond_presnfcd))]
-# 
-# # summary(as.factor(cond_presnfcd$STUMP_CD_PNWRS))
-# 
-# # hist(cond_presnfcd$BALIVE)
-```
-
-There are standplot_cns that do not have trees. 
-I am not sure if I should count them. They might be NAs. 
-
-Looking at an example:
-
-- The subplot table says they are all the same.
-- The Cond table doesn't make distinctions for Subplots. 
-- There are tree records in the the other three plots. 
-
-I am not sure what to do. There are some codes that should be controlled for, 
-but I cannot get rid of all of them. Some of the codes that should be controlled 
-for were probably brought in with the cond table, I couldn't use standplot_cn. 
-So it pulled in every condition. 
-
-
-
-I found this field and it could be of use:
-
-PHYSCLCD
-Physiographic class code. A code indicating the general effect of land form, topographical
-position, and soil on moisture available to trees.
-
-___
-
-
-Removing the no tree plots. 
-
-```{r}
-x <- anti_join(X_predictors, t3, by = "STANDPLOT_CN")
-nrow(X_predictors) - nrow(x)
-
-X_predictors <- left_join(x, X_predictors, by = "STANDPLOT_CN")
-```
-
-
-```{r}
-# Adding the plots without regen. 
-imp_response <- left_join(X_predictors, seedling_response, join_by(STANDPLOT_CN))
-
-# removing the NAs
-imp_response <- nas_to_zeroes(imp_response) 
-# imp_data <- imp_data[,1:35]
-
-# removing fields from standlist to join
-FPAG <- standlist |> select(STANDPLOT_CN, FPAG)
-# renaming the field
-pred <- pred |> rename(STANDPLOT_CN = StandID)
-pred <- left_join(x, pred, by = "STANDPLOT_CN")
-# joining fpags to prediction list. 
-imp_pred <- left_join(pred, FPAG, by = "STANDPLOT_CN")
-
-imp_data <- left_join(imp_pred, imp_response, by = "STANDPLOT_CN")
-```
-
-
-```{r}
-# removing extra objects
-rm(con, X_predictors, Y_response, stplt_cn, t, plant_gr_ref, 
-   plants, standlist, FPAG, pred)
-```
-
-
-```{r}
-# con <- dbConnect(RSQLite::SQLite(), str_c(getwd(), "/attempt_3.db"))
-# dbWriteTable(con, "imp_data", imp_data)
-# dbWriteTable(con, "plants_ref", plants_ref)
-# dbWriteTable(con, "plots", plot)
-# dbWriteTable(con, "trees", tree)
-# dbDisconnect(con)
-
-keep <- c("clean_na_cols", "db_list", "nas_to_zeroes", "z_scores", "k")
-rm(list = ls()[!(ls() %in% keep)])
-```
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

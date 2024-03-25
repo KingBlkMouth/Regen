@@ -82,6 +82,7 @@ DBH and tpa are in the tree table.
 
 
 ```{r}
+#| eval: false
 x <- standlist |> select(STANDPLOT_CN)
 
 t <- left_join(x, tree, by = "STANDPLOT_CN")
@@ -98,6 +99,7 @@ sdi <- tpa[tpa$HISTORY == 1, ] |> group_by(STANDPLOT_CN) |>
 
 
 ```{r}
+#| eval: false
 y <- left_join(x, sdi, by = "STANDPLOT_CN")
 
 y <- left_join(y, c2, by = "STANDPLOT_CN")
