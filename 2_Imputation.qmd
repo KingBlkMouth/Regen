@@ -3,3 +3,373 @@ title: "Imputation"
 ---
 
 Pull the FVS output and organize the data. 
+
+
+
+
+```{r}
+#| message: false
+#| warning: false
+
+library(tidyverse, quietly = T)
+library(esquisse)
+library(yaImpute)
+library(RSQLite)
+library(vegan)
+library(randomForest)
+library(RSQLite)
+
+options(scipen = 999)
+```
+
+Set k for knn. 
+Get the compute and summary tables from the fvs run. 
+Get the tree and plots tables from fvs_ready. 
+Also adding the cond table for troubleshooting. 
+
+```{r}
+k = 10
+
+
+# Pulling my list of subplots with FPAGs that I used in FVS
+# "C:\RxFire\Regen\Regen_Notes\standlist03242024.csv"
+# getwd()
+standlist <- read_csv("standlist03242024.csv", 
+                      col_types = c("cccc")) 
+
+
+## The FVS variables DB I created earlier by running these plots in FVS
+## and extracting the first years estimates of CC, BA, & SDI
+# "C:/RxFire/Regen/FVS/regen_020724_4n/regen_020724_4n.db"
+# "C:\RxFire\Regen\FVS\regen_032524_0919\regen_032524_0919.db"
+con <- dbConnect(
+  RSQLite::SQLite(), "C:/RxFire/Regen/FVS/regen_032524_0919/regen_032524_0919.db"
+  )
+
+# Compute has CC
+# Summary2 has BA and SDI
+comp <- dbGetQuery(con, "select CaseID, StandID, CC from FVS_Compute")
+summary <- dbGetQuery(
+  con, 
+  str_c("select CaseID, StandID, Tpa, BA, SDI from FVS_Summary2",
+        " where Year = 2020")
+  )
+
+pred <- left_join(comp, summary, join_by(CaseID, StandID))
+
+dbDisconnect(con)
+
+# rm(comp, summary, con)
+
+# making a list for sql
+db_list <- function(df, CN_col){
+  name <- NULL
+  name <- df |> select({{CN_col}})
+  name <- name |> mutate(CN_col = str_c("'", {{CN_col}}, "'")) 
+  name <- str_flatten_comma(name$CN_col)
+  # name <- str_flatten_comma(name[, CN_col])
+  name
+}
+stplt_cn <- db_list(df = pred, CN_col = StandID)
+
+
+# connecting to the WA state FIA db
+con <- dbConnect(RSQLite::SQLite(), "C:/RxFire/Data/_FIADB_WA.db")
+
+# collecting the trees
+tree <- dbGetQuery(
+  con, 
+  str_c("select * from FVS_TREEINIT_PLOT where STANDPLOT_CN in (", 
+        stplt_cn, ")"))
+
+# collecting tne plots and subplots
+plot <- dbGetQuery(
+  con, 
+  str_c("select * from FVS_PLOTINIT_PLOT where STANDPLOT_CN in (", 
+        stplt_cn, ")"))
+
+
+# cond <- dbGetQuery(
+#   con, 
+#   str_c("select * from cond where STANDPLOT_CN in (", 
+#         stplt_cn, ")"))
+
+dbDisconnect(con)
+```
+
+
+Clean the tables. 
+
+```{r}
+# Cleaning out the NA columns
+clean_na_cols <- function(df){
+  df <- df[, colSums(is.na(df)) < nrow(df)]
+}
+
+tree <- clean_na_cols(tree)
+plot <- clean_na_cols(plot)
+
+# Cleaning out the useless columns
+plot <- plot |> select(-c(GROUPS, STAND_ID, STANDPLOT_ID, INV_DAY, INV_MONTH, 
+                          REGION, FOREST, SAM_WT, PHYSIO_REGION, STATE, COUNTY))
+
+tree <- tree |> select(-c(STAND_ID, STANDPLOT_ID))
+
+pred <- pred |> select(-c(CaseID, Tpa))
+```
+
+Seedling densities are the trees per acre for each species' seedlings. 
+Adding the plant symbols for seedlings. 
+
+
+```{r}
+# Separating the seedlings from the rest
+seedling_densities <- tree |>  filter(startsWith(TREE_CN, "S")) |> 
+  group_by(STANDPLOT_CN, SPECIES) |> 
+  summarise(TPA = sum(TREE_COUNT))
+
+
+con <- dbConnect(
+  RSQLite::SQLite(), "C:\\RxFire\\Data\\_FIADB_WA.db"
+  )
+# Pulling in the species reference table
+plants_ref <- dbGetQuery(
+  con, "select SPECIES_SYMBOL, SPCD, COMMON_NAME, W_SPGRPCD from REF_SPECIES"
+  )
+plant_gr_ref <- dbGetQuery(
+  con, "select SPGRPCD, NAME from REF_SPECIES_GROUP"
+  )
+dbDisconnect(con)
+
+# Cleaning it up
+plants_ref <- plants_ref |> rename(SPGRPCD = W_SPGRPCD, SYMBL = SPECIES_SYMBOL)
+plants_ref <- left_join(plants_ref, plant_gr_ref, by = join_by(SPGRPCD))
+plants <- plants_ref |> select(SYMBL, SPCD)
+seedling_densities <- seedling_densities |> mutate(SPECIES = as.numeric(SPECIES))
+
+# Getting plant codes for seedlings
+seedling_densities <- left_join(seedling_densities, plants, join_by("SPECIES" == "SPCD"))
+# Removing an extra col. 
+seedling_densities <- seedling_densities |> select(-c(SPECIES))
+```
+
+Widening the table to match the st Joe example. 
+The value of each species TPA goes into a column for that species. 
+Each row is a standplot_cn. If there were no species of a type in that stand, a 
+zero is entered. 
+
+
+```{r}
+# Matching the St. Joe data
+seedling_response <- seedling_densities |> pivot_wider(names_from = SYMBL, 
+                 values_from = TPA,
+                 values_fill = 0,
+                 names_glue = "{SYMBL}_{'TD'}")
+
+
+# Un-grouping to avoid future messages
+seedling_response <- seedling_response |> ungroup()
+seedling_densities <- seedling_densities |> ungroup()
+
+
+
+
+# replacing all NAs with zero, just in case
+nas_to_zeroes <- function(df){
+  df <- df |> mutate_all(~replace(., is.na(.), 0))
+  df
+}
+seedling_response <- nas_to_zeroes(seedling_response) 
+
+# clearing out the objects
+X_predictors <- NULL
+Y_response <- NULL
+# creating lists of subplots
+X_predictors <- pred |> select(STANDPLOT_CN = StandID) |> unique()
+Y_response <- seedling_response |> select(STANDPLOT_CN = STANDPLOT_CN)
+```
+
+There is a mismatch in dims between the predictors and response variables. 
+
+X has about 25k rows and Y has about 13k. 
+This is looking at all possible plots with the value computed from FVS, vs
+those plots with seedlings. 
+
+If I remove the extra 12k rows where no regeneration is occurring, that's bad. 
+If I don't remove it, then I half of my data is zero. 
+
+The current plan is to use a couple models, one for probability of regeneration. 
+one for regen with and one one without disturbance. 
+From what I understand, the probability of regen model is for post disturbance. 
+So, this is more of an ingrowth model. We need the zeroes and I don't like that. 
+
+That is what I did last time, so at least the plots will be comparable. 
+
+I think I can at least remove the subplots that are non-forested. 
+
+
+```{r}
+# finding the mismatch 
+tt <- anti_join(X_predictors, Y_response, by = "STANDPLOT_CN")
+
+t <- left_join(tt, tree, by = "STANDPLOT_CN")
+
+t2 <- t |> group_by(STANDPLOT_CN) |> 
+  summarize(seedling_records = sum(startsWith(TREE_CN, "s")),
+            lt_records = sum(!startsWith(TREE_CN, "s")))
+
+t3 <- t2 |> filter(is.na(seedling_records) & is.na(lt_records)) |> 
+  select(STANDPLOT_CN)
+
+
+t2 <- t2 |> filter(!is.na(lt_records) & !is.na(seedling_records))
+```
+
+
+Of those records where there is no regen, 12k at least had large trees. 
+1k had neither seedlings of large trees.
+
+
+I tried to find out why there were no trees on those subplots, but I couldn't:
+
+```
+# t3 <- left_join(t3, plot, by = "STANDPLOT_CN")
+# 
+# standlist <- t3 |> select(STAND_CN)
+# standcn <- db_list(standlist, STAND_CN)
+# 
+# con <- dbConnect(RSQLite::SQLite(), "C:/RxFire/Data/_FIADB_WA.db")
+# 
+# cond <- dbGetQuery(
+#   con, 
+#   str_c("select * from cond where PLT_CN in (", 
+#         standcn, ")"))
+# 
+# dbDisconnect(con)
+# 
+# cond <- clean_na_cols(cond)
+# 
+# 
+# cond_status_cd <- cond |> 
+#   filter(COND_STATUS_CD == 1 | COND_STATUS_CD == 2 )
+# 
+# # hist(cond_status_cd$OWNGRPCD)
+# 
+# # Fire damage. 
+# hist(cond_status_cd[cond_status_cd$DSTRBCD1 > 29 & 
+#                       cond_status_cd$DSTRBCD1 < 40, 
+#                     "DSTRBCD1"])
+# 
+# cond_presnfcd <- cond_status_cd |> 
+#   filter(is.na(PRESNFCD)) |> clean_na_cols()
+# 
+# cond_presnfcd <- cond_presnfcd |> 
+#   select(-c(STATECD, INVYR, CN, COUNTYCD, PLOT,
+#             MAPDEN, PROP_BASIS, SLOPE, ASPECT, DSTRBYR1, DSTRBYR2, DSTRBYR3))
+# 
+# # names(cond_presnfcd)
+# 
+# cond_presnfcd <- cond_presnfcd |> 
+#   select(-c(CREATED_BY, CREATED_DATE, CREATED_IN_INSTANCE, MODIFIED_BY, MODIFIED_DATE, MODIFIED_IN_INSTANCE))
+# 
+# cond_presnfcd2 <- cond_presnfcd[, c(1, 49:ncol(cond_presnfcd))]
+# 
+# # summary(as.factor(cond_presnfcd$STUMP_CD_PNWRS))
+# 
+# # hist(cond_presnfcd$BALIVE)
+```
+
+There are standplot_cns that do not have trees. 
+I am not sure if I should count them. They might be NAs. 
+
+Looking at an example:
+
+- The subplot table says they are all the same.
+- The Cond table doesn't make distinctions for Subplots. 
+- There are tree records in the the other three plots. 
+
+I am not sure what to do. There are some codes that should be controlled for, 
+but I cannot get rid of all of them. Some of the codes that should be controlled 
+for were probably brought in with the cond table, I couldn't use standplot_cn. 
+So it pulled in every condition. 
+
+
+
+I found this field and it could be of use:
+
+PHYSCLCD
+Physiographic class code. A code indicating the general effect of land form, topographical
+position, and soil on moisture available to trees.
+
+___
+
+
+Removing the no tree plots. 
+
+```{r}
+x <- anti_join(X_predictors, t3, by = "STANDPLOT_CN")
+nrow(X_predictors) - nrow(x)
+
+X_predictors <- left_join(x, X_predictors, by = "STANDPLOT_CN")
+```
+
+
+```{r}
+# Adding the plots without regen. 
+imp_response <- left_join(X_predictors, seedling_response, join_by(STANDPLOT_CN))
+
+# removing the NAs
+imp_response <- nas_to_zeroes(imp_response) 
+# imp_data <- imp_data[,1:35]
+
+# removing fields from standlist to join
+FPAG <- standlist |> select(STANDPLOT_CN, FPAG)
+# renaming the field
+pred <- pred |> rename(STANDPLOT_CN = StandID)
+pred <- left_join(x, pred, by = "STANDPLOT_CN")
+# joining fpags to prediction list. 
+imp_pred <- left_join(pred, FPAG, by = "STANDPLOT_CN")
+
+imp_data <- left_join(imp_pred, imp_response, by = "STANDPLOT_CN")
+```
+
+
+```{r}
+# removing extra objects
+rm(con, X_predictors, Y_response, stplt_cn, t, plant_gr_ref, 
+   plants, standlist, FPAG, pred)
+```
+
+
+```{r}
+# con <- dbConnect(RSQLite::SQLite(), str_c(getwd(), "/attempt_3.db"))
+# dbWriteTable(con, "imp_data", imp_data)
+# dbWriteTable(con, "plants_ref", plants_ref)
+# dbWriteTable(con, "plots", plot)
+# dbWriteTable(con, "trees", tree)
+# dbDisconnect(con)
+
+keep <- c("clean_na_cols", "db_list", "nas_to_zeroes", "z_scores", "k")
+rm(list = ls()[!(ls() %in% keep)])
+```
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

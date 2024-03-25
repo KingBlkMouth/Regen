@@ -8,6 +8,7 @@ website:
       - href: index.qmd
         text: Home
       - 1_Copied_Code.qmd
+      - 2_Imputation.qmd
 
 format:
   html:

@@ -14,6 +14,37 @@ title: "Regen_Notes"
   - git remote -v
   
 
+## Contents
+
+*There are many absolute paths in plot selection.*
+
+1. Plot Selection
+    + Plot selection
+        - Select eco-regions and associated plots
+    + Ch 4
+        - Remove artificial, unsampled, non-forest, and periodic plots
+    + Ch 5
+        - Select subplots from plots, 
+        - Control for equal conditions. 
+        - Clean FPAGs. 
+        - Select FVS ready data from subplot list
+        - Write an input FVS database and standlist. 
+    + Ch 6
+        - Set: run name, input database, & standlist
+        - Run plots in FVS to get canopy cover. 
+
+2. Imputation
+    + 
+
+3. 
+
+
+
+* unordered list
+    + sub-item 1
+    + sub-item 2
+        - sub-sub-item 1
+
 
 ## Plot Selection
 

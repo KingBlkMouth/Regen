@@ -9,19 +9,8 @@ It has all been updated as of Mar 23 2024.
 
 ___
 
-Add selection code from AGP. 
-
-
-This is chapter 15 from my last notebook. It is mostly a re-do of plot selection. 
-I fixed a couple of errors that I made in the first run. This code is missing the 
-part where I selected the plots within the NSA.
-
-I still need to pull in the extra plots from the rest of WA. 
-After I do that, 
-I will add a section that selects the plots to use. 
-Then this will be everything that needs to be done to start looking at 
-potential regen plots in one spot. 
-
+The code on this page goes from a shapefile and FIA data to FVS's computed 
+variables. 
 ___
 
 ## Plot selection
@@ -41,7 +30,7 @@ options(scipen = 999)
 Previous steps: 
   
   1. I pulled the lat and long from the FIA's WA database. 
-  2. Created a point cloud from the coordinates table in Arc Prp. 
+  2. Created a point cloud from the coordinates table in Arc Pro. 
   3. Clipped the point cloud with POC3/OKWEN/OKWEN_shapefiles/OKWEN_AllFOAs_60km_buffer.shp
   4. Saved the clipped points to 60k_buffer_fiaplots.csv. 
 
@@ -66,19 +55,18 @@ foa_60_plots <- read.csv("C:/RxFire/Regen/60k_buffer_fiaPlots.csv")
 # Matching the foa cns to the table with ecoregions. 
 cns <- foa_60_plots |> select(CN)
 
-
 # dbListTables(con)
-
-
 # dbListFields(con, "FVS_PLOTINIT_PLOT")
 
 plots <- dbGetQuery(con, "SELECT STAND_CN, STANDPLOT_CN, ECOREGION FROM FVS_PLOTINIT_PLOT")
 
 cns$CN <- as.character(cns$CN)
 
+# 45304 plots
 plots_60 <- left_join(cns, plots, join_by(CN == STAND_CN))
 
 # Checking the number of NAs
+print("There are this many NAs")
 nrow(plots_60) - nrow(drop_na(plots_60))
 
 plots_60 <- drop_na(plots_60)
@@ -90,15 +78,25 @@ n_ecos <- plots_60 |> group_by(ECOREGION) |>
   summarise(n = n()) |> 
   arrange(desc(n))
 
+# Create a list of ecoregions in the study area. 
+# The first time, I used gen_eco, that was too broad. 
 eco_list <- n_ecos |> 
   mutate(
     gen_eco = str_sub(ECOREGION, 1, -2)
   )
+# Pull all plots in those ecoregions. 
+# nsa_plots <- plots |> mutate(
+#   gen_eco = str_sub(ECOREGION, 1, -2)) |> 
+#   filter(gen_eco %in% eco_list$gen_eco)
 
 nsa_plots <- plots |> mutate(
   gen_eco = str_sub(ECOREGION, 1, -2)) |> 
-  filter(gen_eco %in% eco_list$gen_eco)
+  filter(ECOREGION %in% eco_list$ECOREGION)
 
+# 59,800 plots w/gen_eco, 58878 w/ecoregion
+# save(nsa_plots, file = "nsa_plots.Rdata")
+
+rm(list = ls()[!ls() %in% c("nsa_plots")])
 ```
 
 
@@ -115,24 +113,22 @@ library(writexl)
 
 options(scipen = 999)
 
+# nsa_plots <- read_csv("C:/RxFire/Regen/Species_Plot_ecotype/FIA_NSA_Nat_design_NEWWA.csv",
+#                       col_types = c("c"))
 
-nsa_plots <- read_csv("C:/RxFire/Regen/Species_Plot_ecotype/FIA_NSA_Nat_design_NEWWA.csv",
-                      col_types = c("c"))
+load("./nsa_plots.Rdata")
 
 con <- dbConnect(RSQLite::SQLite(), "C:/RxFire/Data/_FIADB_WA.db")
 # Making a list to pull from the big database'
 # This requires less RAM than loading in the database. 
 standlist <- NULL
-standlist <- str_c("'", nsa_plots$CN, "'")
+standlist <- str_c("'", nsa_plots$STAND_CN, "'")
 standlist <- str_flatten_comma(standlist)
 
 # Pulling the tables
 ztree <- dbGetQuery(con, str_c("select * from TREE WHERE PLT_CN IN (", standlist, ")"))
-# ztree_init <- dbGetQuery(con, str_c("select * from fvs_treeinit_plot WHERE PLOT_CN IN (", standlist, ")"))
 zplot <- dbGetQuery(con, str_c("select * from plot WHERE CN IN (", standlist, ")"))
-# zstand <- dbGetQuery(con, str_c("select * from fvs_standinit_plot WHERE STAND_CN IN (", standlist, ")"))
 zp2veg <- dbGetQuery(con, str_c("select * from P2VEG_SUBPLOT_SPP WHERE PLT_CN IN (", standlist, ")"))
-# zsubplot <- dbGetQuery(con, str_c("select * from SUBPLOT WHERE PLT_CN IN (", standlist, ")"))
 SPGRPkey <- dbGetQuery(con,"select * from REF_SPECIES_GROUP")
 
 
@@ -143,18 +139,18 @@ ztree <- ztree[, colSums(is.na(ztree)) < nrow(ztree)]
 # ztree_init <- ztree_init[, colSums(is.na(ztree_init)) < nrow(ztree_init)] 
 zp2veg <- zp2veg[, colSums(is.na(zp2veg)) < nrow(zp2veg)]
 
-
-
-
 zcond <- dbGetQuery(con, str_c("select * from COND WHERE PLT_CN IN (", standlist, ")"))
 zcond <- zcond[, colSums(is.na(zcond)) < nrow(zcond)]
 
+print("the number of condition CNs in the standlist:") 
+dim(zcond)
 
 # Remove artificial regeneration, keep NAs and zeros. 
 zcond <- zcond |> filter(
   STDORGCD == 0 | is.na(STDORGCD)
 )
-
+print("after controlling for artificial regen")
+dim(zcond)
 
 # # Altered: remove all non-forest conditions. 
 # Remove Non-Forested Conditions related to man. 
@@ -162,6 +158,8 @@ zcond <- zcond |> filter(
 zcond <- zcond |> filter(
   (is.na(PRESNFCD))
 )
+print("after controlling for non-forest conditions")
+dim(zcond)
 
 
 
@@ -170,18 +168,27 @@ zcond <- zcond |> filter(
   COND_STATUS_CD == 1 | is.na(COND_STATUS_CD) | COND_STATUS_CD == 2
 )
 
+
+
 # Remove unsampled plots. 
 zcond <- zcond |> filter(
   is.na(COND_NONSAMPLE_REASN_CD)
 )
+print("after controlling for unsampled and water")
+dim(zcond)
+
 
 # There should also be a line for removing the periodic visits, 
-# KINDCD = 0, but I removed them when I pulled out the CNs. 
-# zplot <- zplot |> filter(
-#   KINDCD != 0
-# )
+# KINDCD = 0.
+zplot <- zplot |> filter(
+  KINDCD != 0
+)
+x <- zplot |> select(PLT_CN = CN, KINDCD)
+y <- left_join(zcond, x, by = "PLT_CN")
+zcond <- drop_na(y, KINDCD)
 
-
+print("after controlling for periodic visits")
+dim(zcond)
 
 
 zcond <- zcond |> select(
@@ -191,12 +198,17 @@ zcond <- zcond |> mutate(
   FPAG = str_remove_all(str_sub(HABTYPCD, 1, 4), " ")
 )
 
-# NAs need to be filled in
+# NAs in FPAG
 na <- zcond |> filter(is.na(FPAG))
 # good needs some cleaning
 good <- zcond |> filter(!is.na(FPAG))
 
+good$PLT_CN <- as.character(good$PLT_CN)
 
+# # Confirming there are no periodic plots. 
+# good |> group_by(PLT_CN) |> 
+#   summarise(len = str_width(PLT_CN)) |> 
+#   arrange(len)
 
 
 
@@ -216,7 +228,7 @@ zp2veg <- zp2veg |> select(CN,
 test <- na |> select(CN)
 
 
-
+# Looking at those NAs
 CN <- NULL
 CN <- str_c("'", test$CN, "'")
 CN <- str_flatten_comma(CN)
@@ -252,7 +264,7 @@ dbDisconnect(con)
 
 g <- good |> select(PLT_CN, CONDID, HABTYPCD) |> unique()
 
-# write_csv(good, "C:/RxFire/Regen/Species_Plot_ecotype/good_plots3.csv")
+# write_csv(good, "./good_plots_03242024.csv")
 ```
 
 6092 stands to use vs 6,337 before. 
@@ -260,13 +272,15 @@ g <- good |> select(PLT_CN, CONDID, HABTYPCD) |> unique()
 
 ## CH 5
 
+good shouldn't have the short cns. Those are periodic visits. 
+
 ```{r}
 rm(list = ls())
 
 con <- dbConnect(RSQLite::SQLite(), "C:/RxFire/Data/_FIADB_WA.db")
 
 # This is just the csv I saved above. 
-good <- read_csv("C:/RxFire/Regen/Species_Plot_ecotype/good_plots3.csv",
+good <- read_csv("./good_plots_03242024.csv",
                  col_types = c("ccnc"))
 
 good <- good |> select(PLT_CN, CONDID, FPAG) |> unique()
@@ -323,6 +337,8 @@ t <- t |> mutate(
 subs <- t |> rename(SUBPLOT_CN = CN)
 
 unique(t$FPAG) |> sort()
+
+dbDisconnect(con)
 ```
 Only conifer hardwood and shrub classes present. 
 
@@ -331,10 +347,11 @@ Only conifer hardwood and shrub classes present.
 
 
 ```{r}
-# write_csv(t2, "C:/RxFire/Regen/Species_Plot_ecotype/good_SUB_plots.csv")
+con <- dbConnect(RSQLite::SQLite(), "C:/RxFire/Data/_FIADB_WA.db")
+# write_csv(subs, "./good_SUB_plots.csv")
 
-# subs <- read_csv("C:/RxFire/Regen/Species_Plot_ecotype/good_SUB_plots.csv",
-#                  col_types = c("cncc"))
+subs <- read_csv("./good_SUB_plots.csv",
+                 col_types = c("cncc"))
 
 subs <- subs |> mutate(
   STANDPLOT_CN = str_c(PLT_CN, "_", SUBP)
@@ -396,6 +413,7 @@ rtrees <- left_join(regen, tree, by = "STANDPLOT_CN")
 
 t4 <- regen |> group_by(FPAG) |> summarise(n = n()) 
 
+print("Median number of subplots where regen occurred is ")
 median(t4$n)
 
 
@@ -406,33 +424,55 @@ p$INV_YEAR <-  2020
 
 
 rm(t, t4)
+dbDisconnect(con)
 
- 
-# con = dbConnect(RSQLite::SQLite(), dbname = 'C:/RxFire/Regen/Mar21_Regen_FVS.db')
+name <- str_c("FVS_inputDB_", 
+              strftime(Sys.Date(),"%m%d%y"), 
+              "_", 
+              strftime(Sys.time(),"%H%M"),
+              ".db")
+
+# con = dbConnect(RSQLite::SQLite(), dbname = str_c("../", name)
 # 
-# dbWriteTable(conn = con, name = "FVS_StandInit", value = stand, overwrite = T)
-# dbWriteTable(conn = con, name = "FVS_PlotInit", value = p, overwrite = T)
-# dbWriteTable(conn = con, name = "FVS_TreeInit", value = tree, overwrite = T)
+# dbWriteTable(conn = con, name = "FVS_STANDINIT_PLOT", value = stand, overwrite = T)
+# dbWriteTable(conn = con, name = "FVS_PLOTINIT_PLOT", value = p, overwrite = T)
+# dbWriteTable(conn = con, name = "FVS_TREEINIT_PLOT", value = tree, overwrite = T)
 # dbListTables(conn = con)
-# 
 # dbDisconnect(con)
 
 standlist <- p |> select(STAND_CN, STANDPLOT_CN, VARIANT, FPAG)
 
-# unique(standlist$VARIANT)
+unique(standlist$VARIANT)
 
 standlist <- standlist |> mutate(
-  VARIANT = ifelse(VARIANT == "PN", "WC", VARIANT)
+  VARIANT = ifelse(VARIANT == "PN", "WC", VARIANT),
+  VARIANT = ifelse(VARIANT == "IE", "EC", VARIANT)
 )
+unique(standlist$VARIANT)
 
-# write_csv(standlist, "C:/RxFire/Regen/standlist3.csv")
+name <- str_c("standlist_", 
+              strftime(Sys.Date(),"%m%d%y"), 
+              "_", 
+              strftime(Sys.time(),"%H%M"),
+              ".csv")
+
+# write_csv(standlist, str_c("./", name))
 ```
 
-Median number of subplots where regen occurred is 14. 
 
 ## CH 6 FVS
 
-This code chunk runs FVS to get CC. 
+This code chunk runs FVS to get CC, BA, and SDI. 
+
+Set FVS bin to the FVS executable. 
+
+This time consuming step might be avoided using the p2veg_spp table. 
+There is a canopy cover by species variable there. It could be summed. 
+Also, perhaps using percent CC by species could be a better predictor than just 
+CC.
+
+FVS has been running for 20 minutes with these 25,516 subplots. 
+
 
 ```{r}
 #| eval: false
@@ -450,26 +490,30 @@ options(scipen = 999)
 ## Set all the file paths and names in this section. Then, run the rest of the script in sections 2. 
 
 ## Set the working directory here.
-setwd("C:\\RxFire\\Regen\\FVS")
+# setwd("C:\\RxFire\\Regen\\FVS")
+fvs_wd <- "C:\\RxFire\\Regen\\FVS"
 
 ## Where are the FVS executables? FVSbin? 
 #  Include the \\FVS prefix to variant.exe. 
 FVSbin <-  "C:\\FVSbin_v3.1\\FVS"
 
-# 
-## Name this Run
-name <- "regen_03222024_1"
+# Test
+
+name <- str_c("regen_", 
+              strftime(Sys.Date(),"%m%d%y"), 
+              "_", 
+              strftime(Sys.time(),"%H%M"))
 
 
 ## Set the path to the stand input database here, aka the output db from 3_CNs_to_FVS:
-inputDatabase <- 'C:\\RxFire\\Regen\\Mar21_Regen_FVS.db'
+inputDatabase <- 'C:/RxFire/Regen/Mar24_Regen_FVS.db'
 # C:\\RxFire\\Data\\FIADB_WA.db
 # C:\\RxFire\\Regen\\FVS\\Feb6_Regen_FVS_1.db
 # C:\\RxFire\\Regen\\Feb7_Regen_FVS_1.db
 
 # 1.2 Standlist from xlsx -------------------------------------------------
 
-standlist <- read_csv("C:/RxFire/Regen/standlist3.csv", 
+standlist <- read_csv("C:/RxFire/Regen/Regen_Notes/standlist03242024.csv", 
                       col_types = c("cccc")) |> select(
                         CN = STANDPLOT_CN, FVSVariant = VARIANT
                       ) 
@@ -487,7 +531,7 @@ standlist <- read_csv("C:/RxFire/Regen/standlist3.csv",
 int <- Sys.time()
 
 # Create directory where FVS runs will be sent:
-RunDirectory <- str_c(getwd(), '/', name)
+RunDirectory <- str_c(fvs_wd, '/', name)
 
 if (!dir.exists(RunDirectory)) {
   print(paste("Making Run directory: ", RunDirectory))
@@ -522,7 +566,7 @@ outputDatabase <- str_c(RunDirectory, "/", name, ".db")
 
 
 ## This function creates the string for a single stand in FVS.
-createInputFile <- function(stand, managementID, inputDatabase, outputDatabase, areaSpecificKcp, FL){
+createInputFile <- function(stand, managementID, inputDatabase, outputDatabase){
   # Create .key file
   input <- paste0('STDIDENT\n',                     
                   stand, '\n',                     
@@ -535,12 +579,12 @@ createInputFile <- function(stand, managementID, inputDatabase, outputDatabase, 
                   # 0 = Change all cycles | Cycle length to one year
                   'TIMEINT           0         1\n',
                   'SCREEN\n',               
-                  'DATABASE\n',                                                                                     # Databases in       
+                  'DATABASE\n',                                                                                     # Databases in    
                   'DSNIN\n',                                                
                   inputDatabase, '\n',                                        
                   'StandSQL\n',                                             
                   'SELECT * FROM FVS_PLOTINIT_PLOT\n',
-                  # 'SELECT * FROM FVS_PlotInit\n',  # For a different spelling                   
+                  # 'SELECT * FROM FVS_PlotInit\n',  # For a different table name                   
                   "WHERE  Standplot_CN  = '%stand_cn%'\n",                     
                   'EndSQL\n',                                                    
                   'DSNIN\n',                                          
@@ -582,9 +626,8 @@ for (g in unique(standlist$FVSVariant)) {
     
     keywords <- createInputFile(stand = group_stands$CN[s], managementID = group_stands$CN[s], 
                                 inputDatabase = inputDatabase,
-                                outputDatabase = outputDatabase, 
-                                areaSpecificKcp = (paste0(kcp_dir, "/", group_stands$kcp[s])), 
-                                FL = FL[a])
+                                outputDatabase = outputDatabase
+                                )
     
     masterkeys <- paste0(masterkeys, keywords)
   }
@@ -628,4 +671,393 @@ print(out - int)
 # Run this Batch file
 shell.exec(str_c(RunDirectory, '\\test.bat'))
 ```
+
+## Imputation Prep
+
+Pull the FVS output and organize the data. 
+
+
+
+
+```{r}
+#| message: false
+#| warning: false
+
+library(tidyverse, quietly = T)
+library(esquisse)
+library(yaImpute)
+library(RSQLite)
+library(vegan)
+library(randomForest)
+library(RSQLite)
+
+options(scipen = 999)
+```
+
+Set k for knn. 
+Get the compute and summary tables from the fvs run. 
+Get the tree and plots tables from fvs_ready. 
+Also adding the cond table for troubleshooting. 
+
+```{r}
+k = 10
+
+
+# Pulling my list of subplots with FPAGs that I used in FVS
+# "C:\RxFire\Regen\Regen_Notes\standlist03242024.csv"
+# getwd()
+standlist <- read_csv("standlist03242024.csv", 
+                      col_types = c("cccc")) 
+
+
+## The FVS variables DB I created earlier by running these plots in FVS
+## and extracting the first years estimates of CC, BA, & SDI
+# "C:/RxFire/Regen/FVS/regen_020724_4n/regen_020724_4n.db"
+# "C:\RxFire\Regen\FVS\regen_032524_0919\regen_032524_0919.db"
+con <- dbConnect(
+  RSQLite::SQLite(), "C:/RxFire/Regen/FVS/regen_032524_0919/regen_032524_0919.db"
+  )
+
+# Compute has CC
+# Summary2 has BA and SDI
+comp <- dbGetQuery(con, "select CaseID, StandID, CC from FVS_Compute")
+summary <- dbGetQuery(
+  con, 
+  str_c("select CaseID, StandID, Tpa, BA, SDI from FVS_Summary2",
+        " where Year = 2020")
+  )
+
+pred <- left_join(comp, summary, join_by(CaseID, StandID))
+
+dbDisconnect(con)
+
+# rm(comp, summary, con)
+
+# making a list for sql
+db_list <- function(df, CN_col){
+  name <- NULL
+  name <- df |> select({{CN_col}})
+  name <- name |> mutate(CN_col = str_c("'", {{CN_col}}, "'")) 
+  name <- str_flatten_comma(name$CN_col)
+  # name <- str_flatten_comma(name[, CN_col])
+  name
+}
+stplt_cn <- db_list(df = pred, CN_col = StandID)
+
+
+# connecting to the WA state FIA db
+con <- dbConnect(RSQLite::SQLite(), "C:/RxFire/Data/_FIADB_WA.db")
+
+# collecting the trees
+tree <- dbGetQuery(
+  con, 
+  str_c("select * from FVS_TREEINIT_PLOT where STANDPLOT_CN in (", 
+        stplt_cn, ")"))
+
+# collecting tne plots and subplots
+plot <- dbGetQuery(
+  con, 
+  str_c("select * from FVS_PLOTINIT_PLOT where STANDPLOT_CN in (", 
+        stplt_cn, ")"))
+
+
+# cond <- dbGetQuery(
+#   con, 
+#   str_c("select * from cond where STANDPLOT_CN in (", 
+#         stplt_cn, ")"))
+
+dbDisconnect(con)
+```
+
+
+Clean the tables. 
+
+```{r}
+# Cleaning out the NA columns
+clean_na_cols <- function(df){
+  df <- df[, colSums(is.na(df)) < nrow(df)]
+}
+
+tree <- clean_na_cols(tree)
+plot <- clean_na_cols(plot)
+
+# Cleaning out the useless columns
+plot <- plot |> select(-c(GROUPS, STAND_ID, STANDPLOT_ID, INV_DAY, INV_MONTH, 
+                          REGION, FOREST, SAM_WT, PHYSIO_REGION, STATE, COUNTY))
+
+tree <- tree |> select(-c(STAND_ID, STANDPLOT_ID))
+
+pred <- pred |> select(-c(CaseID, Tpa))
+```
+
+Seedling densities are the trees per acre for each species' seedlings. 
+Adding the plant symbols for seedlings. 
+
+
+```{r}
+# Separating the seedlings from the rest
+seedling_densities <- tree |>  filter(startsWith(TREE_CN, "S")) |> 
+  group_by(STANDPLOT_CN, SPECIES) |> 
+  summarise(TPA = sum(TREE_COUNT))
+
+
+con <- dbConnect(
+  RSQLite::SQLite(), "C:\\RxFire\\Data\\_FIADB_WA.db"
+  )
+# Pulling in the species reference table
+plants_ref <- dbGetQuery(
+  con, "select SPECIES_SYMBOL, SPCD, COMMON_NAME, W_SPGRPCD from REF_SPECIES"
+  )
+plant_gr_ref <- dbGetQuery(
+  con, "select SPGRPCD, NAME from REF_SPECIES_GROUP"
+  )
+dbDisconnect(con)
+
+# Cleaning it up
+plants_ref <- plants_ref |> rename(SPGRPCD = W_SPGRPCD, SYMBL = SPECIES_SYMBOL)
+plants_ref <- left_join(plants_ref, plant_gr_ref, by = join_by(SPGRPCD))
+plants <- plants_ref |> select(SYMBL, SPCD)
+seedling_densities <- seedling_densities |> mutate(SPECIES = as.numeric(SPECIES))
+
+# Getting plant codes for seedlings
+seedling_densities <- left_join(seedling_densities, plants, join_by("SPECIES" == "SPCD"))
+# Removing an extra col. 
+seedling_densities <- seedling_densities |> select(-c(SPECIES))
+```
+
+Widening the table to match the st Joe example. 
+The value of each species TPA goes into a column for that species. 
+Each row is a standplot_cn. If there were no species of a type in that stand, a 
+zero is entered. 
+
+
+```{r}
+# Matching the St. Joe data
+seedling_response <- seedling_densities |> pivot_wider(names_from = SYMBL, 
+                 values_from = TPA,
+                 values_fill = 0,
+                 names_glue = "{SYMBL}_{'TD'}")
+
+
+# Un-grouping to avoid future messages
+seedling_response <- seedling_response |> ungroup()
+seedling_densities <- seedling_densities |> ungroup()
+
+
+
+
+# replacing all NAs with zero, just in case
+nas_to_zeroes <- function(df){
+  df <- df |> mutate_all(~replace(., is.na(.), 0))
+  df
+}
+seedling_response <- nas_to_zeroes(seedling_response) 
+
+# clearing out the objects
+X_predictors <- NULL
+Y_response <- NULL
+# creating lists of subplots
+X_predictors <- pred |> select(STANDPLOT_CN = StandID) |> unique()
+Y_response <- seedling_response |> select(STANDPLOT_CN = STANDPLOT_CN)
+```
+
+There is a mismatch in dims between the predictors and response variables. 
+
+X has about 25k rows and Y has about 13k. 
+This is looking at all possible plots with the value computed from FVS, vs
+those plots with seedlings. 
+
+If I remove the extra 12k rows where no regeneration is occurring, that's bad. 
+If I don't remove it, then I half of my data is zero. 
+
+The current plan is to use a couple models, one for probability of regeneration. 
+one for regen with and one one without disturbance. 
+From what I understand, the probability of regen model is for post disturbance. 
+So, this is more of an ingrowth model. We need the zeroes and I don't like that. 
+
+That is what I did last time, so at least the plots will be comparable. 
+
+I think I can at least remove the subplots that are non-forested. 
+
+
+```{r}
+# finding the mismatch 
+tt <- anti_join(X_predictors, Y_response, by = "STANDPLOT_CN")
+
+t <- left_join(tt, tree, by = "STANDPLOT_CN")
+
+t2 <- t |> group_by(STANDPLOT_CN) |> 
+  summarize(seedling_records = sum(startsWith(TREE_CN, "s")),
+            lt_records = sum(!startsWith(TREE_CN, "s")))
+
+t3 <- t2 |> filter(is.na(seedling_records) & is.na(lt_records)) |> 
+  select(STANDPLOT_CN)
+
+
+t2 <- t2 |> filter(!is.na(lt_records) & !is.na(seedling_records))
+```
+
+
+Of those records where there is no regen, 12k at least had large trees. 
+1k had neither seedlings of large trees.
+
+
+I tried to find out why there were no trees on those subplots, but I couldn't:
+
+```
+# t3 <- left_join(t3, plot, by = "STANDPLOT_CN")
+# 
+# standlist <- t3 |> select(STAND_CN)
+# standcn <- db_list(standlist, STAND_CN)
+# 
+# con <- dbConnect(RSQLite::SQLite(), "C:/RxFire/Data/_FIADB_WA.db")
+# 
+# cond <- dbGetQuery(
+#   con, 
+#   str_c("select * from cond where PLT_CN in (", 
+#         standcn, ")"))
+# 
+# dbDisconnect(con)
+# 
+# cond <- clean_na_cols(cond)
+# 
+# 
+# cond_status_cd <- cond |> 
+#   filter(COND_STATUS_CD == 1 | COND_STATUS_CD == 2 )
+# 
+# # hist(cond_status_cd$OWNGRPCD)
+# 
+# # Fire damage. 
+# hist(cond_status_cd[cond_status_cd$DSTRBCD1 > 29 & 
+#                       cond_status_cd$DSTRBCD1 < 40, 
+#                     "DSTRBCD1"])
+# 
+# cond_presnfcd <- cond_status_cd |> 
+#   filter(is.na(PRESNFCD)) |> clean_na_cols()
+# 
+# cond_presnfcd <- cond_presnfcd |> 
+#   select(-c(STATECD, INVYR, CN, COUNTYCD, PLOT,
+#             MAPDEN, PROP_BASIS, SLOPE, ASPECT, DSTRBYR1, DSTRBYR2, DSTRBYR3))
+# 
+# # names(cond_presnfcd)
+# 
+# cond_presnfcd <- cond_presnfcd |> 
+#   select(-c(CREATED_BY, CREATED_DATE, CREATED_IN_INSTANCE, MODIFIED_BY, MODIFIED_DATE, MODIFIED_IN_INSTANCE))
+# 
+# cond_presnfcd2 <- cond_presnfcd[, c(1, 49:ncol(cond_presnfcd))]
+# 
+# # summary(as.factor(cond_presnfcd$STUMP_CD_PNWRS))
+# 
+# # hist(cond_presnfcd$BALIVE)
+```
+
+There are standplot_cns that do not have trees. 
+I am not sure if I should count them. They might be NAs. 
+
+Looking at an example:
+
+- The subplot table says they are all the same.
+- The Cond table doesn't make distinctions for Subplots. 
+- There are tree records in the the other three plots. 
+
+I am not sure what to do. There are some codes that should be controlled for, 
+but I cannot get rid of all of them. Some of the codes that should be controlled 
+for were probably brought in with the cond table, I couldn't use standplot_cn. 
+So it pulled in every condition. 
+
+
+
+I found this field and it could be of use:
+
+PHYSCLCD
+Physiographic class code. A code indicating the general effect of land form, topographical
+position, and soil on moisture available to trees.
+
+___
+
+
+Removing the no tree plots. 
+
+```{r}
+x <- anti_join(X_predictors, t3, by = "STANDPLOT_CN")
+nrow(X_predictors) - nrow(x)
+
+X_predictors <- left_join(x, X_predictors, by = "STANDPLOT_CN")
+```
+
+
+```{r}
+# Adding the plots without regen. 
+imp_response <- left_join(X_predictors, seedling_response, join_by(STANDPLOT_CN))
+
+# removing the NAs
+imp_response <- nas_to_zeroes(imp_response) 
+# imp_data <- imp_data[,1:35]
+
+# removing fields from standlist to join
+FPAG <- standlist |> select(STANDPLOT_CN, FPAG)
+# renaming the field
+pred <- pred |> rename(STANDPLOT_CN = StandID)
+
+pred <- left_join(x, pred, by = "STANDPLOT_CN")
+# joining fpags to prediction list. 
+imp_pred <- left_join(pred, FPAG, by = "STANDPLOT_CN")
+
+imp_data <- left_join(imp_pred, imp_response, by = "STANDPLOT_CN")
+```
+
+Making a set for the zeroes just in case. 
+```{r}
+zx <- Y_response |> select(STANDPLOT_CN)
+# Adding the plots without regen. 
+zimp_response <- left_join(zx, seedling_response, join_by(STANDPLOT_CN))
+
+# removing the NAs
+zimp_response <- nas_to_zeroes(zimp_response) 
+
+zpred <- left_join(zx, pred, by = "STANDPLOT_CN")
+# joining fpags to prediction list. 
+zimp_pred <- left_join(zpred, FPAG, by = "STANDPLOT_CN")
+
+zimp_data <- left_join(zimp_pred, zimp_response, by = "STANDPLOT_CN")
+```
+
+Cleaning up the other tables
+
+```{r}
+tree <- left_join(x, tree, by = "STANDPLOT_CN")
+plot <- left_join(x, plot, by = "STANDPLOT_CN")
+```
+
+
+
+```{r}
+# removing extra objects
+rm(con, X_predictors, Y_response, stplt_cn, t, plant_gr_ref, 
+   plants, standlist, FPAG, pred)
+```
+
+
+```{r}
+name <- str_c("attempt_", 
+              strftime(Sys.Date(),"%m%d%y"))
+              # , 
+              # "_"
+              # , 
+              # strftime(Sys.Date(),"%H%M"))
+
+# con <- dbConnect(RSQLite::SQLite(), str_c("./", name, ".db"))
+# dbWriteTable(con, "imp_data", imp_data)
+# dbWriteTable(con, "plants_ref", plants_ref)
+# dbWriteTable(con, "FVS_PLOTINIT_PLOT", plot)
+# dbWriteTable(con, "FVS_TREEINIT_PLOT", tree)
+# dbWriteTable(con, "regen_only_imp_data", zimp_data)
+# 
+# dbDisconnect(con)
+
+keep <- c("clean_na_cols", "db_list", "nas_to_zeroes", "z_scores", "k")
+# rm(list = ls()[!(ls() %in% keep)])
+```
+ 
+
 
