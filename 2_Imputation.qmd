@@ -2,9 +2,71 @@
 title: "Imputation"
 ---
 
-Pull the FVS output and organize the data. 
+## Summary
+
+1. First set
+
+First set is a repeat of the first imputation I did. This one is using the full 
+set of CNs. That is, it contains all the stands that are in ecoregions associated 
+with the study area. 
+
+It is comparing the Kralicek three predictors vs the set that contains elevation, 
+aspect, and slope as well. 
+The z variables indicate that the data set only contains plots that have seedlings. 
+There are less zeroes in that set. The full set is about half zeroes. 
+
+This set has the msn and mal distance plots, but not RF. 
+
+2. Set 2
+
+Adding in Random Forests, broadening FPAG to fpa by removing one digit from the 
+Ecoregion code. Organizing the response by species prevalence. 
+Prevalent species are those that have records starting between the 75 percentile 
+and the 90th. It is all zeroes before that. 
+Common species start between the 90th and 97.5. 
+Uncommon species start to have records between 97.5 and 99. 
+Rare after 99.
+
+Prevalent species are 
+
+| SYMBL | Name |
+|:-----:|:-------------------:|
+| PSME |  Doug-fir |
+| ABAM |  silver fir |
+| ABLA |  subalpine fir |
+| TSHE | western hemlock  |
 
 
+Common species are:
+
+| SYMBL | Name |
+|:-----:|:-------------------:|
+| PIPO | Ponderosa pine  |
+| TSME | Mountain Hemlock |
+| ABGR | Grand Fir |
+| THPL | Red Cedar |
+| PIEN | Engelmann spruce |
+| PICO | Lodgepole pine |
+| PIMO3 | W. White Pine |
+
+
+
+Uncommon species are:
+
+| SYMBL | Name |
+|:-----:|:-------------------:|
+| PIAL | whitebark pine  |
+| ACGL | Rocky Mountain maple |
+| LAOC | western larch |
+| TABR2 | Pacific yew |
+| CHNO |  Alaska yellow-cedar |
+| POTR5 | quaking aspen |
+	
+				
+				
+	
+				
+	
 
 
 ```{r}
@@ -21,6 +83,16 @@ library(RSQLite)
 
 options(scipen = 999)
 ```
+
+## Set 1, 3 vs 6, full set vs regen only
+
+This is a repeat of the first comparison I did. 
+I am using the expanded dataset for this run, but for CDS6, it is only about 
+400 extra plots.
+
+This time around, I saved a dataset where I only kept plots/stands that had 
+regeneration/seedlings. So I changed it a little to compare three and six predictor 
+variable models while also seeing what happens without so many zeroes. 
 
 ```{r}
 #| message: false
@@ -137,13 +209,19 @@ names <- c('PSME_TD', 'PICO_TD', 'PIPO_TD', 'PRVI_TD', 'ABGR_TD', 'PREM_TD',
 
 imp_msn_dist_3 <- imputed_msn_dist_3[, names(imputed_msn_dist_3) %in% names] |> 
   filter(PSME_TD < 15000 & PSME_TD.o < 15000)
-imp_msn_dist_6 <- imputed_msn_dist_6[, names(imputed_msn_dist_6) %in% names]|> 
+imp_msn_dist_6 <- imputed_msn_dist_6[, names(imputed_msn_dist_6) %in% names] |> 
   filter(PSME_TD < 15000 & PSME_TD.o < 15000)
-zimp_msn_dist_3 <- imputed_zmsn_dist_3[, names(imputed_zmsn_dist_3) %in% names]|> 
+zimp_msn_dist_3 <- imputed_zmsn_dist_3[, names(imputed_zmsn_dist_3) %in% names] |> 
   filter(PSME_TD < 15000 & PSME_TD.o < 15000)
-zimp_msn_dist_6 <- imputed_zmsn_dist_6[, names(imputed_zmsn_dist_6) %in% names]|> 
+zimp_msn_dist_6 <- imputed_zmsn_dist_6[, names(imputed_zmsn_dist_6) %in% names] |> 
   filter(PSME_TD < 15000 & PSME_TD.o < 15000)
 ```
+
+
+### Plots, 3 vs 6 & Full vs Regen 
+
+Here are imputed vs observed when using other the Kralicek 3 variables or adding
+elev, slope, and aspect for the 6 variable ones. 
 
 ```{r}
 #| column: page
@@ -153,6 +231,12 @@ plot(imp_msn_dist_3)
 plot(imp_msn_dist_6)
 ```
 
+___
+
+Here are the three vs six variable plots, but this time, z is for zero. 
+As in  there are no zeroes in response variables. z means these are only for 
+plots that have seedlings. 
+
 ```{r}
 #| column: page
 #| layout-ncol: 2
@@ -160,6 +244,12 @@ plot(imp_msn_dist_6)
 plot(zimp_msn_dist_3)
 plot(zimp_msn_dist_6)
 ```
+
+___
+
+Three variables, all plots vs seedling only plots/stands. 
+
+**These have different labels. Prvi and Abgr are swapped.**
 
 ```{r}
 #| column: page
@@ -169,6 +259,10 @@ plot(imp_msn_dist_3)
 plot(zimp_msn_dist_3)
 ```
 
+___
+
+Six variable plots, all stands vs seeldings only. 
+
 ```{r}
 #| column: page
 #| layout-ncol: 2
@@ -176,4 +270,512 @@ plot(zimp_msn_dist_3)
 plot(imp_msn_dist_6)
 plot(zimp_msn_dist_6)
 ```
+
+
+## FPAG to fpa
+
+I am skipping a set of imputations I did before, in attempt 4 fpag. 
+That one was a failure because FPAG couldn't be added to the distance matrix. 
+I couldn't use it with MSN, I don't think I have tried to use it with RF yet. 
+
+This set of code is from CH 14 in the regen book. 
+
+```{r}
+rm(list = ls())
+
+k = 10
+
+# Pulling from my new interim save point
+con <- dbConnect(RSQLite::SQLite(), "./attempt_032524.db")
+imp_data <- dbGetQuery(con, "select * from imp_data")
+zimp_data <- dbGetQuery(con, "select * from regen_only_imp_data")
+plots <- dbGetQuery(con, "select * from fvs_plotinit_plot")
+plants_ref <- dbGetQuery(con, "select * from plants_ref")
+dbDisconnect(con)
+rm(con)
+
+imp_data_orig <- imp_data
+
+# Grabbing the topography variables
+pred_topo <- plots |> select(
+  STANDPLOT_CN, ELEVFT, SLOPE, ASPECT
+)
+# Get the Kralicek variables
+pred_Kral <- imp_data |> select(
+  STANDPLOT_CN, CC, BA, SDI, FPAG
+)
+
+# remove the predictors from the response.
+response <- imp_data |> select(
+  -c(CC, BA, SDI, FPAG)
+)
+# join the Kralicek and topo variables. 
+predictors <- left_join(pred_Kral, pred_topo, join_by(STANDPLOT_CN))|> 
+  relocate(FPAG, .after = STANDPLOT_CN)
+
+
+
+unique(imp_data$FPAG)
+```
+
+
+```{r}
+imp_data |> group_by(FPAG) |> 
+  summarise(n = n()) |> 
+  arrange(desc(n)) |> head()
+```
+
+
+```{r}
+imp_data_FPA <- imp_data |> 
+  mutate(
+    fpa = str_sub(FPAG, 1, 3)
+  )
+
+x <- unique(imp_data_FPA$fpa)
+x
+```
+
+
+```{r}
+# There are 17 fpas vs 34 FPAGs
+n_distinct(imp_data_FPA$fpa)
+n_distinct(imp_data_FPA$FPAG)
+
+
+
+# n_distinct(imp_data$FPAG)
+
+# There are 4028 vs 2402 in the largest group
+imp_data_FPA |> group_by(fpa) |> 
+  summarise(n = n()) |> 
+  arrange(desc(n)) |> head()
+```
+
+Before expanding the set, there were 17 fpas and 34 fpags. 
+Now there are 92 fpas and 198 FPAGs
+
+Here is the table before:
+
+| fpa | n |
+|:---:|:---:|
+| CDS | 4028 |
+| CES | 2004 |
+| CFS | 1840 |
+| CDG | 1383 |
+| CMS | 1221 |
+| CHS | 1220
+
+
+## Species prevalence
+
+```{r}
+z <- apply(imp_data, 2, max) 
+z <- z[6:length(z)]
+x <- names(z)
+y <- z
+names(y) <- NULL
+y <- as.numeric(y)
+names(y) <- x
+# This is a sorted list of the maximum trees per acre per species on one plot
+y |> sort(decreasing = T)
+
+imp <- imp_data
+
+imp_p <- imp |> select(1:5)
+imp_r <- imp |> select(1, 6:ncol(imp))
+imp_r <- imp_r |> mutate(
+  total_TD = rowSums(imp_r[,2:ncol(imp_r)])
+)
+
+imp <- left_join(imp_p, imp_r, by = "STANDPLOT_CN")
+imp_z <- imp[imp$total_TD > 0,]
+
+# summary(imp_z[,6:ncol(imp_z)])
+
+
+
+# apply(imp_z[,6:ncol(imp_z)], 2, quantile, seq(0.72, 0.90, .04))
+
+prevalent_sp <- c('PSME_TD', 'ABAM_TD', 'ABLA_TD', 'TSHE_TD')
+keep <- names(imp_z)[!names(imp_z) %in% prevalent_sp]
+
+imp_z2 <- imp_z[,keep]
+
+# apply(imp_z2[,6:ncol(imp_z2)], 2, quantile, seq(0.90, 0.9875, .025))
+
+common_sp <- c('PIPO_TD' , 'TSME_TD', 'ABGR_TD', 'THPL_TD', 'PIEN_TD', 'PICO_TD', 'PIMO3_TD')
+
+keep <- names(imp_z2)[!names(imp_z2) %in% common_sp]
+imp_z3 <- imp_z2[,keep]
+
+# apply(imp_z3[,6:ncol(imp_z3)], 2, quantile, seq(0.975, .99, .005))
+
+uncommon_sp <- c('PIAL_TD', 'ACGL_TD', 'LAOC_TD', 'TABR2_TD', 'CHNO_TD', 
+                 'POTR5_TD')
+
+keep <- names(imp_z3)[!names(imp_z3) %in% uncommon_sp]
+imp_z4 <- imp_z3[,keep]
+
+# apply(imp_z4[,6:ncol(imp_z4)], 2, quantile, seq(0.99, 1, .005))
+
+rare_sp <- names(imp_z4[,6:(ncol(imp_z4)-1)])
+
+sp_prevalence <-  list(prevalent = prevalent_sp, 
+     common = common_sp, 
+     uncommon = uncommon_sp, 
+     rare = rare_sp)
+# save(sp_prevalence, file = "sp_prevalence.Rdata")
+# getwd()
+
+print(sp_prevalence)
+
+
+# Here are the quantiles for most prevelant species with zeroes
+# apply(imp_data[,sp_prevalence$prevalent], 2, quantile, seq(0.86, 1, .01))
+
+
+# Here are the quantiles for common species with zeroes
+apply(imp_data[,sp_prevalence$common], 2, quantile, seq(0.95, 1, .01))
+# Here are the quantiles for uncommon species with zeroes
+apply(imp_data[,sp_prevalence$uncommon], 2, quantile, seq(0.9875, 1, .0025))
+# Here are the quantiles for rare species with zeroes
+apply(imp_data[,sp_prevalence$rare], 2, quantile, seq(0.9925, 1, .0025))
+```
+
+## Set 2, RF on CDS
+
+
+```{r}
+CDS <- imp_data_FPA[imp_data_FPA$fpa == "CDS", ]
+
+CDS <- CDS |>  mutate(
+  common = rowSums(CDS[,sp_prevalence$common]),
+  uncommon = rowSums(CDS[,sp_prevalence$uncommon]),
+  rare_TD = rowSums(CDS[,sp_prevalence$rare]), 
+  total_TD = rowSums((CDS[, 6:39]))
+) |> 
+  select(-sp_prevalence$rare, -sp_prevalence$uncommon, -sp_prevalence$common) 
+
+CDS <- CDS |> 
+  relocate(fpa, .after = FPAG)
+
+
+# Here are the quantiles for most prevalent species with zeroes
+apply(CDS[,sp_prevalence$prevalent], 2, quantile, seq(0.99, 1, .001))
+```
+I viewed the table and picked values based on the next highest after the max. 
+I suppose I could also trim the highest values. 
+
+```{r}
+# I am replacing the highest value with the next highest value
+CDS$PSME_TD[CDS$PSME_TD > 3148.5] <- 3148.5
+# Removing an All zero column and a nearly empty one. 
+CDS <- CDS |> select(-c(ABAM_TD, TSHE_TD))
+
+cds <- CDS
+
+refs <- cds[1:(3*nrow(cds)/4),]
+
+# CDS
+# cds
+# data("MoscowMtStJoe")
+
+x <- cds |> select(1:4)
+x <- remove_rownames(x)
+x <- column_to_rownames(x, "STANDPLOT_CN")
+
+y <- cds |> select(1, 7:ncol(cds))
+# y <- y[refs]
+y <- remove_rownames(y)
+y <- column_to_rownames(y, "STANDPLOT_CN")
+
+
+
+mal <- yai(x = x, y = y, method = "mahalanobis", k = k)
+msn <- yai(x = x, y = y, method = "msn", k = k)
+gnn <- yai(x = x, y = y, method = "gnn", k = k)
+ica <- yai(x = x, y = y, method = "ica", k = k)
+
+error_full <- errorStats(mal, msn, gnn, ica)
+
+yrf <- cbind(whatsMax(y[ ,1:(ncol(y)-1)]), y[, ncol(y)])
+
+names(yrf) <- c('Max_SP', 'sp_max_TD', 'total_TD')
+
+# rf <- yai(x = x, y = yrf, method = "randomForest", k = k)
+# save(rf, file = "rf.Rdata")
+load("rf.Rdata")
+
+# This won't run with rf in it? 
+# error_full <- errorStats(mal, msn, gnn, rf)
+
+Full_set <- impute(rf, ancillaryData = y)
+rmsd <- compare.yai(mal, msn, gnn, Full_set, ica)
+
+
+rmsd.yai(Full_set)
+```
+
+
+### Plots, RF, Full set
+
+Dots below the one to one line indicate lower rmsd for the named imputation on 
+the horizontal. RF does the best. 
+
+```{r}
+plot(rmsd, main = "Full Set")
+```
+
+```{r}
+par(mar = c(1,1,3.2,1))
+plot(rf, vars = yvars(rf))
+```
+
+```{r}
+par(mar = c(1,1,3.2,1))
+plot(msn)
+```
+
+```{r}
+rmsd
+```
+
+```{r}
+find_best <- function(df) {
+  data.frame(name = names(df)[apply(df, 1, which.min)],
+     value = apply(df, 1, min))
+}
+
+find_best(rmsd)
+```
+
+
+## RF on seedlings only. 
+
+```{r}
+rm(list = ls())
+
+k = 10
+
+# Pulling from my new interim save point
+con <- dbConnect(RSQLite::SQLite(), "./attempt_032524.db")
+# imp_data <- dbGetQuery(con, "select * from imp_data")
+zimp_data <- dbGetQuery(con, "select * from regen_only_imp_data")
+plots <- dbGetQuery(con, "select * from fvs_plotinit_plot")
+plants_ref <- dbGetQuery(con, "select * from plants_ref")
+dbDisconnect(con)
+rm(con)
+
+# Grabbing the topography variables
+pred_topo <- plots |> select(
+  STANDPLOT_CN, ELEVFT, SLOPE, ASPECT
+)
+# Get the Kralicek variables
+pred_Kral <- zimp_data |> select(
+  STANDPLOT_CN, CC, BA, SDI, FPAG
+)
+
+# remove the predictors from the response.
+response <- zimp_data |> select(
+  -c(CC, BA, SDI, FPAG)
+)
+# join the Kralicek and topo variables. 
+predictors <- left_join(pred_Kral, pred_topo, join_by(STANDPLOT_CN))|> 
+  relocate(FPAG, .after = STANDPLOT_CN)
+```
+
+
+### Sp prev
+
+```{r}
+z <- apply(zimp_data, 2, max) 
+z <- z[6:length(z)]
+x <- names(z)
+y <- z
+names(y) <- NULL
+y <- as.numeric(y)
+names(y) <- x
+# This is a sorted list of the maximum trees per acre per species on one plot
+# y |> sort(decreasing = T)
+
+
+
+
+
+imp <- zimp_data
+
+imp_p <- imp |> select(1:5)
+imp_r <- imp |> select(1, 6:ncol(imp))
+imp_r <- imp_r |> mutate(
+  total_TD = rowSums(imp_r[,2:ncol(imp_r)])
+)
+
+imp <- left_join(imp_p, imp_r, by = "STANDPLOT_CN")
+
+# This is why the species stuff below is the same as before. 
+imp_z <- imp[imp$total_TD > 0,]
+
+# summary(imp_z[,6:ncol(imp_z)])
+
+
+
+apply(imp_z[,6:ncol(imp_z)], 2, quantile, seq(0.72, 0.90, .04))
+
+prevalent_sp <- c('PSME_TD', 'ABAM_TD', 'ABLA_TD', 'TSHE_TD')
+keep <- names(imp_z)[!names(imp_z) %in% prevalent_sp]
+
+imp_z2 <- imp_z[,keep]
+
+# apply(imp_z2[,6:ncol(imp_z2)], 2, quantile, seq(0.90, 0.9875, .025))
+
+common_sp <- c('PIPO_TD' , 'TSME_TD', 'ABGR_TD', 'THPL_TD', 'PIEN_TD', 'PICO_TD', 'PIMO3_TD')
+
+keep <- names(imp_z2)[!names(imp_z2) %in% common_sp]
+imp_z3 <- imp_z2[,keep]
+
+# apply(imp_z3[,6:ncol(imp_z3)], 2, quantile, seq(0.975, .99, .005))
+
+uncommon_sp <- c('PIAL_TD', 'ACGL_TD', 'LAOC_TD', 'TABR2_TD', 'CHNO_TD', 
+                 'POTR5_TD')
+
+keep <- names(imp_z3)[!names(imp_z3) %in% uncommon_sp]
+imp_z4 <- imp_z3[,keep]
+
+# apply(imp_z4[,6:ncol(imp_z4)], 2, quantile, seq(0.99, 1, .005))
+
+rare_sp <- names(imp_z4[,6:(ncol(imp_z4)-1)])
+
+sp_prevalence <-  list(prevalent = prevalent_sp, 
+     common = common_sp, 
+     uncommon = uncommon_sp, 
+     rare = rare_sp)
+# save(sp_prevalence, file = "sp_prevalence.Rdata")
+# getwd()
+
+print(sp_prevalence)
+
+
+# Here are the quantiles for most prevelant species with zeroes
+# apply(imp_data[,sp_prevalence$prevalent], 2, quantile, seq(0.86, 1, .01))
+
+
+# Here are the quantiles for common species with zeroes
+apply(zimp_data[,sp_prevalence$common], 2, quantile, seq(0.95, 1, .01))
+# Here are the quantiles for uncommon species with zeroes
+apply(zimp_data[,sp_prevalence$uncommon], 2, quantile, seq(0.9875, 1, .0025))
+# Here are the quantiles for rare species with zeroes
+apply(zimp_data[,sp_prevalence$rare], 2, quantile, seq(0.9925, 1, .0025))
+```
+
+
+### CDS
+```{r}
+imp_data_FPA <- zimp_data |> 
+  mutate(
+    fpa = str_sub(FPAG, 1, 3)
+  )
+
+x <- unique(imp_data_FPA$fpa)
+
+CDS <- imp_data_FPA[imp_data_FPA$fpa == "CDS", ]
+
+CDS <- CDS |>  mutate(
+  common = rowSums(CDS[,sp_prevalence$common]),
+  uncommon = rowSums(CDS[,sp_prevalence$uncommon]),
+  rare_TD = rowSums(CDS[,sp_prevalence$rare]), 
+  total_TD = rowSums((CDS[, 6:39]))
+) |> 
+  select(-sp_prevalence$rare, -sp_prevalence$uncommon, -sp_prevalence$common) 
+
+CDS <- CDS |> 
+  relocate(fpa, .after = FPAG)
+
+# I am replacing the highest value with the next highest value
+CDS$PSME_TD[CDS$PSME_TD > 3148.5] <- 3148.5
+# Removing an All zero column and a nearly empty one. 
+CDS <- CDS |> select(-c(ABAM_TD, TSHE_TD))
+
+cds <- CDS
+
+refs <- cds[1:(3*nrow(cds)/4),]
+
+# CDS
+# cds
+# data("MoscowMtStJoe")
+
+x <- cds |> select(1:4)
+x <- remove_rownames(x)
+x <- column_to_rownames(x, "STANDPLOT_CN")
+
+y <- cds |> select(1, 7:ncol(cds))
+# y <- y[refs]
+y <- remove_rownames(y)
+y <- column_to_rownames(y, "STANDPLOT_CN")
+
+
+
+zmal <- yai(x = x, y = y, method = "mahalanobis", k = k)
+zmsn <- yai(x = x, y = y, method = "msn", k = k)
+zgnn <- yai(x = x, y = y, method = "gnn", k = k)
+zica <- yai(x = x, y = y, method = "ica", k = k)
+
+zerror_full <- errorStats(zmal, zmsn, zgnn, zica)
+
+zyrf <- cbind(whatsMax(y[ ,1:(ncol(y)-1)]), y[, ncol(y)])
+
+names(zyrf) <- c('Max_SP', 'sp_max_TD', 'total_TD')
+
+# zrf <- yai(x = x, y = zyrf, method = "randomForest", k = k)
+# save(zrf, file = "zrf.Rdata")
+load("zrf.Rdata")
+
+# This won't run with rf in it? 
+# error_full <- errorStats(mal, msn, gnn, rf)
+
+zFull_set <- impute(zrf, ancillaryData = y)
+zrmsd <- compare.yai(zmal, zmsn, zgnn, zFull_set, zica)
+
+
+rmsd.yai(zFull_set)
+```
+
+
+```{r}
+find_best <- function(df) {
+  data.frame(name = names(df)[apply(df, 1, which.min)],
+     value = apply(df, 1, min))
+}
+find_best(zrmsd)
+```
+
+
+
+### Plots
+
+```{r}
+plot(zrmsd, main = "Full Set")
+```
+
+
+```{r}
+par(mar = c(1,1,3.2,1))
+plot(zrf, vars = yvars(zrf))
+```
+
+
+```{r}
+par(mar = c(1,1,3.2,1))
+plot(zmsn)
+```
+
+
+
+
+
+```{r}
+rmsd
+```
+
+#### end
 

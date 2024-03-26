@@ -18,7 +18,7 @@ title: "Regen_Notes"
 
 *There are many absolute paths in plot selection.*
 
-1. Plot Selection
+1. [Plot Selection](https://kingblkmouth.github.io/Regen/1_Copied_Code.html)
     + Plot selection
         - Select eco-regions and associated plots
     + Ch 4
@@ -32,8 +32,12 @@ title: "Regen_Notes"
     + Ch 6
         - Set: run name, input database, & standlist
         - Run plots in FVS to get canopy cover. 
+        
+    + Imputation Prep
+        - Organizing the data like yaImpute did in the St.Joe example. 
+        - Saving the clean data. 
 
-2. Imputation
+2. [Imputation](https://kingblkmouth.github.io/Regen/2_Imputation.html)
     + 
 
 3. 
