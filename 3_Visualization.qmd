@@ -3,4 +3,42 @@ title: "Visualization"
 format: html
 ---
 
-## 
+## To-do
+
+
+2. Take the k nn and make a distribution to get stochastic regen
+    - The yai objects have the distances and nearest neighbors. 
+    - yai$neiDstTrgs is a matrix of distances between a target and the k references. 
+    - Pick from those nn to get stochastic regen.
+
+3. Try to find the probability of regen in the RF tool, it may be from a different model.
+    - I must have been thinking of something else. I cannot find the probability. 
+
+There could be something in the idea of making a probablity out of the distribution 
+of nearest references that have regeneration. Say, if there were 10 NN and one had 
+regen, but the others didn't, it would be a ten percent chance of regen. 
+Then recompute the yai distances for the stands with regen, but only include 
+stands with seedlings. 
+
+
+
+5. Can FPAG be a predictor in RF, it didn’t work in MSN. If so also try ecoregion.
+6. Check on using Climate water deficit?
+    - Find the data, consider the possibilities, and try to use it.
+8. Create some visualizations for seedling density by predictor.
+
+done:
+
+1. Make the FPAGs 3 digits, removing some specificity
+    - At least in CDS6 vs CDS, it didn't help much. 
+    
+4. Add more data from eco-regions in the state and maybe further afield.
+    - It doubled the number of plots available, but I only tested CDS
+    - In both sets, about half the plots didn't have seedlings. 
+    - **It may be time to test more FPAGs.** 
+   
+ 
+I am set up in the imputation page to try adding FPAG as a predictor in RF. 
+If I can use categorical in RF, PHYSCLCD would probably be a good one. to try. 
+
+2. The knn distribution is in the 

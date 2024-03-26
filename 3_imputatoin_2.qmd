@@ -1,0 +1,111 @@
+---
+title: "Non-FVS variables"
+format: html
+---
+
+```{r}
+#| message: false
+#| warning: false
+
+library(tidyverse)
+library(RSQLite)
+library(readxl)
+library(writexl)
+
+options(scipen = 999)
+```
+
+```{r}
+con <- dbConnect(RSQLite::SQLite(), "C:/RxFire/Data/_FIADB_WA.db")
+
+standlist <- read_csv("C:/RxFire/Regen/Regen_Notes/standlist03242024.csv", 
+                      col_types = c("cccc")) 
+
+n_distinct(standlist$STAND_CN)
+
+STAND_CN <- NULL
+STAND_CN <- str_c("'", unique(standlist$STAND_CN), "'")
+STAND_CN <- str_flatten_comma(STAND_CN)
+
+# COND::BALIVE Basal area per acre of livetrees
+subcond <- dbGetQuery(con, str_c(
+  "select * from subp_cond where PLT_CN IN (", STAND_CN, ")"))
+cond <- dbGetQuery(con, str_c(
+  "select * from cond where PLT_CN IN (", STAND_CN, ")"))
+
+# P2VEG_STR::COVER_PCT, NT AND TT ARE TREES. 
+veg <- dbGetQuery(con, str_c(
+  "select * from P2VEG_SUBP_STRUCTURE where PLT_CN IN (", STAND_CN, ")"))
+
+tree <- dbGetQuery(con, str_c(
+  "select * from FVS_TREEINIT_PLOT where STAND_CN IN (", STAND_CN, ")"))
+
+subcond <- subcond |> 
+  mutate(
+    STANDPLOT_CN = str_c(as.character(PLT_CN), "_", as.character(SUBP))
+  )
+s <- subcond |> select(PLT_CN, STANDPLOT_CN, SUBP, CONDID, )
+
+c <- left_join(s, cond, join_by(PLT_CN, CONDID))
+c2 <- c |> select(STANDPLOT_CN, BALIVE) |> drop_na()
+
+veg <- veg |> 
+  mutate(
+    STANDPLOT_CN = str_c(as.character(PLT_CN), "_", as.character(SUBP))
+  )
+
+
+```
+
+```{r}
+v <- veg |> filter(LAYER == 5)
+v <- v |> filter(GROWTH_HABIT_CD == "TT")
+
+v2 <- v |> group_by(STANDPLOT_CN) |> 
+  summarise(CC = sum(COVER_PCT))
+
+
+```
+
+
+p. 183 FVS essentials. 
+
+$$
+SDI = \sum (TPA_i (\frac{DBH}{10})^{1.605})
+$$
+TPA_i is tpa for a tree record. 
+
+SDI is the sum of Trees per acre times the DBH for those trees, divided by ten 
+to the power of 1.605. 
+
+DBH and tpa are in the tree table. 
+
+
+```{r}
+#| eval: false
+x <- standlist |> select(STANDPLOT_CN)
+
+t <- left_join(x, tree, by = "STANDPLOT_CN")
+c <- left_join(x, cond, by = "STANDPLOT_CN")
+v <- left_join(x, veg, by = "STANDPLOT_CN")
+
+tpa <- t |> 
+  mutate(sdi = (TREE_COUNT * ((DIAMETER/10)^1.605)))
+
+sdi <- tpa[tpa$HISTORY == 1, ] |> group_by(STANDPLOT_CN) |> 
+  summarize(SDI = sum(sdi)) |> drop_na()
+
+```
+
+
+```{r}
+#| eval: false
+y <- left_join(x, sdi, by = "STANDPLOT_CN")
+
+y <- left_join(y, c2, by = "STANDPLOT_CN")
+
+y <- left_join(y, v2, by = "STANDPLOT_CN")
+
+```
+
+Canopy cover is not well predicted by the p2veg tables. 

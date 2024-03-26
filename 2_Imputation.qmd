@@ -27,6 +27,20 @@ Common species start between the 90th and 97.5.
 Uncommon species start to have records between 97.5 and 99. 
 Rare after 99.
 
+3. The same RF and other distance measures, but on a dataset containing 
+only plots with regeneration. 
+
+Results were mixed. It looks like is does a better job of imputing, but the rmsd 
+is higher. It seems like rmsd would be lower in the full set since imputing zero 
+would be right half the time. 
+
+
+
+
+
+
+
+
 Prevalent species are 
 
 | SYMBL | Name |
@@ -443,10 +457,15 @@ apply(imp_data[,sp_prevalence$uncommon], 2, quantile, seq(0.9875, 1, .0025))
 apply(imp_data[,sp_prevalence$rare], 2, quantile, seq(0.9925, 1, .0025))
 ```
 
-## Set 2, RF on CDS
+## 2, RF on CDS
 
 
 ```{r}
+imp_data_FPA <- imp_data |> 
+  mutate(
+    fpa = str_sub(FPAG, 1, 3)
+  )
+
 CDS <- imp_data_FPA[imp_data_FPA$fpa == "CDS", ]
 
 CDS <- CDS |>  mutate(
@@ -528,12 +547,12 @@ plot(rmsd, main = "Full Set")
 ```
 
 ```{r}
-par(mar = c(1,1,3.2,1))
+par(mar = c(1,2,3.2,1))
 plot(rf, vars = yvars(rf))
 ```
 
 ```{r}
-par(mar = c(1,1,3.2,1))
+par(mar = c(1,2,3.2,1))
 plot(msn)
 ```
 
@@ -551,10 +570,9 @@ find_best(rmsd)
 ```
 
 
-## RF on seedlings only. 
+## 3. RF on seedling plots 
 
 ```{r}
-rm(list = ls())
 
 k = 10
 
@@ -586,87 +604,6 @@ predictors <- left_join(pred_Kral, pred_topo, join_by(STANDPLOT_CN))|>
 ```
 
 
-### Sp prev
-
-```{r}
-z <- apply(zimp_data, 2, max) 
-z <- z[6:length(z)]
-x <- names(z)
-y <- z
-names(y) <- NULL
-y <- as.numeric(y)
-names(y) <- x
-# This is a sorted list of the maximum trees per acre per species on one plot
-# y |> sort(decreasing = T)
-
-
-
-
-
-imp <- zimp_data
-
-imp_p <- imp |> select(1:5)
-imp_r <- imp |> select(1, 6:ncol(imp))
-imp_r <- imp_r |> mutate(
-  total_TD = rowSums(imp_r[,2:ncol(imp_r)])
-)
-
-imp <- left_join(imp_p, imp_r, by = "STANDPLOT_CN")
-
-# This is why the species stuff below is the same as before. 
-imp_z <- imp[imp$total_TD > 0,]
-
-# summary(imp_z[,6:ncol(imp_z)])
-
-
-
-apply(imp_z[,6:ncol(imp_z)], 2, quantile, seq(0.72, 0.90, .04))
-
-prevalent_sp <- c('PSME_TD', 'ABAM_TD', 'ABLA_TD', 'TSHE_TD')
-keep <- names(imp_z)[!names(imp_z) %in% prevalent_sp]
-
-imp_z2 <- imp_z[,keep]
-
-# apply(imp_z2[,6:ncol(imp_z2)], 2, quantile, seq(0.90, 0.9875, .025))
-
-common_sp <- c('PIPO_TD' , 'TSME_TD', 'ABGR_TD', 'THPL_TD', 'PIEN_TD', 'PICO_TD', 'PIMO3_TD')
-
-keep <- names(imp_z2)[!names(imp_z2) %in% common_sp]
-imp_z3 <- imp_z2[,keep]
-
-# apply(imp_z3[,6:ncol(imp_z3)], 2, quantile, seq(0.975, .99, .005))
-
-uncommon_sp <- c('PIAL_TD', 'ACGL_TD', 'LAOC_TD', 'TABR2_TD', 'CHNO_TD', 
-                 'POTR5_TD')
-
-keep <- names(imp_z3)[!names(imp_z3) %in% uncommon_sp]
-imp_z4 <- imp_z3[,keep]
-
-# apply(imp_z4[,6:ncol(imp_z4)], 2, quantile, seq(0.99, 1, .005))
-
-rare_sp <- names(imp_z4[,6:(ncol(imp_z4)-1)])
-
-sp_prevalence <-  list(prevalent = prevalent_sp, 
-     common = common_sp, 
-     uncommon = uncommon_sp, 
-     rare = rare_sp)
-# save(sp_prevalence, file = "sp_prevalence.Rdata")
-# getwd()
-
-print(sp_prevalence)
-
-
-# Here are the quantiles for most prevelant species with zeroes
-# apply(imp_data[,sp_prevalence$prevalent], 2, quantile, seq(0.86, 1, .01))
-
-
-# Here are the quantiles for common species with zeroes
-apply(zimp_data[,sp_prevalence$common], 2, quantile, seq(0.95, 1, .01))
-# Here are the quantiles for uncommon species with zeroes
-apply(zimp_data[,sp_prevalence$uncommon], 2, quantile, seq(0.9875, 1, .0025))
-# Here are the quantiles for rare species with zeroes
-apply(zimp_data[,sp_prevalence$rare], 2, quantile, seq(0.9925, 1, .0025))
-```
 
 
 ### CDS
@@ -740,6 +677,7 @@ zrmsd <- compare.yai(zmal, zmsn, zgnn, zFull_set, zica)
 rmsd.yai(zFull_set)
 ```
 
+For each species set, which imputation had the lowest rmsd? 
 
 ```{r}
 find_best <- function(df) {
@@ -747,35 +685,453 @@ find_best <- function(df) {
      value = apply(df, 1, min))
 }
 find_best(zrmsd)
+find_best(rmsd)
 ```
 
+RF does best for all but total tree density. 
+The set with all the zeroes has lower rmsd. 
+I find that odd.
+
+It would be likely that imputing zero for zero would reduce rmsd. Even by chance, 
+if half the data is zero, it would be likely to imput the observed. 
 
 
-### Plots
+## Plots vs Plots
+
+
+These tell the same story, RF does better. 
 
 ```{r}
-plot(zrmsd, main = "Full Set")
+#| column: page
+#| layout-ncol: 2
+plot(zrmsd, main = "zFull Set")
+plot(rmsd, main = "Full Set")
 ```
+___
 
+
+The zSeedling data shows the distribution of species better. It's not half zeros. 
+The imputed values look identical.  
 
 ```{r}
-par(mar = c(1,1,3.2,1))
+#| column: page
+#| layout-ncol: 2
 plot(zrf, vars = yvars(zrf))
+plot(rf, vars = yvars(rf))
+```
+
+___ 
+
+zSeedling's imputed vs observed are closer to the 1:1 line. 
+The large values in total and uncommon make it less clear. 
+
+```{r}
+#| column: page
+#| layout-ncol: 2
+#| 
+par(mar = c(2,2,3.2,1))
+plot(zmsn)
+plot(msn)
+```
+
+___
+
+For the RF imputation, the Seedlings only data was marginally more distant. 
+
+```{r}
+zrmsd
+rmsd
+
+zrmsd$zFull_set.rmsdS - rmsd$Full_set.rmsdS
+```
+
+## Checking on yaImpute functions. 
+
+I think the yai objects have the data for nearest neighbors. 
+
+
+```{r}
+rm(list = ls())
+
+# Pulling from my new interim save point
+con <- dbConnect(RSQLite::SQLite(), "./attempt_032524.db")
+imp_data <- dbGetQuery(con, "select * from imp_data")
+zimp_data <- dbGetQuery(con, "select * from regen_only_imp_data")
+plots <- dbGetQuery(con, "select * from fvs_plotinit_plot")
+plants_ref <- dbGetQuery(con, "select * from plants_ref")
+dbDisconnect(con)
+rm(con)
+
+load("sp_prevalence.Rdata")
+```
+
+### Test imp, full set. 
+```{r}
+imp_data_FPA <- imp_data |> 
+  mutate(
+    fpa = str_sub(FPAG, 1, 3)
+  )
+
+# CDS <- imp_data_FPA[imp_data_FPA$fpa == "CDS", ]
+
+
+imp_data_FPA <- imp_data_FPA |>  mutate(
+  common = rowSums(imp_data_FPA[,sp_prevalence$common]),
+  uncommon = rowSums(imp_data_FPA[,sp_prevalence$uncommon]),
+  rare_TD = rowSums(imp_data_FPA[,sp_prevalence$rare]),
+  total_TD = rowSums((imp_data_FPA[, 6:39]))
+) |>
+  select(-sp_prevalence$rare, -sp_prevalence$uncommon, -sp_prevalence$common)
+
+# imp_data_FPA <- imp_data_FPA |>  mutate(
+#   total_TD = rowSums((imp_data_FPA[, 6:(ncol(imp_data_FPA)-1)]))
+# )
+
+imp_data_FPA <- imp_data_FPA |> 
+  relocate(fpa, .after = FPAG)
+
+
+# Here are the quantiles for most prevalent species with zeroes
+# apply(imp_data_FPA[,sp_prevalence$prevalent], 2, quantile, seq(0.99, 1, .001))
+
+# I am replacing the highest value with the next highest value
+# imp_data_FPA$PSME_TD[imp_data_FPA$PSME_TD > 3148.5] <- 3148.5
+# Removing an All zero column and a nearly empty one. 
+# imp_data_FPA <- imp_data_FPA |> select(-c(ABAM_TD, TSHE_TD))
+
+cds <- imp_data_FPA
+
+refs <- rownames(cds[1:(3*nrow(cds)/4),])
+
+x <- cds |> select(1:4)
+x <- remove_rownames(x)
+x <- column_to_rownames(x, "STANDPLOT_CN")
+
+yfull <- cds |> select(1, 7:ncol(cds))
+y <- yfull[refs,]
+y <- remove_rownames(y)
+y <- column_to_rownames(y, "STANDPLOT_CN")
+yfull <- remove_rownames(yfull)
+yfull <- column_to_rownames(yfull, "STANDPLOT_CN")
+
+k = 10
+
+mal <- yai(x = x, y = y, method = "mahalanobis", k = k)
+msn <- yai(x = x, y = y, method = "msn", k = k)
+gnn <- yai(x = x, y = y, method = "gnn", k = k)
+ica <- yai(x = x, y = y, method = "ica", k = k)
+
+msn_boot <- yai(x = x, y = yfull, method = "msn", k = k, bootstrap = T)
+
+# error_full <- errorStats(mal, msn, gnn, ica)
+# 
+yrf <- cbind(whatsMax(y[ ,1:(ncol(y)-1)]), y[, ncol(y)])
+# 
+names(yrf) <- c('Max_SP', 'sp_max_TD', 'total_TD')
+# 
+# frf2 <- yai(x = x, y = yrf, method = "randomForest", k = k)
+# save(frf, file = "frf.Rdata")
+# save(frf2, file = "frf2.Rdata")
+load("frf.Rdata")
+load("frf2.Rdata")
+
+# This won't run with rf in it? 
+# error_full <- errorStats(mal, msn, gnn, rf)
+
+Full_set <- impute(frf, ancillaryData = y)
+frf2_set <- impute(frf2, ancillaryData = y)
+rmsd <- compare.yai(mal, msn, gnn, Full_set, ica, msn_boot)
+
+
+rmsd.yai(Full_set) |> arrange(desc(rmsd)) |> summary()
+```
+
+
+These got messed up when I went back and tried to save a plot to compare the 
+fpag as factor plot. 
+The second one was originally for all species individually. 
+It wasn't anything special. Same as others, messy. 
+
+```{r}
+par(mar = c(1,1,3.2,1))
+# jpeg("p_full_set.jpg")
+plot(frf2_set)
 ```
 
 
 ```{r}
 par(mar = c(1,1,3.2,1))
-plot(zmsn)
+plot(Full_set)
 ```
+
+
+```{r}
+plot(rmsd)
+```
+
+## Stochastic Distribution
+
+### Notably dist example
+
+```{r}
+# data(iris)
+# 
+# 
+# # form some test data
+# refs=sample(rownames(iris),50)
+# x <- iris[,1:3]      # Sepal.Length Sepal.Width Petal.Length
+# y <- iris[refs,4:5]  # Petal.Width Species
+# 
+# # build an msn run, first build dummy variables for species.
+# 
+# sp1 <- as.integer(iris$Species=="setosa")
+# sp2 <- as.integer(iris$Species=="versicolor")
+# y2 <- data.frame(cbind(iris[,4],sp1,sp2),row.names=rownames(iris))
+# y2 <- y2[refs,]
+# 
+# names(y2) <- c("Petal.Width","Sp1","Sp2")
+# 
+# xmsn <- yai(x=x,y=y2,method="msn")
+# 
+# notablyDistant(xmsn)
+```
+
+
+```{r}
+# empty
+
+x <- msn$neiDstTrgs
+x <- as.data.frame(x)
+max(x[,1])
+hist(x[,1], breaks = 100)
+mean(x[,1]) + sd(x[,1])*2
+hist(x[x$Dst.k1 < (mean(x[,1]) + sd(x[,1])*2), "Dst.k1"], breaks = 100)
+
+```
+
+
+```{r}
+hist(log(x[,1]), breaks = 100)
+hist(log(x[x$Dst.k1 < (mean(x[,1]) + sd(x[,1])*2), "Dst.k1"]), breaks = 100)
+
+
+log(0.04307483)
+
+notablyDistant(msn, threshold = .134)
+
+summary(x)
+```
+
+
+```{r}
+test <- imp_data_FPA |> filter(fpa == "CWF")
+test <- test[,2:4]
+
+test2 <- newtargets(msn, newdata = test)
+test2
+```
+
+
+
+## RF with categoricals
+
+```{r}
+KEEP <- c("frf2_set", "KEEP")
+```
+
+
+```{r}
+rm(list = ls()[!ls() %in% KEEP])
+
+# Pulling from my new interim save point
+con <- dbConnect(RSQLite::SQLite(), "./attempt_032524.db")
+imp_data <- dbGetQuery(con, "select * from imp_data")
+zimp_data <- dbGetQuery(con, "select * from regen_only_imp_data")
+plots <- dbGetQuery(con, "select * from fvs_plotinit_plot")
+plants_ref <- dbGetQuery(con, "select * from plants_ref")
+dbDisconnect(con)
+rm(con)
+
+load("sp_prevalence.Rdata")
+```
+
+### Test imp, full set. 
+```{r}
+imp_data_FPA <- imp_data |> 
+  mutate(
+    fpa = str_sub(FPAG, 1, 3)
+  )
+```
+
+
+```{r}
+imp_data_FPA <- imp_data_FPA |>  mutate(
+  common = rowSums(imp_data_FPA[,sp_prevalence$common]),
+  uncommon = rowSums(imp_data_FPA[,sp_prevalence$uncommon]),
+  rare_TD = rowSums(imp_data_FPA[,sp_prevalence$rare]),
+  total_TD = rowSums((imp_data_FPA[, 6:39]))
+) |>
+  select(-sp_prevalence$rare, -sp_prevalence$uncommon, -sp_prevalence$common)
+
+
+imp_data_FPA <- imp_data_FPA |> 
+  relocate(fpa, .after = FPAG)
+
+# I am removing the extra rows to speed up the imputation test. 
+fpas <- imp_data_FPA |> 
+  filter(
+    total_TD > 0
+  )
+
+refs <- rownames(fpas[1:(3*nrow(fpas)/4),])
+
+x <- fpas |> select(1:5)
+x <- remove_rownames(x)
+x <- column_to_rownames(x, "STANDPLOT_CN")
+
+yfull <- fpas |> select(1, 7:ncol(fpas))
+y <- yfull[refs,]
+y <- remove_rownames(y)
+y <- column_to_rownames(y, "STANDPLOT_CN")
+yfull <- remove_rownames(yfull)
+yfull <- column_to_rownames(yfull, "STANDPLOT_CN")
+
+k = 10
+
+yrf <- cbind(whatsMax(y[ ,1:(ncol(y)-1)]), y[, ncol(y)])
+
+names(yrf) <- c('Max_SP', 'sp_max_TD', 'total_TD')
+```
+
+### as factor
+
+It doesn't like the categorical, but maybe I can do a dummy variable. 
+
+```{r}
+x$FPAG <- as.factor(x$FPAG)
+```
+
+Running the full set results in:
+
+Error in randomForest.default(x = xRefs[, xN, FALSE], y = yone, proximity = FALSE,  : 
+  Can not handle categorical predictors with more than 53 categories.
+
+Now I'll use fewer categories. 
+
+
+
+```{r}
+t <- fpas |> group_by(FPAG) |> 
+  summarise(n = n()) |> 
+  arrange(desc(n)) |> 
+  filter(n > 120)
+keep <- t$FPAG
+
+t2 <- fpas |> 
+  filter(FPAG %in% keep)
+
+t2$FPAG <- as.factor(t2$FPAG)
+```
+
+
+```{r}
+refs <- rownames(t2[1:(3*nrow(t2)/4),])
+
+x <- t2 |> select(1:5)
+x <- remove_rownames(x)
+x <- column_to_rownames(x, "STANDPLOT_CN")
+
+yfull <- t2 |> select(1, 7:ncol(t2))
+y <- yfull[refs,]
+y <- remove_rownames(y)
+y <- column_to_rownames(y, "STANDPLOT_CN")
+yfull <- remove_rownames(yfull)
+yfull <- column_to_rownames(yfull, "STANDPLOT_CN")
+
+k = 10
+
+yrf <- cbind(whatsMax(y[ ,1:(ncol(y)-1)]), y[, ncol(y)])
+
+names(yrf) <- c('Max_SP', 'sp_max_TD', 'total_TD')
+# trf <- yai(x = x, y = yrf, method = "randomForest", k = k)
+
+# save(trf, file = "trf.Rdata")
+load("trf.Rdata")
+```
+
+```{r}
+#| column: page
+#| layout-ncol: 2
+plot(trf, vars = yvars(trf))
+# plot(rf, vars = yvars(rf))
+
+trf_i <- impute(trf, ancillaryData = y)
+```
+
+## Best imp plot so far!
+
+The first one (trf_i) is this imputation. It is using Fpag as a predictor on the 
+those FPAGs that have at least 120 plots. 
+The second is from the test imp. It is on the whole dataset without FPAG as a 
+predictor. 
+
+Generally, I see the points coming away from the zero axis toward the 1:1 line. 
+That is good news. I'd like to see these without the outliers. 
+
+```{r}
+#| column: page
+#| layout-ncol: 2
+
+par(mar = c(1,2,3.2,1))
+plot(trf_i)
+
+plot(frf2_set)
+# xlim = c(1,10)
+```
+
+Uncommon and rare species seem to be mostly unaffected. 
+total_TD might be a little worse. 
+
+
+
+
+```{r}
+#| column: page
+#| layout-ncol: 2
+
+par(mar = c(1,2,3.2,1))
+plot(trf_i, 
+     xlim = c(0, 10000),
+     ylim = c(0, 10000))
+
+plot(frf2_set, 
+     xlim = c(0, 10000),
+     ylim = c(0, 10000))
+```
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 
 ```{r}
-rmsd
+par(mar = c(1,2,3.2,1))
+plot(trf, vars = yvars(yrf))
 ```
 
-#### end
+
+
+
+
+
+
 
