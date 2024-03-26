@@ -482,73 +482,85 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>trf_rmsd <span class="ot">&lt;-</span> <span class="fu">rmsd.yai</span>(trf_i)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>ph_rmsd <span class="ot">&lt;-</span> <span class="fu">rmsd.yai</span>(rf_phys_i)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>ph_rmsd <span class="ot">&lt;-</span> <span class="fu">rmsd.yai</span>(rf_phys_i)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>ph_rmsd <span class="ot">&lt;-</span> <span class="fu">rownames_to_column</span>(ph_rmsd, <span class="st">"spec"</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>trf_rmsd <span class="ot">&lt;-</span> trf_rmsd <span class="sc">|&gt;</span> <span class="fu">rownames_to_column</span>(<span class="st">"spec"</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">left_join</span>(ph_rmsd, trf_rmsd, <span class="at">by =</span> <span class="st">"spec"</span>, </span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">suffix =</span> <span class="fu">c</span>(<span class="st">".ph"</span>, <span class="st">".trf"</span>))</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> z <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">diff =</span> rmsd.ph <span class="sc">-</span> rmsd.trf)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>z</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      spec  rmsd.ph  rmsd.trf       diff
+1  PSME_TD 235.6963  271.0354  -35.33918
+2  ABLA_TD 251.8946  360.8483 -108.95375
+3  ABAM_TD 266.6706  365.0843  -98.41369
+4  TSHE_TD 489.8800  683.5967 -193.71663
+5   common 491.8279  675.7789 -183.95094
+6 uncommon 289.2675  435.4299 -146.16231
+7  rare_TD 156.6363  221.3685  -64.73221
+8 total_TD 764.4339 1001.2730 -236.83915</code></pre>
+</div>
 </div>
 <p>The imputation with physcode lower in rmsd across the board.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>ph_rmsd<span class="sc">$</span>rmsd<span class="sc">-</span>trf<span class="sc">$</span>rmsd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>numeric(0)</code></pre>
-</div>
-</div>
+<p>I am not sure what the distance is for RF, but I know it needs to be minimized.</p>
 <p>s</p>
 </section>
 <section id="non-fvs-variables." class="level2">
 <h2 class="anchored" data-anchor-id="non-fvs-variables.">Non-FVS Variables.</h2>
 <p>I was testing out if I could get the FVS variables without running FVS. It took a while for FVS to run the 25k plots I selected. So, I was trying to get the same variables straight from FIA while waiting to start the last set of imputations.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(writexl)</span>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(writexl)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">scipen =</span> <span class="dv">999</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">"C:/RxFire/Data/_FIADB_WA.db"</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>standlist <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"C:/RxFire/Regen/Regen_Notes/standlist03242024.csv"</span>, </span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">col_types =</span> <span class="fu">c</span>(<span class="st">"cccc"</span>)) </span>
 <span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">scipen =</span> <span class="dv">999</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="fu">n_distinct</span>(standlist<span class="sc">$</span>STAND_CN)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>STAND_CN <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>STAND_CN <span class="ot">&lt;-</span> <span class="fu">str_c</span>(<span class="st">"'"</span>, <span class="fu">unique</span>(standlist<span class="sc">$</span>STAND_CN), <span class="st">"'"</span>)</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>STAND_CN <span class="ot">&lt;-</span> <span class="fu">str_flatten_comma</span>(STAND_CN)</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a><span class="co"># COND::BALIVE Basal area per acre of livetrees</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>subcond <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="fu">str_c</span>(</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"select * from subp_cond where PLT_CN IN ("</span>, STAND_CN, <span class="st">")"</span>))</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>cond <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="fu">str_c</span>(</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"select * from cond where PLT_CN IN ("</span>, STAND_CN, <span class="st">")"</span>))</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a><span class="co"># P2VEG_STR::COVER_PCT, NT AND TT ARE TREES. </span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>veg <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="fu">str_c</span>(</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">"select * from P2VEG_SUBP_STRUCTURE where PLT_CN IN ("</span>, STAND_CN, <span class="st">")"</span>))</span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="fu">str_c</span>(</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>  <span class="st">"select * from FVS_TREEINIT_PLOT where STAND_CN IN ("</span>, STAND_CN, <span class="st">")"</span>))</span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>subcond <span class="ot">&lt;-</span> subcond <span class="sc">|&gt;</span> </span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">STANDPLOT_CN =</span> <span class="fu">str_c</span>(<span class="fu">as.character</span>(PLT_CN), <span class="st">"_"</span>, <span class="fu">as.character</span>(SUBP))</span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> subcond <span class="sc">|&gt;</span> <span class="fu">select</span>(PLT_CN, STANDPLOT_CN, SUBP, CONDID, )</span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="fu">left_join</span>(s, cond, <span class="fu">join_by</span>(PLT_CN, CONDID))</span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>c2 <span class="ot">&lt;-</span> c <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN, BALIVE) <span class="sc">|&gt;</span> <span class="fu">drop_na</span>()</span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>veg <span class="ot">&lt;-</span> veg <span class="sc">|&gt;</span> </span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">STANDPLOT_CN =</span> <span class="fu">str_c</span>(<span class="fu">as.character</span>(PLT_CN), <span class="st">"_"</span>, <span class="fu">as.character</span>(SUBP))</span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">"C:/RxFire/Data/_FIADB_WA.db"</span>)</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>standlist <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"C:/RxFire/Regen/Regen_Notes/standlist03242024.csv"</span>, </span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">col_types =</span> <span class="fu">c</span>(<span class="st">"cccc"</span>)) </span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="fu">n_distinct</span>(standlist<span class="sc">$</span>STAND_CN)</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>STAND_CN <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>STAND_CN <span class="ot">&lt;-</span> <span class="fu">str_c</span>(<span class="st">"'"</span>, <span class="fu">unique</span>(standlist<span class="sc">$</span>STAND_CN), <span class="st">"'"</span>)</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>STAND_CN <span class="ot">&lt;-</span> <span class="fu">str_flatten_comma</span>(STAND_CN)</span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="co"># COND::BALIVE Basal area per acre of livetrees</span></span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>subcond <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="fu">str_c</span>(</span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"select * from subp_cond where PLT_CN IN ("</span>, STAND_CN, <span class="st">")"</span>))</span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>cond <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="fu">str_c</span>(</span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"select * from cond where PLT_CN IN ("</span>, STAND_CN, <span class="st">")"</span>))</span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="co"># P2VEG_STR::COVER_PCT, NT AND TT ARE TREES. </span></span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>veg <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="fu">str_c</span>(</span>
-<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">"select * from P2VEG_SUBP_STRUCTURE where PLT_CN IN ("</span>, STAND_CN, <span class="st">")"</span>))</span>
-<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="fu">str_c</span>(</span>
-<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>  <span class="st">"select * from FVS_TREEINIT_PLOT where STAND_CN IN ("</span>, STAND_CN, <span class="st">")"</span>))</span>
-<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>subcond <span class="ot">&lt;-</span> subcond <span class="sc">|&gt;</span> </span>
-<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">STANDPLOT_CN =</span> <span class="fu">str_c</span>(<span class="fu">as.character</span>(PLT_CN), <span class="st">"_"</span>, <span class="fu">as.character</span>(SUBP))</span>
-<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> subcond <span class="sc">|&gt;</span> <span class="fu">select</span>(PLT_CN, STANDPLOT_CN, SUBP, CONDID, )</span>
-<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="fu">left_join</span>(s, cond, <span class="fu">join_by</span>(PLT_CN, CONDID))</span>
-<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>c2 <span class="ot">&lt;-</span> c <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN, BALIVE) <span class="sc">|&gt;</span> <span class="fu">drop_na</span>()</span>
-<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>veg <span class="ot">&lt;-</span> veg <span class="sc">|&gt;</span> </span>
-<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">STANDPLOT_CN =</span> <span class="fu">str_c</span>(<span class="fu">as.character</span>(PLT_CN), <span class="st">"_"</span>, <span class="fu">as.character</span>(SUBP))</span>
-<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> veg <span class="sc">|&gt;</span> <span class="fu">filter</span>(LAYER <span class="sc">==</span> <span class="dv">5</span>)</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> v <span class="sc">|&gt;</span> <span class="fu">filter</span>(GROWTH_HABIT_CD <span class="sc">==</span> <span class="st">"TT"</span>)</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>v2 <span class="ot">&lt;-</span> v <span class="sc">|&gt;</span> <span class="fu">group_by</span>(STANDPLOT_CN) <span class="sc">|&gt;</span> </span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">CC =</span> <span class="fu">sum</span>(COVER_PCT))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> veg <span class="sc">|&gt;</span> <span class="fu">filter</span>(LAYER <span class="sc">==</span> <span class="dv">5</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> v <span class="sc">|&gt;</span> <span class="fu">filter</span>(GROWTH_HABIT_CD <span class="sc">==</span> <span class="st">"TT"</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>v2 <span class="ot">&lt;-</span> v <span class="sc">|&gt;</span> <span class="fu">group_by</span>(STANDPLOT_CN) <span class="sc">|&gt;</span> </span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">CC =</span> <span class="fu">sum</span>(COVER_PCT))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>p.&nbsp;183 FVS essentials.</p>
 <p><span class="math display">\[
@@ -557,24 +569,24 @@ SDI = \sum (TPA_i (\frac{DBH}{10})^{1.605})
 <p>SDI is the sum of Trees per acre times the DBH for those trees, divided by ten to the power of 1.605.</p>
 <p>DBH and tpa are in the tree table.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> standlist <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN)</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, tree, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, cond, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, veg, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>tpa <span class="ot">&lt;-</span> t <span class="sc">|&gt;</span> </span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sdi =</span> (TREE_COUNT <span class="sc">*</span> ((DIAMETER<span class="sc">/</span><span class="dv">10</span>)<span class="sc">^</span><span class="fl">1.605</span>)))</span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>sdi <span class="ot">&lt;-</span> tpa[tpa<span class="sc">$</span>HISTORY <span class="sc">==</span> <span class="dv">1</span>, ] <span class="sc">|&gt;</span> <span class="fu">group_by</span>(STANDPLOT_CN) <span class="sc">|&gt;</span> </span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">SDI =</span> <span class="fu">sum</span>(sdi)) <span class="sc">|&gt;</span> <span class="fu">drop_na</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> standlist <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, tree, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, cond, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, veg, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>tpa <span class="ot">&lt;-</span> t <span class="sc">|&gt;</span> </span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sdi =</span> (TREE_COUNT <span class="sc">*</span> ((DIAMETER<span class="sc">/</span><span class="dv">10</span>)<span class="sc">^</span><span class="fl">1.605</span>)))</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>sdi <span class="ot">&lt;-</span> tpa[tpa<span class="sc">$</span>HISTORY <span class="sc">==</span> <span class="dv">1</span>, ] <span class="sc">|&gt;</span> <span class="fu">group_by</span>(STANDPLOT_CN) <span class="sc">|&gt;</span> </span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">SDI =</span> <span class="fu">sum</span>(sdi)) <span class="sc">|&gt;</span> <span class="fu">drop_na</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, sdi, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">left_join</span>(y, c2, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">left_join</span>(y, v2, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, sdi, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">left_join</span>(y, c2, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">left_join</span>(y, v2, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Canopy cover is not well predicted by the p2veg tables.</p>
 
