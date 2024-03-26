@@ -93,6 +93,10 @@ ul.task-list li input[type="checkbox"] {
     <a class="nav-link" href="./2_Imputation.html" rel="" target="">
  <span class="menu-text">Imputation</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./3_imputation_2.html" rel="" target="">
+ <span class="menu-text">Non-FVS variables</span></a>
+  </li>  
 </ul>
             <div class="quarto-navbar-tools ms-auto">
 </div>
@@ -109,7 +113,7 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#section" id="toc-section" class="nav-link active" data-scroll-target="#section"></a></li>
+  <li><a href="#to-do" id="toc-to-do" class="nav-link active" data-scroll-target="#to-do">To-do</a></li>
   </ul>
 </nav>
     </div>
@@ -133,8 +137,52 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<section id="section" class="level2">
-<h2 class="anchored" data-anchor-id="section"></h2>
+<section id="to-do" class="level2">
+<h2 class="anchored" data-anchor-id="to-do">To-do</h2>
+<ol start="2" type="1">
+<li>Take the k nn and make a distribution to get stochastic regen
+<ul>
+<li>The yai objects have the distances and nearest neighbors.</li>
+<li>yai$neiDstTrgs is a matrix of distances between a target and the k references.</li>
+<li>Pick from those nn to get stochastic regen.</li>
+</ul></li>
+<li>Try to find the probability of regen in the RF tool, it may be from a different model.
+<ul>
+<li>I must have been thinking of something else. I cannot find the probability.</li>
+</ul></li>
+</ol>
+<p>There could be something in the idea of making a probablity out of the distribution of nearest references that have regeneration. Say, if there were 10 NN and one had regen, but the others didn’t, it would be a ten percent chance of regen. Then recompute the yai distances for the stands with regen, but only include stands with seedlings.</p>
+<ol start="5" type="1">
+<li>Can FPAG be a predictor in RF, it didn’t work in MSN. If so also try ecoregion.</li>
+</ol>
+<ul>
+<li>It worked, and the imputed vs observed plots look pretty good.</li>
+<li></li>
+</ul>
+<ol start="6" type="1">
+<li>Check on using Climate water deficit?
+<ul>
+<li>Find the data, consider the possibilities, and try to use it.</li>
+</ul></li>
+<li>Create some visualizations for seedling density by predictor.</li>
+</ol>
+<p>done:</p>
+<ol type="1">
+<li>Make the FPAGs 3 digits, removing some specificity
+<ul>
+<li>At least in CDS6 vs CDS, it didn’t help much.</li>
+</ul></li>
+<li>Add more data from eco-regions in the state and maybe further afield.
+<ul>
+<li>It doubled the number of plots available, but I only tested CDS</li>
+<li>In both sets, about half the plots didn’t have seedlings.</li>
+<li><strong>It may be time to test more FPAGs.</strong></li>
+</ul></li>
+</ol>
+<p>I am set up in the imputation page to try adding FPAG as a predictor in RF. If I can use categorical in RF, PHYSCLCD would probably be a good one. to try.</p>
+<ol start="2" type="1">
+<li>The knn distribution is in the</li>
+</ol>
 
 
 </section>

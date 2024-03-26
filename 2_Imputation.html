@@ -127,6 +127,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="nav-link active" href="./2_Imputation.html" rel="" target="" aria-current="page">
  <span class="menu-text">Imputation</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./3_imputation_2.html" rel="" target="">
+ <span class="menu-text">Non-FVS variables</span></a>
+  </li>  
 </ul>
             <div class="quarto-navbar-tools ms-auto">
 </div>
@@ -150,16 +154,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   <li><a href="#fpag-to-fpa" id="toc-fpag-to-fpa" class="nav-link" data-scroll-target="#fpag-to-fpa">FPAG to fpa</a></li>
   <li><a href="#species-prevalence" id="toc-species-prevalence" class="nav-link" data-scroll-target="#species-prevalence">Species prevalence</a></li>
-  <li><a href="#set-2-rf-on-cds" id="toc-set-2-rf-on-cds" class="nav-link" data-scroll-target="#set-2-rf-on-cds">Set 2, RF on CDS</a>
+  <li><a href="#rf-on-cds" id="toc-rf-on-cds" class="nav-link" data-scroll-target="#rf-on-cds">2, RF on CDS</a>
   <ul class="collapse">
   <li><a href="#plots-rf-full-set" id="toc-plots-rf-full-set" class="nav-link" data-scroll-target="#plots-rf-full-set">Plots, RF, Full set</a></li>
   </ul></li>
-  <li><a href="#rf-on-seedlings-only." id="toc-rf-on-seedlings-only." class="nav-link" data-scroll-target="#rf-on-seedlings-only.">RF on seedlings only.</a>
+  <li><a href="#rf-on-seedling-plots" id="toc-rf-on-seedling-plots" class="nav-link" data-scroll-target="#rf-on-seedling-plots">3. RF on seedling plots</a>
   <ul class="collapse">
-  <li><a href="#sp-prev" id="toc-sp-prev" class="nav-link" data-scroll-target="#sp-prev">Sp prev</a></li>
   <li><a href="#cds" id="toc-cds" class="nav-link" data-scroll-target="#cds">CDS</a></li>
-  <li><a href="#plots" id="toc-plots" class="nav-link" data-scroll-target="#plots">Plots</a></li>
   </ul></li>
+  <li><a href="#plots-vs-plots" id="toc-plots-vs-plots" class="nav-link" data-scroll-target="#plots-vs-plots">Plots vs Plots</a></li>
+  <li><a href="#checking-on-yaimpute-functions." id="toc-checking-on-yaimpute-functions." class="nav-link" data-scroll-target="#checking-on-yaimpute-functions.">Checking on yaImpute functions.</a></li>
+  <li><a href="#test-imp-full-set." id="toc-test-imp-full-set." class="nav-link" data-scroll-target="#test-imp-full-set.">Test imp, full set.</a></li>
+  <li><a href="#stochastic-distribution" id="toc-stochastic-distribution" class="nav-link" data-scroll-target="#stochastic-distribution">Stochastic Distribution</a>
+  <ul class="collapse">
+  <li><a href="#notably-dist-example" id="toc-notably-dist-example" class="nav-link" data-scroll-target="#notably-dist-example">Notably dist example</a></li>
+  </ul></li>
+  <li><a href="#rf-with-categoricals" id="toc-rf-with-categoricals" class="nav-link" data-scroll-target="#rf-with-categoricals">RF with categoricals</a>
+  <ul class="collapse">
+  <li><a href="#test-imp-full-set.-1" id="toc-test-imp-full-set.-1" class="nav-link" data-scroll-target="#test-imp-full-set.-1">Test imp, full set.</a></li>
+  <li><a href="#as-factor" id="toc-as-factor" class="nav-link" data-scroll-target="#as-factor">as factor</a></li>
+  </ul></li>
+  <li><a href="#plots" id="toc-plots" class="nav-link" data-scroll-target="#plots">Plots</a></li>
   </ul>
 </nav>
     </div>
@@ -195,6 +210,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Set 2</li>
 </ol>
 <p>Adding in Random Forests, broadening FPAG to fpa by removing one digit from the Ecoregion code. Organizing the response by species prevalence. Prevalent species are those that have records starting between the 75 percentile and the 90th. It is all zeroes before that. Common species start between the 90th and 97.5. Uncommon species start to have records between 97.5 and 99. Rare after 99.</p>
+<ol start="3" type="1">
+<li>The same RF and other distance measures, but on a dataset containing only plots with regeneration.</li>
+</ol>
+<p>Results were mixed. It looks like is does a better job of imputing, but the rmsd is higher. It seems like rmsd would be lower in the full set since imputing zero would be right half the time.</p>
 <p>Prevalent species are</p>
 <table class="table">
 <thead>
@@ -816,25 +835,30 @@ $rare
 </div>
 </div>
 </section>
-<section id="set-2-rf-on-cds" class="level2">
-<h2 class="anchored" data-anchor-id="set-2-rf-on-cds">Set 2, RF on CDS</h2>
+<section id="rf-on-cds" class="level2">
+<h2 class="anchored" data-anchor-id="rf-on-cds">2, RF on CDS</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>CDS <span class="ot">&lt;-</span> imp_data_FPA[imp_data_FPA<span class="sc">$</span>fpa <span class="sc">==</span> <span class="st">"CDS"</span>, ]</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>CDS <span class="ot">&lt;-</span> CDS <span class="sc">|&gt;</span>  <span class="fu">mutate</span>(</span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">common =</span> <span class="fu">rowSums</span>(CDS[,sp_prevalence<span class="sc">$</span>common]),</span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">uncommon =</span> <span class="fu">rowSums</span>(CDS[,sp_prevalence<span class="sc">$</span>uncommon]),</span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">rare_TD =</span> <span class="fu">rowSums</span>(CDS[,sp_prevalence<span class="sc">$</span>rare]), </span>
-<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">total_TD =</span> <span class="fu">rowSums</span>((CDS[, <span class="dv">6</span><span class="sc">:</span><span class="dv">39</span>]))</span>
-<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span> </span>
-<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>sp_prevalence<span class="sc">$</span>rare, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>uncommon, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>common) </span>
-<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>CDS <span class="ot">&lt;-</span> CDS <span class="sc">|&gt;</span> </span>
-<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(fpa, <span class="at">.after =</span> FPAG)</span>
-<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Here are the quantiles for most prevalent species with zeroes</span></span>
-<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(CDS[,sp_prevalence<span class="sc">$</span>prevalent], <span class="dv">2</span>, quantile, <span class="fu">seq</span>(<span class="fl">0.99</span>, <span class="dv">1</span>, .<span class="dv">001</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data <span class="sc">|&gt;</span> </span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">fpa =</span> <span class="fu">str_sub</span>(FPAG, <span class="dv">1</span>, <span class="dv">3</span>)</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>CDS <span class="ot">&lt;-</span> imp_data_FPA[imp_data_FPA<span class="sc">$</span>fpa <span class="sc">==</span> <span class="st">"CDS"</span>, ]</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>CDS <span class="ot">&lt;-</span> CDS <span class="sc">|&gt;</span>  <span class="fu">mutate</span>(</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">common =</span> <span class="fu">rowSums</span>(CDS[,sp_prevalence<span class="sc">$</span>common]),</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">uncommon =</span> <span class="fu">rowSums</span>(CDS[,sp_prevalence<span class="sc">$</span>uncommon]),</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">rare_TD =</span> <span class="fu">rowSums</span>(CDS[,sp_prevalence<span class="sc">$</span>rare]), </span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">total_TD =</span> <span class="fu">rowSums</span>((CDS[, <span class="dv">6</span><span class="sc">:</span><span class="dv">39</span>]))</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span> </span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>sp_prevalence<span class="sc">$</span>rare, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>uncommon, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>common) </span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>CDS <span class="ot">&lt;-</span> CDS <span class="sc">|&gt;</span> </span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(fpa, <span class="at">.after =</span> FPAG)</span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Here are the quantiles for most prevalent species with zeroes</span></span>
+<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(CDS[,sp_prevalence<span class="sc">$</span>prevalent], <span class="dv">2</span>, quantile, <span class="fu">seq</span>(<span class="fl">0.99</span>, <span class="dv">1</span>, .<span class="dv">001</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         PSME_TD ABAM_TD   ABLA_TD   TSHE_TD
 99%     974.5487       0   0.00000   0.00000
@@ -928,12 +952,12 @@ the same.</code></pre>
 <div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rmsd.yai</span>(Full_set)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>              rmsd
-PSME_TD  186.88683
-ABLA_TD   25.13958
-common   249.39947
-uncommon 375.42857
-rare_TD  110.26771
-total_TD 426.26731</code></pre>
+PSME_TD  188.40859
+ABLA_TD   26.69023
+common   252.39648
+uncommon 376.31626
+rare_TD  111.67231
+total_TD 428.91156</code></pre>
 </div>
 </div>
 <section id="plots-rf-full-set" class="level3">
@@ -946,14 +970,14 @@ total_TD 426.26731</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="fl">3.2</span>,<span class="dv">1</span>))</span>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="fl">3.2</span>,<span class="dv">1</span>))</span>
 <span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(rf, <span class="at">vars =</span> <span class="fu">yvars</span>(rf))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="2_Imputation_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="fl">3.2</span>,<span class="dv">1</span>))</span>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="fl">3.2</span>,<span class="dv">1</span>))</span>
 <span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(msn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="2_Imputation_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
@@ -963,12 +987,12 @@ total_TD 426.26731</code></pre>
 <div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>rmsd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         mal.rmsdS msn.rmsdS gnn.rmsdS Full_set.rmsdS ica.rmsdS
-PSME_TD  0.9742293 1.0028254 1.0430676      0.8709108 0.9783871
-ABLA_TD  1.2163312 1.3051459 1.4111898      1.1119614 1.2163312
-common   0.9446253 1.0126262 0.8401424      0.7409197 0.9465916
-uncommon 1.4020282 1.3936819 1.4072269      1.0101107 1.4020564
-rare_TD  1.3471906 1.2835394 1.3637743      1.1853372 1.3623549
-total_TD 0.5857362 0.8211703 0.4994699      0.6540893 0.5857362</code></pre>
+PSME_TD  0.9742293 1.0028254 1.0430676      0.8780024 0.9763443
+ABLA_TD  1.2163312 1.3051459 1.4111898      1.1805489 1.2163312
+common   0.9446253 1.0126262 0.8401424      0.7498232 0.9465007
+uncommon 1.4020282 1.3936819 1.4072269      1.0124991 1.4020973
+rare_TD  1.3471906 1.2835394 1.3637743      1.2004361 1.3663772
+total_TD 0.5857362 0.8211703 0.4994699      0.6581468 0.5857362</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -980,283 +1004,100 @@ total_TD 0.5857362 0.8211703 0.4994699      0.6540893 0.5857362</code></pre>
 <span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a><span class="fu">find_best</span>(rmsd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                   name     value
-PSME_TD  Full_set.rmsdS 0.8709108
-ABLA_TD  Full_set.rmsdS 1.1119614
-common   Full_set.rmsdS 0.7409197
-uncommon Full_set.rmsdS 1.0101107
-rare_TD  Full_set.rmsdS 1.1853372
+PSME_TD  Full_set.rmsdS 0.8780024
+ABLA_TD  Full_set.rmsdS 1.1805489
+common   Full_set.rmsdS 0.7498232
+uncommon Full_set.rmsdS 1.0124991
+rare_TD  Full_set.rmsdS 1.2004361
 total_TD      gnn.rmsdS 0.4994699</code></pre>
 </div>
 </div>
 </section>
 </section>
-<section id="rf-on-seedlings-only." class="level2">
-<h2 class="anchored" data-anchor-id="rf-on-seedlings-only.">RF on seedlings only.</h2>
+<section id="rf-on-seedling-plots" class="level2">
+<h2 class="anchored" data-anchor-id="rf-on-seedling-plots">3. RF on seedling plots</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>())</span>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>k <span class="ot">=</span> <span class="dv">10</span></span>
 <span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>k <span class="ot">=</span> <span class="dv">10</span></span>
-<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Pulling from my new interim save point</span></span>
-<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">"./attempt_032524.db"</span>)</span>
-<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a><span class="co"># imp_data &lt;- dbGetQuery(con, "select * from imp_data")</span></span>
-<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>zimp_data <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"select * from regen_only_imp_data"</span>)</span>
-<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>plots <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"select * from fvs_plotinit_plot"</span>)</span>
-<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>plants_ref <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"select * from plants_ref"</span>)</span>
-<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span>
-<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(con)</span>
-<span id="cb53-13"><a href="#cb53-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb53-14"><a href="#cb53-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Grabbing the topography variables</span></span>
-<span id="cb53-15"><a href="#cb53-15" aria-hidden="true" tabindex="-1"></a>pred_topo <span class="ot">&lt;-</span> plots <span class="sc">|&gt;</span> <span class="fu">select</span>(</span>
-<span id="cb53-16"><a href="#cb53-16" aria-hidden="true" tabindex="-1"></a>  STANDPLOT_CN, ELEVFT, SLOPE, ASPECT</span>
-<span id="cb53-17"><a href="#cb53-17" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb53-18"><a href="#cb53-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the Kralicek variables</span></span>
-<span id="cb53-19"><a href="#cb53-19" aria-hidden="true" tabindex="-1"></a>pred_Kral <span class="ot">&lt;-</span> zimp_data <span class="sc">|&gt;</span> <span class="fu">select</span>(</span>
-<span id="cb53-20"><a href="#cb53-20" aria-hidden="true" tabindex="-1"></a>  STANDPLOT_CN, CC, BA, SDI, FPAG</span>
-<span id="cb53-21"><a href="#cb53-21" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb53-22"><a href="#cb53-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb53-23"><a href="#cb53-23" aria-hidden="true" tabindex="-1"></a><span class="co"># remove the predictors from the response.</span></span>
-<span id="cb53-24"><a href="#cb53-24" aria-hidden="true" tabindex="-1"></a>response <span class="ot">&lt;-</span> zimp_data <span class="sc">|&gt;</span> <span class="fu">select</span>(</span>
-<span id="cb53-25"><a href="#cb53-25" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span><span class="fu">c</span>(CC, BA, SDI, FPAG)</span>
-<span id="cb53-26"><a href="#cb53-26" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb53-27"><a href="#cb53-27" aria-hidden="true" tabindex="-1"></a><span class="co"># join the Kralicek and topo variables. </span></span>
-<span id="cb53-28"><a href="#cb53-28" aria-hidden="true" tabindex="-1"></a>predictors <span class="ot">&lt;-</span> <span class="fu">left_join</span>(pred_Kral, pred_topo, <span class="fu">join_by</span>(STANDPLOT_CN))<span class="sc">|&gt;</span> </span>
-<span id="cb53-29"><a href="#cb53-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(FPAG, <span class="at">.after =</span> STANDPLOT_CN)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Pulling from my new interim save point</span></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">"./attempt_032524.db"</span>)</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a><span class="co"># imp_data &lt;- dbGetQuery(con, "select * from imp_data")</span></span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>zimp_data <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"select * from regen_only_imp_data"</span>)</span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>plots <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"select * from fvs_plotinit_plot"</span>)</span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>plants_ref <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"select * from plants_ref"</span>)</span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(con)</span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Grabbing the topography variables</span></span>
+<span id="cb53-13"><a href="#cb53-13" aria-hidden="true" tabindex="-1"></a>pred_topo <span class="ot">&lt;-</span> plots <span class="sc">|&gt;</span> <span class="fu">select</span>(</span>
+<span id="cb53-14"><a href="#cb53-14" aria-hidden="true" tabindex="-1"></a>  STANDPLOT_CN, ELEVFT, SLOPE, ASPECT</span>
+<span id="cb53-15"><a href="#cb53-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb53-16"><a href="#cb53-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the Kralicek variables</span></span>
+<span id="cb53-17"><a href="#cb53-17" aria-hidden="true" tabindex="-1"></a>pred_Kral <span class="ot">&lt;-</span> zimp_data <span class="sc">|&gt;</span> <span class="fu">select</span>(</span>
+<span id="cb53-18"><a href="#cb53-18" aria-hidden="true" tabindex="-1"></a>  STANDPLOT_CN, CC, BA, SDI, FPAG</span>
+<span id="cb53-19"><a href="#cb53-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb53-20"><a href="#cb53-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-21"><a href="#cb53-21" aria-hidden="true" tabindex="-1"></a><span class="co"># remove the predictors from the response.</span></span>
+<span id="cb53-22"><a href="#cb53-22" aria-hidden="true" tabindex="-1"></a>response <span class="ot">&lt;-</span> zimp_data <span class="sc">|&gt;</span> <span class="fu">select</span>(</span>
+<span id="cb53-23"><a href="#cb53-23" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span><span class="fu">c</span>(CC, BA, SDI, FPAG)</span>
+<span id="cb53-24"><a href="#cb53-24" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb53-25"><a href="#cb53-25" aria-hidden="true" tabindex="-1"></a><span class="co"># join the Kralicek and topo variables. </span></span>
+<span id="cb53-26"><a href="#cb53-26" aria-hidden="true" tabindex="-1"></a>predictors <span class="ot">&lt;-</span> <span class="fu">left_join</span>(pred_Kral, pred_topo, <span class="fu">join_by</span>(STANDPLOT_CN))<span class="sc">|&gt;</span> </span>
+<span id="cb53-27"><a href="#cb53-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(FPAG, <span class="at">.after =</span> STANDPLOT_CN)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="sp-prev" class="level3">
-<h3 class="anchored" data-anchor-id="sp-prev">Sp prev</h3>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">apply</span>(zimp_data, <span class="dv">2</span>, max) </span>
-<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> z[<span class="dv">6</span><span class="sc">:</span><span class="fu">length</span>(z)]</span>
-<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">names</span>(z)</span>
-<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> z</span>
-<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(y) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(y)</span>
-<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(y) <span class="ot">&lt;-</span> x</span>
-<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a><span class="co"># This is a sorted list of the maximum trees per acre per species on one plot</span></span>
-<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a><span class="co"># y |&gt; sort(decreasing = T)</span></span>
-<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-14"><a href="#cb54-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-15"><a href="#cb54-15" aria-hidden="true" tabindex="-1"></a>imp <span class="ot">&lt;-</span> zimp_data</span>
-<span id="cb54-16"><a href="#cb54-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-17"><a href="#cb54-17" aria-hidden="true" tabindex="-1"></a>imp_p <span class="ot">&lt;-</span> imp <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>)</span>
-<span id="cb54-18"><a href="#cb54-18" aria-hidden="true" tabindex="-1"></a>imp_r <span class="ot">&lt;-</span> imp <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="dv">1</span>, <span class="dv">6</span><span class="sc">:</span><span class="fu">ncol</span>(imp))</span>
-<span id="cb54-19"><a href="#cb54-19" aria-hidden="true" tabindex="-1"></a>imp_r <span class="ot">&lt;-</span> imp_r <span class="sc">|&gt;</span> <span class="fu">mutate</span>(</span>
-<span id="cb54-20"><a href="#cb54-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">total_TD =</span> <span class="fu">rowSums</span>(imp_r[,<span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(imp_r)])</span>
-<span id="cb54-21"><a href="#cb54-21" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb54-22"><a href="#cb54-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-23"><a href="#cb54-23" aria-hidden="true" tabindex="-1"></a>imp <span class="ot">&lt;-</span> <span class="fu">left_join</span>(imp_p, imp_r, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb54-24"><a href="#cb54-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-25"><a href="#cb54-25" aria-hidden="true" tabindex="-1"></a><span class="co"># This is why the species stuff below is the same as before. </span></span>
-<span id="cb54-26"><a href="#cb54-26" aria-hidden="true" tabindex="-1"></a>imp_z <span class="ot">&lt;-</span> imp[imp<span class="sc">$</span>total_TD <span class="sc">&gt;</span> <span class="dv">0</span>,]</span>
-<span id="cb54-27"><a href="#cb54-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-28"><a href="#cb54-28" aria-hidden="true" tabindex="-1"></a><span class="co"># summary(imp_z[,6:ncol(imp_z)])</span></span>
-<span id="cb54-29"><a href="#cb54-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-30"><a href="#cb54-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-31"><a href="#cb54-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-32"><a href="#cb54-32" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(imp_z[,<span class="dv">6</span><span class="sc">:</span><span class="fu">ncol</span>(imp_z)], <span class="dv">2</span>, quantile, <span class="fu">seq</span>(<span class="fl">0.72</span>, <span class="fl">0.90</span>, .<span class="dv">04</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>     ABGR_TD PIPO_TD   PSME_TD PIAL_TD   ABLA_TD TSME_TD LALY_TD   ABAM_TD
-72%  0.00000       0   0.00000       0   0.00000       0       0   0.00000
-76%  0.00000       0   0.00000       0   0.00000       0       0  74.96528
-80%  0.00000       0  74.96528       0   0.00000       0       0  74.96528
-84%  0.00000       0  74.96528       0  74.96528       0       0 224.89585
-88% 74.96528       0 149.93057       0 149.93057       0       0 374.82641
-    THPL_TD PIEN_TD   TSHE_TD ACGL_TD PICO_TD LAOC_TD TABR2_TD CHNO_TD BEPA_TD
-72%       0       0   0.00000       0       0       0        0       0       0
-76%       0       0   0.00000       0       0       0        0       0       0
-80%       0       0   0.00000       0       0       0        0       0       0
-84%       0       0  74.96528       0       0       0        0       0       0
-88%       0       0 149.93057       0       0       0        0       0       0
-    PREM_TD ABPR_TD PIMO3_TD PRVI_TD POTR5_TD ALRU2_TD QUGA4_TD CONU4_TD
-72%       0       0        0       0        0        0        0        0
-76%       0       0        0       0        0        0        0        0
-80%       0       0        0       0        0        0        0        0
-84%       0       0        0       0        0        0        0        0
-88%       0       0        0       0        0        0        0        0
-    ACMA3_TD JUOC_TD FRLA_TD 2TB_TD POBAT_TD MAFU_TD ARME_TD ABCO_TD PISI_TD
-72%        0       0       0      0        0       0       0       0       0
-76%        0       0       0      0        0       0       0       0       0
-80%        0       0       0      0        0       0       0       0       0
-84%        0       0       0      0        0       0       0       0       0
-88%        0       0       0      0        0       0       0       0       0
-    PSMA_TD ALRH2_TD JUNI_TD BEUT_TD BEOC2_TD PRPE2_TD JUHI_TD CHLA_TD PRAV_TD
-72%       0        0       0       0        0        0       0       0       0
-76%       0        0       0       0        0        0       0       0       0
-80%       0        0       0       0        0        0       0       0       0
-84%       0        0       0       0        0        0       0       0       0
-88%       0        0       0       0        0        0       0       0       0
-     total_TD
-72%  599.7223
-76%  749.6528
-80%  899.5834
-84% 1124.4792
-88% 1349.3751</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>prevalent_sp <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'PSME_TD'</span>, <span class="st">'ABAM_TD'</span>, <span class="st">'ABLA_TD'</span>, <span class="st">'TSHE_TD'</span>)</span>
-<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> <span class="fu">names</span>(imp_z)[<span class="sc">!</span><span class="fu">names</span>(imp_z) <span class="sc">%in%</span> prevalent_sp]</span>
-<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>imp_z2 <span class="ot">&lt;-</span> imp_z[,keep]</span>
-<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a><span class="co"># apply(imp_z2[,6:ncol(imp_z2)], 2, quantile, seq(0.90, 0.9875, .025))</span></span>
-<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a>common_sp <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'PIPO_TD'</span> , <span class="st">'TSME_TD'</span>, <span class="st">'ABGR_TD'</span>, <span class="st">'THPL_TD'</span>, <span class="st">'PIEN_TD'</span>, <span class="st">'PICO_TD'</span>, <span class="st">'PIMO3_TD'</span>)</span>
-<span id="cb56-9"><a href="#cb56-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb56-10"><a href="#cb56-10" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> <span class="fu">names</span>(imp_z2)[<span class="sc">!</span><span class="fu">names</span>(imp_z2) <span class="sc">%in%</span> common_sp]</span>
-<span id="cb56-11"><a href="#cb56-11" aria-hidden="true" tabindex="-1"></a>imp_z3 <span class="ot">&lt;-</span> imp_z2[,keep]</span>
-<span id="cb56-12"><a href="#cb56-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb56-13"><a href="#cb56-13" aria-hidden="true" tabindex="-1"></a><span class="co"># apply(imp_z3[,6:ncol(imp_z3)], 2, quantile, seq(0.975, .99, .005))</span></span>
-<span id="cb56-14"><a href="#cb56-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb56-15"><a href="#cb56-15" aria-hidden="true" tabindex="-1"></a>uncommon_sp <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'PIAL_TD'</span>, <span class="st">'ACGL_TD'</span>, <span class="st">'LAOC_TD'</span>, <span class="st">'TABR2_TD'</span>, <span class="st">'CHNO_TD'</span>, </span>
-<span id="cb56-16"><a href="#cb56-16" aria-hidden="true" tabindex="-1"></a>                 <span class="st">'POTR5_TD'</span>)</span>
-<span id="cb56-17"><a href="#cb56-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb56-18"><a href="#cb56-18" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> <span class="fu">names</span>(imp_z3)[<span class="sc">!</span><span class="fu">names</span>(imp_z3) <span class="sc">%in%</span> uncommon_sp]</span>
-<span id="cb56-19"><a href="#cb56-19" aria-hidden="true" tabindex="-1"></a>imp_z4 <span class="ot">&lt;-</span> imp_z3[,keep]</span>
-<span id="cb56-20"><a href="#cb56-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb56-21"><a href="#cb56-21" aria-hidden="true" tabindex="-1"></a><span class="co"># apply(imp_z4[,6:ncol(imp_z4)], 2, quantile, seq(0.99, 1, .005))</span></span>
-<span id="cb56-22"><a href="#cb56-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb56-23"><a href="#cb56-23" aria-hidden="true" tabindex="-1"></a>rare_sp <span class="ot">&lt;-</span> <span class="fu">names</span>(imp_z4[,<span class="dv">6</span><span class="sc">:</span>(<span class="fu">ncol</span>(imp_z4)<span class="sc">-</span><span class="dv">1</span>)])</span>
-<span id="cb56-24"><a href="#cb56-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb56-25"><a href="#cb56-25" aria-hidden="true" tabindex="-1"></a>sp_prevalence <span class="ot">&lt;-</span>  <span class="fu">list</span>(<span class="at">prevalent =</span> prevalent_sp, </span>
-<span id="cb56-26"><a href="#cb56-26" aria-hidden="true" tabindex="-1"></a>     <span class="at">common =</span> common_sp, </span>
-<span id="cb56-27"><a href="#cb56-27" aria-hidden="true" tabindex="-1"></a>     <span class="at">uncommon =</span> uncommon_sp, </span>
-<span id="cb56-28"><a href="#cb56-28" aria-hidden="true" tabindex="-1"></a>     <span class="at">rare =</span> rare_sp)</span>
-<span id="cb56-29"><a href="#cb56-29" aria-hidden="true" tabindex="-1"></a><span class="co"># save(sp_prevalence, file = "sp_prevalence.Rdata")</span></span>
-<span id="cb56-30"><a href="#cb56-30" aria-hidden="true" tabindex="-1"></a><span class="co"># getwd()</span></span>
-<span id="cb56-31"><a href="#cb56-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb56-32"><a href="#cb56-32" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(sp_prevalence)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>$prevalent
-[1] "PSME_TD" "ABAM_TD" "ABLA_TD" "TSHE_TD"
-
-$common
-[1] "PIPO_TD"  "TSME_TD"  "ABGR_TD"  "THPL_TD"  "PIEN_TD"  "PICO_TD"  "PIMO3_TD"
-
-$uncommon
-[1] "PIAL_TD"  "ACGL_TD"  "LAOC_TD"  "TABR2_TD" "CHNO_TD"  "POTR5_TD"
-
-$rare
- [1] "LALY_TD"  "BEPA_TD"  "PREM_TD"  "ABPR_TD"  "PRVI_TD"  "ALRU2_TD"
- [7] "QUGA4_TD" "CONU4_TD" "ACMA3_TD" "JUOC_TD"  "FRLA_TD"  "2TB_TD"  
-[13] "POBAT_TD" "MAFU_TD"  "ARME_TD"  "ABCO_TD"  "PISI_TD"  "PSMA_TD" 
-[19] "ALRH2_TD" "JUNI_TD"  "BEUT_TD"  "BEOC2_TD" "PRPE2_TD" "JUHI_TD" 
-[25] "CHLA_TD"  "PRAV_TD" </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Here are the quantiles for most prevelant species with zeroes</span></span>
-<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a><span class="co"># apply(imp_data[,sp_prevalence$prevalent], 2, quantile, seq(0.86, 1, .01))</span></span>
-<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Here are the quantiles for common species with zeroes</span></span>
-<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(zimp_data[,sp_prevalence<span class="sc">$</span>common], <span class="dv">2</span>, quantile, <span class="fu">seq</span>(<span class="fl">0.95</span>, <span class="dv">1</span>, .<span class="dv">01</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>        PIPO_TD    TSME_TD    ABGR_TD    THPL_TD     PIEN_TD     PICO_TD
-95%    74.96528   74.96528   299.8611   149.9306    74.96528    74.96528
-96%    74.96528   74.96528   374.8264   224.8958    74.96528   149.93057
-97%    74.96528  149.93057   449.7917   299.8611    74.96528   224.89585
-98%   149.93057  224.89585   674.6875   449.7917   149.93057   374.82641
-99%   299.86113  449.79170  1124.4792   824.6181   299.86113   899.58339
-100% 9070.79918 4722.81279 13793.6120 14768.1606 24588.61264 18816.28590
-       PIMO3_TD
-95%     0.00000
-96%     0.00000
-97%    74.96528
-98%    74.96528
-99%   149.93057
-100% 1874.13206</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Here are the quantiles for uncommon species with zeroes</span></span>
-<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(zimp_data[,sp_prevalence<span class="sc">$</span>uncommon], <span class="dv">2</span>, quantile, <span class="fu">seq</span>(<span class="fl">0.9875</span>, <span class="dv">1</span>, .<span class="dv">0025</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>         PIAL_TD    ACGL_TD     LAOC_TD   TABR2_TD   CHNO_TD   POTR5_TD
-98.75%  74.96528   149.9306    74.96528   74.96528  149.9306   74.96528
-99%     74.96528   149.9306   149.93057   74.96528  224.8958  149.93057
-99.25%  74.96528   224.8958   224.89585  149.93057  299.8611  149.93057
-99.5%  149.93057   449.7917   449.79170  224.89585  449.7917  299.86113
-99.75% 224.89585   749.6528   899.58339  299.86113  749.6528  449.79170
-100%   974.54867 24063.8557 10345.20898 2248.95847 3148.5419 2773.71545</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Here are the quantiles for rare species with zeroes</span></span>
-<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(zimp_data[,sp_prevalence<span class="sc">$</span>rare], <span class="dv">2</span>, quantile, <span class="fu">seq</span>(<span class="fl">0.9925</span>, <span class="dv">1</span>, .<span class="dv">0025</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>          LALY_TD     BEPA_TD    PREM_TD    ABPR_TD   PRVI_TD   ALRU2_TD
-99.25%    0.00000     0.00000   74.96528   74.96528    0.0000   74.96528
-99.5%    74.96528     0.00000  224.89585  109.44931  149.9306   74.96528
-99.75%  299.86113    74.96528  374.82641  299.86113  599.7223  167.17258
-100%   2548.81960 10944.93124 3523.36827 2623.78489 4347.9864 2248.95847
-         QUGA4_TD CONU4_TD   ACMA3_TD  JUOC_TD  FRLA_TD   2TB_TD   POBAT_TD
-99.25%   74.96528   0.0000   74.96528   0.0000    0.000   0.0000    0.00000
-99.5%   149.93057   0.0000   74.96528   0.0000    0.000   0.0000    0.00000
-99.75%  374.82641   0.0000  149.93057   0.0000    0.000   0.0000   74.96528
-100%   2099.02791 449.7917 1049.51395 374.8264 8770.938 449.7917 1274.40980
-        MAFU_TD  ARME_TD ABCO_TD  PISI_TD  PSMA_TD ALRH2_TD  JUNI_TD  BEUT_TD
-99.25%    0.000   0.0000    0.00   0.0000  0.00000   0.0000   0.0000  0.00000
-99.5%     0.000   0.0000    0.00   0.0000  0.00000   0.0000   0.0000  0.00000
-99.75%    0.000   0.0000    0.00   0.0000  0.00000   0.0000   0.0000  0.00000
-100%   7196.667 224.8958 1274.41 674.6875 74.96528 449.7917 149.9306 74.96528
-       BEOC2_TD PRPE2_TD  JUHI_TD  CHLA_TD  PRAV_TD
-99.25%   0.0000   0.0000  0.00000   0.0000    0.000
-99.5%    0.0000   0.0000  0.00000   0.0000    0.000
-99.75%   0.0000   0.0000  0.00000   0.0000    0.000
-100%   149.9306 224.8958 74.96528 374.8264 2248.958</code></pre>
-</div>
-</div>
-</section>
 <section id="cds" class="level3">
 <h3 class="anchored" data-anchor-id="cds">CDS</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> zimp_data <span class="sc">|&gt;</span> </span>
-<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">fpa =</span> <span class="fu">str_sub</span>(FPAG, <span class="dv">1</span>, <span class="dv">3</span>)</span>
-<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb64-6"><a href="#cb64-6" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">unique</span>(imp_data_FPA<span class="sc">$</span>fpa)</span>
-<span id="cb64-7"><a href="#cb64-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb64-8"><a href="#cb64-8" aria-hidden="true" tabindex="-1"></a>CDS <span class="ot">&lt;-</span> imp_data_FPA[imp_data_FPA<span class="sc">$</span>fpa <span class="sc">==</span> <span class="st">"CDS"</span>, ]</span>
-<span id="cb64-9"><a href="#cb64-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb64-10"><a href="#cb64-10" aria-hidden="true" tabindex="-1"></a>CDS <span class="ot">&lt;-</span> CDS <span class="sc">|&gt;</span>  <span class="fu">mutate</span>(</span>
-<span id="cb64-11"><a href="#cb64-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">common =</span> <span class="fu">rowSums</span>(CDS[,sp_prevalence<span class="sc">$</span>common]),</span>
-<span id="cb64-12"><a href="#cb64-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">uncommon =</span> <span class="fu">rowSums</span>(CDS[,sp_prevalence<span class="sc">$</span>uncommon]),</span>
-<span id="cb64-13"><a href="#cb64-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">rare_TD =</span> <span class="fu">rowSums</span>(CDS[,sp_prevalence<span class="sc">$</span>rare]), </span>
-<span id="cb64-14"><a href="#cb64-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">total_TD =</span> <span class="fu">rowSums</span>((CDS[, <span class="dv">6</span><span class="sc">:</span><span class="dv">39</span>]))</span>
-<span id="cb64-15"><a href="#cb64-15" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span> </span>
-<span id="cb64-16"><a href="#cb64-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>sp_prevalence<span class="sc">$</span>rare, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>uncommon, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>common) </span>
-<span id="cb64-17"><a href="#cb64-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb64-18"><a href="#cb64-18" aria-hidden="true" tabindex="-1"></a>CDS <span class="ot">&lt;-</span> CDS <span class="sc">|&gt;</span> </span>
-<span id="cb64-19"><a href="#cb64-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(fpa, <span class="at">.after =</span> FPAG)</span>
-<span id="cb64-20"><a href="#cb64-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb64-21"><a href="#cb64-21" aria-hidden="true" tabindex="-1"></a><span class="co"># I am replacing the highest value with the next highest value</span></span>
-<span id="cb64-22"><a href="#cb64-22" aria-hidden="true" tabindex="-1"></a>CDS<span class="sc">$</span>PSME_TD[CDS<span class="sc">$</span>PSME_TD <span class="sc">&gt;</span> <span class="fl">3148.5</span>] <span class="ot">&lt;-</span> <span class="fl">3148.5</span></span>
-<span id="cb64-23"><a href="#cb64-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Removing an All zero column and a nearly empty one. </span></span>
-<span id="cb64-24"><a href="#cb64-24" aria-hidden="true" tabindex="-1"></a>CDS <span class="ot">&lt;-</span> CDS <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(ABAM_TD, TSHE_TD))</span>
-<span id="cb64-25"><a href="#cb64-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb64-26"><a href="#cb64-26" aria-hidden="true" tabindex="-1"></a>cds <span class="ot">&lt;-</span> CDS</span>
-<span id="cb64-27"><a href="#cb64-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb64-28"><a href="#cb64-28" aria-hidden="true" tabindex="-1"></a>refs <span class="ot">&lt;-</span> cds[<span class="dv">1</span><span class="sc">:</span>(<span class="dv">3</span><span class="sc">*</span><span class="fu">nrow</span>(cds)<span class="sc">/</span><span class="dv">4</span>),]</span>
-<span id="cb64-29"><a href="#cb64-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb64-30"><a href="#cb64-30" aria-hidden="true" tabindex="-1"></a><span class="co"># CDS</span></span>
-<span id="cb64-31"><a href="#cb64-31" aria-hidden="true" tabindex="-1"></a><span class="co"># cds</span></span>
-<span id="cb64-32"><a href="#cb64-32" aria-hidden="true" tabindex="-1"></a><span class="co"># data("MoscowMtStJoe")</span></span>
-<span id="cb64-33"><a href="#cb64-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb64-34"><a href="#cb64-34" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> cds <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>)</span>
-<span id="cb64-35"><a href="#cb64-35" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(x)</span>
-<span id="cb64-36"><a href="#cb64-36" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(x, <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb64-37"><a href="#cb64-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb64-38"><a href="#cb64-38" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> cds <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="dv">1</span>, <span class="dv">7</span><span class="sc">:</span><span class="fu">ncol</span>(cds))</span>
-<span id="cb64-39"><a href="#cb64-39" aria-hidden="true" tabindex="-1"></a><span class="co"># y &lt;- y[refs]</span></span>
-<span id="cb64-40"><a href="#cb64-40" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(y)</span>
-<span id="cb64-41"><a href="#cb64-41" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(y, <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb64-42"><a href="#cb64-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb64-43"><a href="#cb64-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb64-44"><a href="#cb64-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb64-45"><a href="#cb64-45" aria-hidden="true" tabindex="-1"></a>zmal <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">method =</span> <span class="st">"mahalanobis"</span>, <span class="at">k =</span> k)</span>
-<span id="cb64-46"><a href="#cb64-46" aria-hidden="true" tabindex="-1"></a>zmsn <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">method =</span> <span class="st">"msn"</span>, <span class="at">k =</span> k)</span>
-<span id="cb64-47"><a href="#cb64-47" aria-hidden="true" tabindex="-1"></a>zgnn <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">method =</span> <span class="st">"gnn"</span>, <span class="at">k =</span> k)</span>
-<span id="cb64-48"><a href="#cb64-48" aria-hidden="true" tabindex="-1"></a>zica <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">method =</span> <span class="st">"ica"</span>, <span class="at">k =</span> k)</span>
-<span id="cb64-49"><a href="#cb64-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb64-50"><a href="#cb64-50" aria-hidden="true" tabindex="-1"></a>zerror_full <span class="ot">&lt;-</span> <span class="fu">errorStats</span>(zmal, zmsn, zgnn, zica)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> zimp_data <span class="sc">|&gt;</span> </span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">fpa =</span> <span class="fu">str_sub</span>(FPAG, <span class="dv">1</span>, <span class="dv">3</span>)</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">unique</span>(imp_data_FPA<span class="sc">$</span>fpa)</span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>CDS <span class="ot">&lt;-</span> imp_data_FPA[imp_data_FPA<span class="sc">$</span>fpa <span class="sc">==</span> <span class="st">"CDS"</span>, ]</span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a>CDS <span class="ot">&lt;-</span> CDS <span class="sc">|&gt;</span>  <span class="fu">mutate</span>(</span>
+<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">common =</span> <span class="fu">rowSums</span>(CDS[,sp_prevalence<span class="sc">$</span>common]),</span>
+<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">uncommon =</span> <span class="fu">rowSums</span>(CDS[,sp_prevalence<span class="sc">$</span>uncommon]),</span>
+<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">rare_TD =</span> <span class="fu">rowSums</span>(CDS[,sp_prevalence<span class="sc">$</span>rare]), </span>
+<span id="cb54-14"><a href="#cb54-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">total_TD =</span> <span class="fu">rowSums</span>((CDS[, <span class="dv">6</span><span class="sc">:</span><span class="dv">39</span>]))</span>
+<span id="cb54-15"><a href="#cb54-15" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span> </span>
+<span id="cb54-16"><a href="#cb54-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>sp_prevalence<span class="sc">$</span>rare, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>uncommon, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>common) </span>
+<span id="cb54-17"><a href="#cb54-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-18"><a href="#cb54-18" aria-hidden="true" tabindex="-1"></a>CDS <span class="ot">&lt;-</span> CDS <span class="sc">|&gt;</span> </span>
+<span id="cb54-19"><a href="#cb54-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(fpa, <span class="at">.after =</span> FPAG)</span>
+<span id="cb54-20"><a href="#cb54-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-21"><a href="#cb54-21" aria-hidden="true" tabindex="-1"></a><span class="co"># I am replacing the highest value with the next highest value</span></span>
+<span id="cb54-22"><a href="#cb54-22" aria-hidden="true" tabindex="-1"></a>CDS<span class="sc">$</span>PSME_TD[CDS<span class="sc">$</span>PSME_TD <span class="sc">&gt;</span> <span class="fl">3148.5</span>] <span class="ot">&lt;-</span> <span class="fl">3148.5</span></span>
+<span id="cb54-23"><a href="#cb54-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Removing an All zero column and a nearly empty one. </span></span>
+<span id="cb54-24"><a href="#cb54-24" aria-hidden="true" tabindex="-1"></a>CDS <span class="ot">&lt;-</span> CDS <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(ABAM_TD, TSHE_TD))</span>
+<span id="cb54-25"><a href="#cb54-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-26"><a href="#cb54-26" aria-hidden="true" tabindex="-1"></a>cds <span class="ot">&lt;-</span> CDS</span>
+<span id="cb54-27"><a href="#cb54-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-28"><a href="#cb54-28" aria-hidden="true" tabindex="-1"></a>refs <span class="ot">&lt;-</span> cds[<span class="dv">1</span><span class="sc">:</span>(<span class="dv">3</span><span class="sc">*</span><span class="fu">nrow</span>(cds)<span class="sc">/</span><span class="dv">4</span>),]</span>
+<span id="cb54-29"><a href="#cb54-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-30"><a href="#cb54-30" aria-hidden="true" tabindex="-1"></a><span class="co"># CDS</span></span>
+<span id="cb54-31"><a href="#cb54-31" aria-hidden="true" tabindex="-1"></a><span class="co"># cds</span></span>
+<span id="cb54-32"><a href="#cb54-32" aria-hidden="true" tabindex="-1"></a><span class="co"># data("MoscowMtStJoe")</span></span>
+<span id="cb54-33"><a href="#cb54-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-34"><a href="#cb54-34" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> cds <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>)</span>
+<span id="cb54-35"><a href="#cb54-35" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(x)</span>
+<span id="cb54-36"><a href="#cb54-36" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(x, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb54-37"><a href="#cb54-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-38"><a href="#cb54-38" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> cds <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="dv">1</span>, <span class="dv">7</span><span class="sc">:</span><span class="fu">ncol</span>(cds))</span>
+<span id="cb54-39"><a href="#cb54-39" aria-hidden="true" tabindex="-1"></a><span class="co"># y &lt;- y[refs]</span></span>
+<span id="cb54-40"><a href="#cb54-40" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(y)</span>
+<span id="cb54-41"><a href="#cb54-41" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(y, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb54-42"><a href="#cb54-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-43"><a href="#cb54-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-44"><a href="#cb54-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-45"><a href="#cb54-45" aria-hidden="true" tabindex="-1"></a>zmal <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">method =</span> <span class="st">"mahalanobis"</span>, <span class="at">k =</span> k)</span>
+<span id="cb54-46"><a href="#cb54-46" aria-hidden="true" tabindex="-1"></a>zmsn <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">method =</span> <span class="st">"msn"</span>, <span class="at">k =</span> k)</span>
+<span id="cb54-47"><a href="#cb54-47" aria-hidden="true" tabindex="-1"></a>zgnn <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">method =</span> <span class="st">"gnn"</span>, <span class="at">k =</span> k)</span>
+<span id="cb54-48"><a href="#cb54-48" aria-hidden="true" tabindex="-1"></a>zica <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">method =</span> <span class="st">"ica"</span>, <span class="at">k =</span> k)</span>
+<span id="cb54-49"><a href="#cb54-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-50"><a href="#cb54-50" aria-hidden="true" tabindex="-1"></a>zerror_full <span class="ot">&lt;-</span> <span class="fu">errorStats</span>(zmal, zmsn, zgnn, zica)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in notablyDistant(x, p = 1 - pzero): when computing threshold, 144 zero
 distances of 1671 references were set to 0.0000000003454502</code></pre>
@@ -1275,24 +1116,24 @@ distances of 1671 references were set to 0.00000000000000005551115</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in notablyDistant(x, p = plg): when computing threshold, 144 zero
-distances of 1671 references were set to 0.0000000003455539</code></pre>
+distances of 1671 references were set to 0.0000000003455537</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>zyrf <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">whatsMax</span>(y[ ,<span class="dv">1</span><span class="sc">:</span>(<span class="fu">ncol</span>(y)<span class="sc">-</span><span class="dv">1</span>)]), y[, <span class="fu">ncol</span>(y)])</span>
-<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(zyrf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'Max_SP'</span>, <span class="st">'sp_max_TD'</span>, <span class="st">'total_TD'</span>)</span>
-<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb70-5"><a href="#cb70-5" aria-hidden="true" tabindex="-1"></a><span class="co"># zrf &lt;- yai(x = x, y = zyrf, method = "randomForest", k = k)</span></span>
-<span id="cb70-6"><a href="#cb70-6" aria-hidden="true" tabindex="-1"></a><span class="co"># save(zrf, file = "zrf.Rdata")</span></span>
-<span id="cb70-7"><a href="#cb70-7" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"zrf.Rdata"</span>)</span>
-<span id="cb70-8"><a href="#cb70-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb70-9"><a href="#cb70-9" aria-hidden="true" tabindex="-1"></a><span class="co"># This won't run with rf in it? </span></span>
-<span id="cb70-10"><a href="#cb70-10" aria-hidden="true" tabindex="-1"></a><span class="co"># error_full &lt;- errorStats(mal, msn, gnn, rf)</span></span>
-<span id="cb70-11"><a href="#cb70-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb70-12"><a href="#cb70-12" aria-hidden="true" tabindex="-1"></a>zFull_set <span class="ot">&lt;-</span> <span class="fu">impute</span>(zrf, <span class="at">ancillaryData =</span> y)</span>
-<span id="cb70-13"><a href="#cb70-13" aria-hidden="true" tabindex="-1"></a>zrmsd <span class="ot">&lt;-</span> <span class="fu">compare.yai</span>(zmal, zmsn, zgnn, zFull_set, zica)</span>
-<span id="cb70-14"><a href="#cb70-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb70-15"><a href="#cb70-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb70-16"><a href="#cb70-16" aria-hidden="true" tabindex="-1"></a><span class="fu">rmsd.yai</span>(zFull_set)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>zyrf <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">whatsMax</span>(y[ ,<span class="dv">1</span><span class="sc">:</span>(<span class="fu">ncol</span>(y)<span class="sc">-</span><span class="dv">1</span>)]), y[, <span class="fu">ncol</span>(y)])</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(zyrf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'Max_SP'</span>, <span class="st">'sp_max_TD'</span>, <span class="st">'total_TD'</span>)</span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a><span class="co"># zrf &lt;- yai(x = x, y = zyrf, method = "randomForest", k = k)</span></span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a><span class="co"># save(zrf, file = "zrf.Rdata")</span></span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"zrf.Rdata"</span>)</span>
+<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a><span class="co"># This won't run with rf in it? </span></span>
+<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a><span class="co"># error_full &lt;- errorStats(mal, msn, gnn, rf)</span></span>
+<span id="cb60-11"><a href="#cb60-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-12"><a href="#cb60-12" aria-hidden="true" tabindex="-1"></a>zFull_set <span class="ot">&lt;-</span> <span class="fu">impute</span>(zrf, <span class="at">ancillaryData =</span> y)</span>
+<span id="cb60-13"><a href="#cb60-13" aria-hidden="true" tabindex="-1"></a>zrmsd <span class="ot">&lt;-</span> <span class="fu">compare.yai</span>(zmal, zmsn, zgnn, zFull_set, zica)</span>
+<span id="cb60-14"><a href="#cb60-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-15"><a href="#cb60-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-16"><a href="#cb60-16" aria-hidden="true" tabindex="-1"></a><span class="fu">rmsd.yai</span>(zFull_set)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>              rmsd
 PSME_TD  312.83162
@@ -1303,12 +1144,13 @@ rare_TD  183.63585
 total_TD 709.81751</code></pre>
 </div>
 </div>
+<p>For each species set, which imputation had the lowest rmsd?</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>find_best <span class="ot">&lt;-</span> <span class="cf">function</span>(df) {</span>
-<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">name =</span> <span class="fu">names</span>(df)[<span class="fu">apply</span>(df, <span class="dv">1</span>, which.min)],</span>
-<span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">value =</span> <span class="fu">apply</span>(df, <span class="dv">1</span>, min))</span>
-<span id="cb72-4"><a href="#cb72-4" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb72-5"><a href="#cb72-5" aria-hidden="true" tabindex="-1"></a><span class="fu">find_best</span>(zrmsd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>find_best <span class="ot">&lt;-</span> <span class="cf">function</span>(df) {</span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">name =</span> <span class="fu">names</span>(df)[<span class="fu">apply</span>(df, <span class="dv">1</span>, which.min)],</span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">value =</span> <span class="fu">apply</span>(df, <span class="dv">1</span>, min))</span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a><span class="fu">find_best</span>(zrmsd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                    name     value
 PSME_TD  zFull_set.rmsdS 0.9559565
@@ -1318,107 +1160,741 @@ uncommon zFull_set.rmsdS 1.0143569
 rare_TD  zFull_set.rmsdS 1.2025893
 total_TD      zgnn.rmsdS 0.4994699</code></pre>
 </div>
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">find_best</span>(rmsd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                   name     value
+PSME_TD  Full_set.rmsdS 0.8780024
+ABLA_TD  Full_set.rmsdS 1.1805489
+common   Full_set.rmsdS 0.7498232
+uncommon Full_set.rmsdS 1.0124991
+rare_TD  Full_set.rmsdS 1.2004361
+total_TD      gnn.rmsdS 0.4994699</code></pre>
 </div>
+</div>
+<p>RF does best for all but total tree density. The set with all the zeroes has lower rmsd. I find that odd.</p>
+<p>It would be likely that imputing zero for zero would reduce rmsd. Even by chance, if half the data is zero, it would be likely to imput the observed.</p>
 </section>
-<section id="plots" class="level3">
-<h3 class="anchored" data-anchor-id="plots">Plots</h3>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(zrmsd, <span class="at">main =</span> <span class="st">"Full Set"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
+</section>
+<section id="plots-vs-plots" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="plots-vs-plots">Plots vs Plots</h2>
+<p>These tell the same story, RF does better.</p>
+<div class="page-columns page-full">
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(zrmsd, <span class="at">main =</span> <span class="st">"zFull Set"</span>)</span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(rmsd, <span class="at">main =</span> <span class="st">"Full Set"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell column-page quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="2_Imputation_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="2_Imputation_files/figure-html/unnamed-chunk-23-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+<p>The zSeedling data shows the distribution of species better. It’s not half zeros. The imputed values look identical.</p>
+<div class="page-columns page-full">
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(zrf, <span class="at">vars =</span> <span class="fu">yvars</span>(zrf))</span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(rf, <span class="at">vars =</span> <span class="fu">yvars</span>(rf))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell column-page quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
 <p><img src="2_Imputation_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="672"></p>
 </div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="2_Imputation_files/figure-html/unnamed-chunk-24-2.png" class="img-fluid" width="672"></p>
 </div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="fl">3.2</span>,<span class="dv">1</span>))</span>
-<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(zrf, <span class="at">vars =</span> <span class="fu">yvars</span>(zrf))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
+</div>
+</div>
+</div>
+<hr>
+<p>zSeedling’s imputed vs observed are closer to the 1:1 line. The large values in total and uncommon make it less clear.</p>
+<div class="page-columns page-full">
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>,<span class="fl">3.2</span>,<span class="dv">1</span>))</span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(zmsn)</span>
+<span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(msn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell column-page quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
 <p><img src="2_Imputation_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid" width="672"></p>
 </div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="2_Imputation_files/figure-html/unnamed-chunk-25-2.png" class="img-fluid" width="672"></p>
 </div>
+</div>
+</div>
+</div>
+<hr>
+<p>For the RF imputation, the Seedlings only data was marginally more distant.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="fl">3.2</span>,<span class="dv">1</span>))</span>
-<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(zmsn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="2_Imputation_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>rmsd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>zrmsd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>function (object, vars = NULL, scale = FALSE, ...) 
-{
-    if (missing(object)) 
-        stop("object required.")
-    if (class(object)[1] == "yai") 
-        object = impute.yai(object, vars = vars, observed = TRUE, 
-            ...)
-    if (is.null(object)) 
-        stop("no imputations found using this object")
-    nuke = unlist(lapply(object, function(x) all(is.na(x))))
-    nuke = nuke[nuke]
-    if (length(nuke) &gt; 0) 
-        object = object[, -match(names(nuke), names(object)), 
-            drop = FALSE]
-    object = na.omit(object)
-    if (is.null(vars)) 
-        vars = names(object)
-    vi = paste(unique(strsplit(vars, ".o", fixed = TRUE)))
-    vi = intersect(vi, names(object))
-    notFound = setdiff(vars, names(object))
-    if (length(notFound) &gt; 0) 
-        warning("variables not found or had missing values: ", 
-            paste(notFound, collapse = ", "))
-    if (length(vi) == 0) 
-        stop("nothing to compute")
-    vo = paste(vi, "o", sep = ".")
-    notFound = setdiff(vo, names(object))
-    if (length(notFound) &gt; 0) 
-        warning("variables not found or had missing values: ", 
-            paste(notFound, collapse = ", "))
-    vo = intersect(vo, names(object))
-    both = intersect(paste(unique(strsplit(vo, ".o", fixed = TRUE))), 
-        vi)
-    if (length(both) == 0) 
-        stop("nothing to compute")
-    vo = paste(both, "o", sep = ".")
-    rmsd = data.frame(rep(NA, length(vo)), row.names = both)
-    names(rmsd) = if (scale || length(scale) &gt; 1) 
-        "rmsdS"
-    else "rmsd"
-    usedScale = list()
-    for (i in 1:length(both)) {
-        if (!is.factor(object[, both[i]])) {
-            rmsd[i, 1] = sqrt(mean(((object[, both[i]] - object[, 
-                vo[i]])^2)))
-            if (scale || length(scale) &gt; 1) {
-                div = NULL
-                if (length(scale) &gt; 1) 
-                  div = scale[[both[i]]]
-                if (is.null(div) || is.na(div)) 
-                  div = attr(object, "scale")[both[i], "scale"]
-                if (is.null(div) || is.na(div)) 
-                  div = sd(object[, vo[i]])
-                usedScale[[both[i]]] = div
-                rmsd[i, 1] = if (!is.na(div) &amp;&amp; div &gt; 0.01) 
-                  rmsd[i, 1]/div
-                else NA
-            }
-        }
-    }
-    if (length(usedScale) &gt; 0) 
-        attr(rmsd, "scale") = unlist(usedScale)
-    rmsd
-}
-&lt;bytecode: 0x0000022725167ae8&gt;
-&lt;environment: namespace:yaImpute&gt;</code></pre>
+<pre><code>         zmal.rmsdS zmsn.rmsdS zgnn.rmsdS zFull_set.rmsdS zica.rmsdS
+PSME_TD   1.0307255  0.9949283  1.0455937       0.9559565  1.0328713
+ABLA_TD   1.4671745  1.2608720  1.4111898       1.1841441  1.4671745
+common    0.9436294  0.8770926  0.8384303       0.7420633  0.9392958
+uncommon  1.4064999  1.4029035  1.4069185       1.0143569  1.4066415
+rare_TD   1.4510371  1.2894068  1.3407893       1.2025893  1.3956067
+total_TD  0.5530212  0.6578850  0.4994699       0.6914508  0.5530212</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>rmsd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         mal.rmsdS msn.rmsdS gnn.rmsdS Full_set.rmsdS ica.rmsdS
+PSME_TD  0.9742293 1.0028254 1.0430676      0.8780024 0.9763443
+ABLA_TD  1.2163312 1.3051459 1.4111898      1.1805489 1.2163312
+common   0.9446253 1.0126262 0.8401424      0.7498232 0.9465007
+uncommon 1.4020282 1.3936819 1.4072269      1.0124991 1.4020973
+rare_TD  1.3471906 1.2835394 1.3637743      1.2004361 1.3663772
+total_TD 0.5857362 0.8211703 0.4994699      0.6581468 0.5857362</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>zrmsd<span class="sc">$</span>zFull_set.rmsdS <span class="sc">-</span> rmsd<span class="sc">$</span>Full_set.rmsdS</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]  0.077954107  0.003595165 -0.007759937  0.001857819  0.002153193
+[6]  0.033303953</code></pre>
 </div>
 </div>
-<section id="end" class="level4">
-<h4 class="anchored" data-anchor-id="end">end</h4>
+</section>
+<section id="checking-on-yaimpute-functions." class="level2">
+<h2 class="anchored" data-anchor-id="checking-on-yaimpute-functions.">Checking on yaImpute functions.</h2>
+<p>I think the yai objects have the data for nearest neighbors.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>())</span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Pulling from my new interim save point</span></span>
+<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">"./attempt_032524.db"</span>)</span>
+<span id="cb75-5"><a href="#cb75-5" aria-hidden="true" tabindex="-1"></a>imp_data <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"select * from imp_data"</span>)</span>
+<span id="cb75-6"><a href="#cb75-6" aria-hidden="true" tabindex="-1"></a>zimp_data <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"select * from regen_only_imp_data"</span>)</span>
+<span id="cb75-7"><a href="#cb75-7" aria-hidden="true" tabindex="-1"></a>plots <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"select * from fvs_plotinit_plot"</span>)</span>
+<span id="cb75-8"><a href="#cb75-8" aria-hidden="true" tabindex="-1"></a>plants_ref <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"select * from plants_ref"</span>)</span>
+<span id="cb75-9"><a href="#cb75-9" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span>
+<span id="cb75-10"><a href="#cb75-10" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(con)</span>
+<span id="cb75-11"><a href="#cb75-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-12"><a href="#cb75-12" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"sp_prevalence.Rdata"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="test-imp-full-set." class="level2">
+<h2 class="anchored" data-anchor-id="test-imp-full-set.">Test imp, full set.</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data <span class="sc">|&gt;</span> </span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">fpa =</span> <span class="fu">str_sub</span>(FPAG, <span class="dv">1</span>, <span class="dv">3</span>)</span>
+<span id="cb76-4"><a href="#cb76-4" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb76-5"><a href="#cb76-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-6"><a href="#cb76-6" aria-hidden="true" tabindex="-1"></a><span class="co"># CDS &lt;- imp_data_FPA[imp_data_FPA$fpa == "CDS", ]</span></span>
+<span id="cb76-7"><a href="#cb76-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-8"><a href="#cb76-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-9"><a href="#cb76-9" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span>  <span class="fu">mutate</span>(</span>
+<span id="cb76-10"><a href="#cb76-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">common =</span> <span class="fu">rowSums</span>(imp_data_FPA[,sp_prevalence<span class="sc">$</span>common]),</span>
+<span id="cb76-11"><a href="#cb76-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">uncommon =</span> <span class="fu">rowSums</span>(imp_data_FPA[,sp_prevalence<span class="sc">$</span>uncommon]),</span>
+<span id="cb76-12"><a href="#cb76-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">rare_TD =</span> <span class="fu">rowSums</span>(imp_data_FPA[,sp_prevalence<span class="sc">$</span>rare]),</span>
+<span id="cb76-13"><a href="#cb76-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">total_TD =</span> <span class="fu">rowSums</span>((imp_data_FPA[, <span class="dv">6</span><span class="sc">:</span><span class="dv">39</span>]))</span>
+<span id="cb76-14"><a href="#cb76-14" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb76-15"><a href="#cb76-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>sp_prevalence<span class="sc">$</span>rare, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>uncommon, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>common)</span>
+<span id="cb76-16"><a href="#cb76-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-17"><a href="#cb76-17" aria-hidden="true" tabindex="-1"></a><span class="co"># imp_data_FPA &lt;- imp_data_FPA |&gt;  mutate(</span></span>
+<span id="cb76-18"><a href="#cb76-18" aria-hidden="true" tabindex="-1"></a><span class="co">#   total_TD = rowSums((imp_data_FPA[, 6:(ncol(imp_data_FPA)-1)]))</span></span>
+<span id="cb76-19"><a href="#cb76-19" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span>
+<span id="cb76-20"><a href="#cb76-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-21"><a href="#cb76-21" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span> </span>
+<span id="cb76-22"><a href="#cb76-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(fpa, <span class="at">.after =</span> FPAG)</span>
+<span id="cb76-23"><a href="#cb76-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-24"><a href="#cb76-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-25"><a href="#cb76-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Here are the quantiles for most prevalent species with zeroes</span></span>
+<span id="cb76-26"><a href="#cb76-26" aria-hidden="true" tabindex="-1"></a><span class="co"># apply(imp_data_FPA[,sp_prevalence$prevalent], 2, quantile, seq(0.99, 1, .001))</span></span>
+<span id="cb76-27"><a href="#cb76-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-28"><a href="#cb76-28" aria-hidden="true" tabindex="-1"></a><span class="co"># I am replacing the highest value with the next highest value</span></span>
+<span id="cb76-29"><a href="#cb76-29" aria-hidden="true" tabindex="-1"></a><span class="co"># imp_data_FPA$PSME_TD[imp_data_FPA$PSME_TD &gt; 3148.5] &lt;- 3148.5</span></span>
+<span id="cb76-30"><a href="#cb76-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Removing an All zero column and a nearly empty one. </span></span>
+<span id="cb76-31"><a href="#cb76-31" aria-hidden="true" tabindex="-1"></a><span class="co"># imp_data_FPA &lt;- imp_data_FPA |&gt; select(-c(ABAM_TD, TSHE_TD))</span></span>
+<span id="cb76-32"><a href="#cb76-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-33"><a href="#cb76-33" aria-hidden="true" tabindex="-1"></a>cds <span class="ot">&lt;-</span> imp_data_FPA</span>
+<span id="cb76-34"><a href="#cb76-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-35"><a href="#cb76-35" aria-hidden="true" tabindex="-1"></a>refs <span class="ot">&lt;-</span> <span class="fu">rownames</span>(cds[<span class="dv">1</span><span class="sc">:</span>(<span class="dv">3</span><span class="sc">*</span><span class="fu">nrow</span>(cds)<span class="sc">/</span><span class="dv">4</span>),])</span>
+<span id="cb76-36"><a href="#cb76-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-37"><a href="#cb76-37" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> cds <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>)</span>
+<span id="cb76-38"><a href="#cb76-38" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(x)</span>
+<span id="cb76-39"><a href="#cb76-39" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(x, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb76-40"><a href="#cb76-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-41"><a href="#cb76-41" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> cds <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="dv">1</span>, <span class="dv">7</span><span class="sc">:</span><span class="fu">ncol</span>(cds))</span>
+<span id="cb76-42"><a href="#cb76-42" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> yfull[refs,]</span>
+<span id="cb76-43"><a href="#cb76-43" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(y)</span>
+<span id="cb76-44"><a href="#cb76-44" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(y, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb76-45"><a href="#cb76-45" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(yfull)</span>
+<span id="cb76-46"><a href="#cb76-46" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(yfull, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb76-47"><a href="#cb76-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-48"><a href="#cb76-48" aria-hidden="true" tabindex="-1"></a>k <span class="ot">=</span> <span class="dv">10</span></span>
+<span id="cb76-49"><a href="#cb76-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-50"><a href="#cb76-50" aria-hidden="true" tabindex="-1"></a>mal <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">method =</span> <span class="st">"mahalanobis"</span>, <span class="at">k =</span> k)</span>
+<span id="cb76-51"><a href="#cb76-51" aria-hidden="true" tabindex="-1"></a>msn <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">method =</span> <span class="st">"msn"</span>, <span class="at">k =</span> k)</span>
+<span id="cb76-52"><a href="#cb76-52" aria-hidden="true" tabindex="-1"></a>gnn <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">method =</span> <span class="st">"gnn"</span>, <span class="at">k =</span> k)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in yai(x = x, y = y, method = "gnn", k = k): 8889 rows have y-variable
+row sums &lt;= 0 were converted to target observations for method gnn</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>ica <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">method =</span> <span class="st">"ica"</span>, <span class="at">k =</span> k)</span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a>msn_boot <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> x, <span class="at">y =</span> yfull, <span class="at">method =</span> <span class="st">"msn"</span>, <span class="at">k =</span> k, <span class="at">bootstrap =</span> T)</span>
+<span id="cb78-4"><a href="#cb78-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-5"><a href="#cb78-5" aria-hidden="true" tabindex="-1"></a><span class="co"># error_full &lt;- errorStats(mal, msn, gnn, ica)</span></span>
+<span id="cb78-6"><a href="#cb78-6" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb78-7"><a href="#cb78-7" aria-hidden="true" tabindex="-1"></a>yrf <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">whatsMax</span>(y[ ,<span class="dv">1</span><span class="sc">:</span>(<span class="fu">ncol</span>(y)<span class="sc">-</span><span class="dv">1</span>)]), y[, <span class="fu">ncol</span>(y)])</span>
+<span id="cb78-8"><a href="#cb78-8" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb78-9"><a href="#cb78-9" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(yrf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'Max_SP'</span>, <span class="st">'sp_max_TD'</span>, <span class="st">'total_TD'</span>)</span>
+<span id="cb78-10"><a href="#cb78-10" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb78-11"><a href="#cb78-11" aria-hidden="true" tabindex="-1"></a><span class="co"># frf2 &lt;- yai(x = x, y = yrf, method = "randomForest", k = k)</span></span>
+<span id="cb78-12"><a href="#cb78-12" aria-hidden="true" tabindex="-1"></a><span class="co"># save(frf, file = "frf.Rdata")</span></span>
+<span id="cb78-13"><a href="#cb78-13" aria-hidden="true" tabindex="-1"></a><span class="co"># save(frf2, file = "frf2.Rdata")</span></span>
+<span id="cb78-14"><a href="#cb78-14" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"frf.Rdata"</span>)</span>
+<span id="cb78-15"><a href="#cb78-15" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"frf2.Rdata"</span>)</span>
+<span id="cb78-16"><a href="#cb78-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-17"><a href="#cb78-17" aria-hidden="true" tabindex="-1"></a><span class="co"># This won't run with rf in it? </span></span>
+<span id="cb78-18"><a href="#cb78-18" aria-hidden="true" tabindex="-1"></a><span class="co"># error_full &lt;- errorStats(mal, msn, gnn, rf)</span></span>
+<span id="cb78-19"><a href="#cb78-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-20"><a href="#cb78-20" aria-hidden="true" tabindex="-1"></a>Full_set <span class="ot">&lt;-</span> <span class="fu">impute</span>(frf, <span class="at">ancillaryData =</span> y)</span>
+<span id="cb78-21"><a href="#cb78-21" aria-hidden="true" tabindex="-1"></a>frf2_set <span class="ot">&lt;-</span> <span class="fu">impute</span>(frf2, <span class="at">ancillaryData =</span> y)</span>
+<span id="cb78-22"><a href="#cb78-22" aria-hidden="true" tabindex="-1"></a>rmsd <span class="ot">&lt;-</span> <span class="fu">compare.yai</span>(mal, msn, gnn, Full_set, ica, msn_boot)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in compare.yai(mal, msn, gnn, Full_set, ica, msn_boot): not all scale
+factors are the same.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rmsd.yai</span>(Full_set) <span class="sc">|&gt;</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(rmsd)) <span class="sc">|&gt;</span> <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      rmsd      
+ Min.   :184.6  
+ 1st Qu.:302.4  
+ Median :321.5  
+ Mean   :338.3  
+ 3rd Qu.:359.6  
+ Max.   :519.1  </code></pre>
+</div>
+</div>
+<p>These got messed up when I went back and tried to save a plot to compare the fpag as factor plot. The second one was originally for all species individually. It wasn’t anything special. Same as others, messy.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="fl">3.2</span>,<span class="dv">1</span>))</span>
+<span id="cb82-2"><a href="#cb82-2" aria-hidden="true" tabindex="-1"></a><span class="co"># jpeg("p_full_set.jpg")</span></span>
+<span id="cb82-3"><a href="#cb82-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(frf2_set)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="2_Imputation_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="fl">3.2</span>,<span class="dv">1</span>))</span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Full_set)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="2_Imputation_files/figure-html/unnamed-chunk-30-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(rmsd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="2_Imputation_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="stochastic-distribution" class="level2">
+<h2 class="anchored" data-anchor-id="stochastic-distribution">Stochastic Distribution</h2>
+<section id="notably-dist-example" class="level3">
+<h3 class="anchored" data-anchor-id="notably-dist-example">Notably dist example</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="co"># data(iris)</span></span>
+<span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb85-3"><a href="#cb85-3" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb85-4"><a href="#cb85-4" aria-hidden="true" tabindex="-1"></a><span class="co"># # form some test data</span></span>
+<span id="cb85-5"><a href="#cb85-5" aria-hidden="true" tabindex="-1"></a><span class="co"># refs=sample(rownames(iris),50)</span></span>
+<span id="cb85-6"><a href="#cb85-6" aria-hidden="true" tabindex="-1"></a><span class="co"># x &lt;- iris[,1:3]      # Sepal.Length Sepal.Width Petal.Length</span></span>
+<span id="cb85-7"><a href="#cb85-7" aria-hidden="true" tabindex="-1"></a><span class="co"># y &lt;- iris[refs,4:5]  # Petal.Width Species</span></span>
+<span id="cb85-8"><a href="#cb85-8" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb85-9"><a href="#cb85-9" aria-hidden="true" tabindex="-1"></a><span class="co"># # build an msn run, first build dummy variables for species.</span></span>
+<span id="cb85-10"><a href="#cb85-10" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb85-11"><a href="#cb85-11" aria-hidden="true" tabindex="-1"></a><span class="co"># sp1 &lt;- as.integer(iris$Species=="setosa")</span></span>
+<span id="cb85-12"><a href="#cb85-12" aria-hidden="true" tabindex="-1"></a><span class="co"># sp2 &lt;- as.integer(iris$Species=="versicolor")</span></span>
+<span id="cb85-13"><a href="#cb85-13" aria-hidden="true" tabindex="-1"></a><span class="co"># y2 &lt;- data.frame(cbind(iris[,4],sp1,sp2),row.names=rownames(iris))</span></span>
+<span id="cb85-14"><a href="#cb85-14" aria-hidden="true" tabindex="-1"></a><span class="co"># y2 &lt;- y2[refs,]</span></span>
+<span id="cb85-15"><a href="#cb85-15" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb85-16"><a href="#cb85-16" aria-hidden="true" tabindex="-1"></a><span class="co"># names(y2) &lt;- c("Petal.Width","Sp1","Sp2")</span></span>
+<span id="cb85-17"><a href="#cb85-17" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb85-18"><a href="#cb85-18" aria-hidden="true" tabindex="-1"></a><span class="co"># xmsn &lt;- yai(x=x,y=y2,method="msn")</span></span>
+<span id="cb85-19"><a href="#cb85-19" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb85-20"><a href="#cb85-20" aria-hidden="true" tabindex="-1"></a><span class="co"># notablyDistant(xmsn)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a><span class="co"># empty</span></span>
+<span id="cb86-2"><a href="#cb86-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb86-3"><a href="#cb86-3" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> msn<span class="sc">$</span>neiDstTrgs</span>
+<span id="cb86-4"><a href="#cb86-4" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(x)</span>
+<span id="cb86-5"><a href="#cb86-5" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(x[,<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.8838358</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(x[,<span class="dv">1</span>], <span class="at">breaks =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="2_Imputation_files/figure-html/unnamed-chunk-33-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb89"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(x[,<span class="dv">1</span>]) <span class="sc">+</span> <span class="fu">sd</span>(x[,<span class="dv">1</span>])<span class="sc">*</span><span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.09517604</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(x[x<span class="sc">$</span>Dst.k1 <span class="sc">&lt;</span> (<span class="fu">mean</span>(x[,<span class="dv">1</span>]) <span class="sc">+</span> <span class="fu">sd</span>(x[,<span class="dv">1</span>])<span class="sc">*</span><span class="dv">2</span>), <span class="st">"Dst.k1"</span>], <span class="at">breaks =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="2_Imputation_files/figure-html/unnamed-chunk-33-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb92"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">log</span>(x[,<span class="dv">1</span>]), <span class="at">breaks =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="2_Imputation_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb93"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">log</span>(x[x<span class="sc">$</span>Dst.k1 <span class="sc">&lt;</span> (<span class="fu">mean</span>(x[,<span class="dv">1</span>]) <span class="sc">+</span> <span class="fu">sd</span>(x[,<span class="dv">1</span>])<span class="sc">*</span><span class="dv">2</span>), <span class="st">"Dst.k1"</span>]), <span class="at">breaks =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="2_Imputation_files/figure-html/unnamed-chunk-34-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a><span class="fu">log</span>(<span class="fl">0.04307483</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -3.144816</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a><span class="fu">notablyDistant</span>(msn, <span class="at">threshold =</span> .<span class="dv">134</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$notablyDistantRefs
+                                use      dist
+22399018010497_3   22398703010497_3 1.6368786
+13009978010497_4   22399290010497_1 1.0888892
+216960325020004_4  22398703010497_3 0.5524446
+40220286010497_3  216961121020004_1 0.4377439
+13009978010497_2   22931069010497_3 0.3776544
+22398786010497_2   22954397010497_3 0.3629839
+22954397010497_3   22954586010497_1 0.3486320
+8605918010901_2   558630833126144_1 0.3471019
+22954397010497_4   22398585010497_3 0.3280782
+216961121020004_1 558629497126144_3 0.2915627
+22399290010497_1   29395670010497_3 0.2781671
+558629497126144_3 290008707489998_3 0.2550805
+22398779010497_4   13037626010497_1 0.2521472
+238861338489998_3  22954586010497_1 0.2470366
+13049707010497_3   22398621010497_4 0.2460680
+24853515010900_2  558630867126144_3 0.2393577
+558630867126144_3  24853515010900_2 0.2393577
+13037626010497_1   22398703010497_3 0.2357689
+22398703010497_3   13037626010497_1 0.2357689
+22399054010497_4   22398369010497_4 0.2353384
+22954484010497_4   22954384010497_4 0.2314548
+22398578010497_3   13050884010497_4 0.2307665
+174763283020004_3  22398573010497_3 0.2305093
+22398573010497_3  174763283020004_3 0.2305093
+238861440489998_2  22399037010497_1 0.2265928
+22398702010497_3   22954586010497_1 0.2199238
+22954586010497_1   22398702010497_3 0.2199238
+22954384010497_4   13037626010497_3 0.2153577
+238861440489998_1  22398784010497_3 0.2049274
+22399288010497_1   22399284010497_4 0.1986057
+22954777010497_4   13060802010497_3 0.1762695
+216960205020004_1  13004916010497_1 0.1761057
+22399284010497_3  290008704489998_3 0.1706586
+22933115010497_1   22954341010497_3 0.1693149
+13037626010497_3   22954372010497_2 0.1684734
+216959926020004_1  22827645010497_2 0.1668744
+13050884010497_2  238861251489998_2 0.1642187
+22827635010497_3  558630690126144_3 0.1641223
+558629658126144_1  40220467010497_3 0.1640346
+22954372010497_2   22827491010497_4 0.1622180
+238861047489998_4 238861293489998_4 0.1559969
+238861293489998_4 238861047489998_4 0.1559969
+174763488020004_1  22954429010497_1 0.1552325
+13204702010497_2   22398806010497_4 0.1528064
+22398786010497_1  216959763020004_1 0.1508395
+22399011010497_2   13036367010497_4 0.1490321
+22954688010497_3   22931146010497_2 0.1489400
+22931145010497_4  345936539489998_3 0.1420914
+13204702010497_4   22398784010497_4 0.1415597
+22398784010497_4   13204702010497_4 0.1415597
+13230130010497_3   22931069010497_3 0.1414399
+22931069010497_3   13230130010497_3 0.1414399
+22399282010497_4  412219998489998_1 0.1369255
+22827491010497_4  216960487020004_3 0.1366811
+22398784010497_1  558630833126144_1 0.1343229
+22398806010497_4   22399028010497_4 0.1341743
+490388032126144_2  22954341010497_3 0.1340595
 
+$notablyDistantTrgs
+                                use      dist
+444202329489998_2  22399018010497_3 0.8838358
+29881887010497_3   22399018010497_3 0.8735740
+558630963126144_3  22399290010497_1 0.4988810
+8642760010901_4    22398702010497_3 0.3745856
+40220846010497_2   22398702010497_3 0.3578139
+412223212489998_1  22399058010497_2 0.3287638
+558630922126144_2 412223101489998_4 0.3257559
+29394875010497_3   13230130010497_3 0.3097321
+558630922126144_1 412223101489998_4 0.3086052
+48206170010497_3   22399290010497_1 0.3054331
+29883273010497_3   22399290010497_1 0.2993880
+490388177126144_1  22954397010497_4 0.2982816
+30763967020004_1   29395670010497_3 0.2862008
+44541363020004_2  345933621489998_1 0.2804372
+412220475489998_4  22954777010497_4 0.2690961
+273641056489998_2  22399288010497_1 0.2689661
+558630977126144_4  22954760010497_3 0.2550543
+44541638020004_4   22398703010497_3 0.2549495
+44541638020004_2  238861158489998_3 0.2503243
+24499760010900_3   22399284010497_3 0.2494237
+273641056489998_4  13009978010497_4 0.2483758
+24543603010900_3  238861784489998_1 0.2416192
+40220150010497_3   22932909010497_1 0.2332969
+558630981126144_3  22954484010497_4 0.2311133
+30764876020004_3   22398786010497_2 0.2178295
+40220128010497_3   22954397010497_4 0.2116447
+48206606010497_2  238861585489998_1 0.1987157
+412223110489998_3  22954397010497_3 0.1986595
+30764893020004_1  412223101489998_4 0.1956262
+484819133489998_3  22398786010497_2 0.1925549
+24490736010900_1  216960205020004_1 0.1918436
+44541063020004_2   48206605010497_2 0.1913806
+484818953489998_3 216960205020004_1 0.1910648
+290008836489998_3  22932909010497_3 0.1879296
+24151714010900_1   44543461020004_3 0.1872123
+40220653010497_4  238861158489998_3 0.1864092
+273643053489998_3  22932909010497_1 0.1855042
+30763621020004_2  238861784489998_1 0.1847611
+412223111489998_3  22398784010497_3 0.1813624
+345934914489998_4 216961407020004_3 0.1781251
+48205092010497_2   13060802010497_3 0.1750833
+290008677489998_2  13230130010497_3 0.1738890
+558629234126144_2 238861293489998_4 0.1730680
+29395534010497_1   22954484010497_3 0.1721210
+24499760010900_1   44543461020004_3 0.1699613
+29881462010497_4   22954484010497_4 0.1644007
+412222533489998_3  22954760010497_3 0.1604215
+558629443126144_3  13230130010497_3 0.1596494
+29883336010497_4   22954760010497_3 0.1590602
+412221538489998_1 216958778020004_1 0.1588589
+484818886489998_1  22398823010497_4 0.1587919
+24494145010900_1  345933621489998_1 0.1576797
+40220860010497_2  238861440489998_1 0.1576258
+44541011020004_3   22954708010497_1 0.1575943
+29394734010497_3  174763543020004_1 0.1568008
+48202708010497_2   22933115010497_1 0.1564757
+273641739489998_4 216960176020004_1 0.1543169
+412220777489998_4  22399018010497_3 0.1498604
+290008677489998_1 558629497126144_3 0.1471938
+29395710010497_1   13050884010497_2 0.1451918
+558630949126144_3  22827572010497_3 0.1451220
+273639950489998_1 238861585489998_1 0.1450536
+412221076489998_2  22954372010497_2 0.1447240
+24163060010900_4   22954342010497_2 0.1436677
+558630931126144_1  22399054010497_3 0.1430704
+444202090489998_4 444202456489998_4 0.1417478
+24530286010900_2  216958778020004_1 0.1406567
+29883201010497_3   22954654010497_2 0.1404798
+412223212489998_3 238861188489998_1 0.1403676
+24846081010900_4  238861440489998_3 0.1391415
+273642539489998_1  22933115010497_1 0.1387503
+48204252010497_3  174763543020004_1 0.1387342
+48206050010497_1  558629497126144_3 0.1383256
+44541224020004_1   22954341010497_3 0.1379265
+30765041020004_2   13016117010497_3 0.1375495
+29881630010497_4   22827635010497_3 0.1372777
+8619726010901_2   174763686020004_4 0.1372125
+273641594489998_1  22954614010497_2 0.1369819
+48205582010497_2   22954373010497_3 0.1353704
 
+$threshold
+[1] 0.134
+
+$method
+[1] "distribution"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb98"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     Dst.k1            Dst.k2            Dst.k3            Dst.k4       
+ Min.   :0.00000   Min.   :0.00000   Min.   :0.00000   Min.   :0.00000  
+ 1st Qu.:0.01204   1st Qu.:0.01768   1st Qu.:0.02129   1st Qu.:0.02408  
+ Median :0.02153   Median :0.02927   Median :0.03454   Median :0.03869  
+ Mean   :0.02888   Mean   :0.03894   Mean   :0.04573   Mean   :0.05115  
+ 3rd Qu.:0.03523   3rd Qu.:0.04694   3rd Qu.:0.05415   3rd Qu.:0.06018  
+ Max.   :0.88384   Max.   :1.69366   Max.   :1.78612   Max.   :1.92789  
+     Dst.k5            Dst.k6            Dst.k7            Dst.k8       
+ Min.   :0.00000   Min.   :0.00000   Min.   :0.00000   Min.   :0.00000  
+ 1st Qu.:0.02627   1st Qu.:0.02817   1st Qu.:0.02972   1st Qu.:0.03138  
+ Median :0.04219   Median :0.04527   Median :0.04813   Median :0.05042  
+ Mean   :0.05557   Mean   :0.05956   Mean   :0.06305   Mean   :0.06621  
+ 3rd Qu.:0.06502   3rd Qu.:0.06961   3rd Qu.:0.07386   3rd Qu.:0.07754  
+ Max.   :2.11432   Max.   :2.40130   Max.   :2.46419   Max.   :2.48889  
+     Dst.k9           Dst.k10       
+ Min.   :0.00000   Min.   :0.00000  
+ 1st Qu.:0.03261   1st Qu.:0.03405  
+ Median :0.05286   Median :0.05498  
+ Mean   :0.06923   Mean   :0.07220  
+ 3rd Qu.:0.08109   3rd Qu.:0.08490  
+ Max.   :2.63022   Max.   :2.66556  </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb100"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a>test <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span> <span class="fu">filter</span>(fpa <span class="sc">==</span> <span class="st">"CWF"</span>)</span>
+<span id="cb100-2"><a href="#cb100-2" aria-hidden="true" tabindex="-1"></a>test <span class="ot">&lt;-</span> test[,<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>]</span>
+<span id="cb100-3"><a href="#cb100-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb100-4"><a href="#cb100-4" aria-hidden="true" tabindex="-1"></a>test2 <span class="ot">&lt;-</span> <span class="fu">newtargets</span>(msn, <span class="at">newdata =</span> test)</span>
+<span id="cb100-5"><a href="#cb100-5" aria-hidden="true" tabindex="-1"></a>test2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+newtargets(object = msn, newdata = test)
+0 observations dropped
+method used:  msn 
+Cancor report:
+      cor      F
+1 0.62757 464.71
+2 0.20890  64.51
+3 0.06102  11.49
+                                                                                                                                                                                        Pr.F
+1 0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2 0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001775
+3 0.0000000000007045589223564445240446940665890451782615855336189270019531250000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  Sig
+1    
+2    
+3    
+3 vectors used, pVal= 0.05 
+cancor$xcoef:
+          [,1]       [,2]       [,3]
+CC  -0.5930479 -0.8225699  1.2486928
+BA  -1.7605768  1.6025717 -0.1081934
+SDI  2.5606038 -0.2173132 -0.2471598
+Projector:
+          [,1]        [,2]         [,3]
+CC  -0.3721794 -0.17183725  0.076190649
+BA  -1.1048860  0.33478188 -0.006601565
+SDI  1.6069593 -0.04539735 -0.015080784
+CCA not run
+randomForest not run
+0 y variables dropped   
+0 x variables dropped   
+Note: ann used
+First 10 targets:
+   Dst.k1      Dst.k2      Dst.k3     Dst.k4      Dst.k5     Dst.k6     Dst.k7
+1       0 0.022839131 0.024065301 0.02503445 0.027518941 0.02881239 0.02893608
+2       0 0.006833636 0.012532360 0.01348305 0.014832297 0.01727352 0.01826303
+3       0 0.011627065 0.013215233 0.01490622 0.015215686 0.02106584 0.02325435
+4       0 0.086915652 0.116651910 0.12766527 0.131262588 0.13309124 0.13377220
+5       0 0.005280908 0.009704220 0.01256398 0.012704678 0.01377202 0.01522488
+6       0 0.007397829 0.008049363 0.00863464 0.008844124 0.01264707 0.01301245
+7       0 0.007806150 0.012867828 0.02558227 0.026881552 0.02739568 0.02915953
+8       0 0.009487715 0.010230969 0.01516286 0.024068629 0.02695494 0.02706587
+9       0 0.008123271 0.033357538 0.03494585 0.043941166 0.04805847 0.05177362
+10      0 0.033440381 0.064661111 0.06648757 0.067584395 0.07127761 0.08327198
+       Dst.k8     Dst.k9    Dst.k10            Id.k1             Id.k2
+1  0.02899794 0.03009278 0.03176503 12964130010497_1 174763519020004_4
+2  0.02020276 0.02097464 0.02163351 12964130010497_2  48204206010497_2
+3  0.02391233 0.02428216 0.02613611 12964130010497_3  40220330010497_2
+4  0.13488224 0.13574756 0.14235163 12964130010497_4  24539823010900_3
+5  0.01568192 0.01861327 0.01911111 12966246010497_1 558630806126144_2
+6  0.01424728 0.01439073 0.01615086 12966246010497_2  22933087010497_3
+7  0.02985969 0.03253432 0.03301640 12966246010497_3  29881627010497_1
+8  0.02818138 0.02826890 0.03202578 12966246010497_4  22398485010497_4
+9  0.05481330 0.05506222 0.05621303 12992742010497_1  22827555010497_3
+10 0.08916667 0.10236031 0.10837711 12992742010497_2  29395694010497_3
+               Id.k3             Id.k4             Id.k5             Id.k6
+1   22399225010497_4 558629785126144_3 238861587489998_2  22827610010497_4
+2   24838588010900_4  22399221010497_3  29883411010497_1 444202393489998_4
+3   22398350010497_3  22398186010497_1  24199550010900_4  40220720010497_1
+4  345936102489998_2   8648137010901_4  29882757010497_2  29882045010497_3
+5   22398222010497_4   8603202010901_2 558630866126144_4  30763912020004_3
+6  273640495489998_1  22399225010497_3  24134547010900_2 193209107020004_3
+7  444202158489998_3  24195448010900_2  48202964010497_2 558629551126144_4
+8   29883214010497_2  22398995010497_2  22398261010497_1  22932917010497_1
+9   22399025010497_4  29883185010497_2  30764203020004_4  22398412010497_1
+10 490388204126144_3  22398585010497_2 174763488020004_2  22931272010497_4
+               Id.k7             Id.k8             Id.k9            Id.k10
+1  345934904489998_2  48206545010497_1 216959705020004_3 216958568020004_4
+2   40403568010497_1 412223102489998_3  44541780020004_4  29395607010497_3
+3  444202209489998_2  22398239010497_4  48206217010497_4  24833864010900_4
+4   22398806010497_3  48202991010497_4 273641507489998_3  22399205010497_3
+5   29883052010497_4  29395653010497_2  22931274010497_2  48203128010497_2
+6   40403580010497_3  40220779010497_1  22933263010497_2 273641521489998_1
+7   24488200010900_4  22399261010497_2  22954382010497_1  22398521010497_4
+8   40220254010497_3  29395646010497_2  22933264010497_2  22933304010497_3
+9  558629442126144_2 216958725020004_4 238861245489998_4  13039392010497_3
+10  13059631010497_4  22399040010497_4  22398574010497_2  22399032010497_2
+No reference neighbors computed.</code></pre>
+</div>
+</div>
 </section>
 </section>
+<section id="rf-with-categoricals" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="rf-with-categoricals">RF with categoricals</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb102"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a>KEEP <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"frf2_set"</span>, <span class="st">"KEEP"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb103"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>()[<span class="sc">!</span><span class="fu">ls</span>() <span class="sc">%in%</span> KEEP])</span>
+<span id="cb103-2"><a href="#cb103-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb103-3"><a href="#cb103-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Pulling from my new interim save point</span></span>
+<span id="cb103-4"><a href="#cb103-4" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">"./attempt_032524.db"</span>)</span>
+<span id="cb103-5"><a href="#cb103-5" aria-hidden="true" tabindex="-1"></a>imp_data <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"select * from imp_data"</span>)</span>
+<span id="cb103-6"><a href="#cb103-6" aria-hidden="true" tabindex="-1"></a>zimp_data <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"select * from regen_only_imp_data"</span>)</span>
+<span id="cb103-7"><a href="#cb103-7" aria-hidden="true" tabindex="-1"></a>plots <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"select * from fvs_plotinit_plot"</span>)</span>
+<span id="cb103-8"><a href="#cb103-8" aria-hidden="true" tabindex="-1"></a>plants_ref <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"select * from plants_ref"</span>)</span>
+<span id="cb103-9"><a href="#cb103-9" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span>
+<span id="cb103-10"><a href="#cb103-10" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(con)</span>
+<span id="cb103-11"><a href="#cb103-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb103-12"><a href="#cb103-12" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"sp_prevalence.Rdata"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="test-imp-full-set.-1" class="level3">
+<h3 class="anchored" data-anchor-id="test-imp-full-set.-1">Test imp, full set.</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb104"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data <span class="sc">|&gt;</span> </span>
+<span id="cb104-2"><a href="#cb104-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb104-3"><a href="#cb104-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">fpa =</span> <span class="fu">str_sub</span>(FPAG, <span class="dv">1</span>, <span class="dv">3</span>)</span>
+<span id="cb104-4"><a href="#cb104-4" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb105"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span>  <span class="fu">mutate</span>(</span>
+<span id="cb105-2"><a href="#cb105-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">common =</span> <span class="fu">rowSums</span>(imp_data_FPA[,sp_prevalence<span class="sc">$</span>common]),</span>
+<span id="cb105-3"><a href="#cb105-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">uncommon =</span> <span class="fu">rowSums</span>(imp_data_FPA[,sp_prevalence<span class="sc">$</span>uncommon]),</span>
+<span id="cb105-4"><a href="#cb105-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">rare_TD =</span> <span class="fu">rowSums</span>(imp_data_FPA[,sp_prevalence<span class="sc">$</span>rare]),</span>
+<span id="cb105-5"><a href="#cb105-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">total_TD =</span> <span class="fu">rowSums</span>((imp_data_FPA[, <span class="dv">6</span><span class="sc">:</span><span class="dv">39</span>]))</span>
+<span id="cb105-6"><a href="#cb105-6" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb105-7"><a href="#cb105-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>sp_prevalence<span class="sc">$</span>rare, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>uncommon, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>common)</span>
+<span id="cb105-8"><a href="#cb105-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb105-9"><a href="#cb105-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb105-10"><a href="#cb105-10" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span> </span>
+<span id="cb105-11"><a href="#cb105-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(fpa, <span class="at">.after =</span> FPAG)</span>
+<span id="cb105-12"><a href="#cb105-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb105-13"><a href="#cb105-13" aria-hidden="true" tabindex="-1"></a><span class="co"># I am removing the extra rows to speed up the imputation test. </span></span>
+<span id="cb105-14"><a href="#cb105-14" aria-hidden="true" tabindex="-1"></a>fpas <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span> </span>
+<span id="cb105-15"><a href="#cb105-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
+<span id="cb105-16"><a href="#cb105-16" aria-hidden="true" tabindex="-1"></a>    total_TD <span class="sc">&gt;</span> <span class="dv">0</span></span>
+<span id="cb105-17"><a href="#cb105-17" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb105-18"><a href="#cb105-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb105-19"><a href="#cb105-19" aria-hidden="true" tabindex="-1"></a>refs <span class="ot">&lt;-</span> <span class="fu">rownames</span>(fpas[<span class="dv">1</span><span class="sc">:</span>(<span class="dv">3</span><span class="sc">*</span><span class="fu">nrow</span>(fpas)<span class="sc">/</span><span class="dv">4</span>),])</span>
+<span id="cb105-20"><a href="#cb105-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb105-21"><a href="#cb105-21" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> fpas <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>)</span>
+<span id="cb105-22"><a href="#cb105-22" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(x)</span>
+<span id="cb105-23"><a href="#cb105-23" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(x, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb105-24"><a href="#cb105-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb105-25"><a href="#cb105-25" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> fpas <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="dv">1</span>, <span class="dv">7</span><span class="sc">:</span><span class="fu">ncol</span>(fpas))</span>
+<span id="cb105-26"><a href="#cb105-26" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> yfull[refs,]</span>
+<span id="cb105-27"><a href="#cb105-27" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(y)</span>
+<span id="cb105-28"><a href="#cb105-28" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(y, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb105-29"><a href="#cb105-29" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(yfull)</span>
+<span id="cb105-30"><a href="#cb105-30" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(yfull, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb105-31"><a href="#cb105-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb105-32"><a href="#cb105-32" aria-hidden="true" tabindex="-1"></a>k <span class="ot">=</span> <span class="dv">10</span></span>
+<span id="cb105-33"><a href="#cb105-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb105-34"><a href="#cb105-34" aria-hidden="true" tabindex="-1"></a>yrf <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">whatsMax</span>(y[ ,<span class="dv">1</span><span class="sc">:</span>(<span class="fu">ncol</span>(y)<span class="sc">-</span><span class="dv">1</span>)]), y[, <span class="fu">ncol</span>(y)])</span>
+<span id="cb105-35"><a href="#cb105-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb105-36"><a href="#cb105-36" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(yrf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'Max_SP'</span>, <span class="st">'sp_max_TD'</span>, <span class="st">'total_TD'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="as-factor" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="as-factor">as factor</h3>
+<p>It doesn’t like the categorical, but maybe I can do a dummy variable.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb106"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a>x<span class="sc">$</span>FPAG <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(x<span class="sc">$</span>FPAG)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Running the full set results in:</p>
+<p>Error in randomForest.default(x = xRefs[, xN, FALSE], y = yone, proximity = FALSE, : Can not handle categorical predictors with more than 53 categories.</p>
+<p>Now I’ll use fewer categories.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb107"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb107-1"><a href="#cb107-1" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> fpas <span class="sc">|&gt;</span> <span class="fu">group_by</span>(FPAG) <span class="sc">|&gt;</span> </span>
+<span id="cb107-2"><a href="#cb107-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb107-3"><a href="#cb107-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n)) <span class="sc">|&gt;</span> </span>
+<span id="cb107-4"><a href="#cb107-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n <span class="sc">&gt;</span> <span class="dv">120</span>)</span>
+<span id="cb107-5"><a href="#cb107-5" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> t<span class="sc">$</span>FPAG</span>
+<span id="cb107-6"><a href="#cb107-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb107-7"><a href="#cb107-7" aria-hidden="true" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> fpas <span class="sc">|&gt;</span> </span>
+<span id="cb107-8"><a href="#cb107-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(FPAG <span class="sc">%in%</span> keep)</span>
+<span id="cb107-9"><a href="#cb107-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb107-10"><a href="#cb107-10" aria-hidden="true" tabindex="-1"></a>t2<span class="sc">$</span>FPAG <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(t2<span class="sc">$</span>FPAG)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb108"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb108-1"><a href="#cb108-1" aria-hidden="true" tabindex="-1"></a>refs <span class="ot">&lt;-</span> <span class="fu">rownames</span>(t2[<span class="dv">1</span><span class="sc">:</span>(<span class="dv">3</span><span class="sc">*</span><span class="fu">nrow</span>(t2)<span class="sc">/</span><span class="dv">4</span>),])</span>
+<span id="cb108-2"><a href="#cb108-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb108-3"><a href="#cb108-3" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> t2 <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>)</span>
+<span id="cb108-4"><a href="#cb108-4" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(x)</span>
+<span id="cb108-5"><a href="#cb108-5" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(x, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb108-6"><a href="#cb108-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb108-7"><a href="#cb108-7" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> t2 <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="dv">1</span>, <span class="dv">7</span><span class="sc">:</span><span class="fu">ncol</span>(t2))</span>
+<span id="cb108-8"><a href="#cb108-8" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> yfull[refs,]</span>
+<span id="cb108-9"><a href="#cb108-9" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(y)</span>
+<span id="cb108-10"><a href="#cb108-10" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(y, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb108-11"><a href="#cb108-11" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(yfull)</span>
+<span id="cb108-12"><a href="#cb108-12" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(yfull, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb108-13"><a href="#cb108-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb108-14"><a href="#cb108-14" aria-hidden="true" tabindex="-1"></a>k <span class="ot">=</span> <span class="dv">10</span></span>
+<span id="cb108-15"><a href="#cb108-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb108-16"><a href="#cb108-16" aria-hidden="true" tabindex="-1"></a>yrf <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">whatsMax</span>(y[ ,<span class="dv">1</span><span class="sc">:</span>(<span class="fu">ncol</span>(y)<span class="sc">-</span><span class="dv">1</span>)]), y[, <span class="fu">ncol</span>(y)])</span>
+<span id="cb108-17"><a href="#cb108-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb108-18"><a href="#cb108-18" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(yrf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'Max_SP'</span>, <span class="st">'sp_max_TD'</span>, <span class="st">'total_TD'</span>)</span>
+<span id="cb108-19"><a href="#cb108-19" aria-hidden="true" tabindex="-1"></a><span class="co"># trf &lt;- yai(x = x, y = yrf, method = "randomForest", k = k)</span></span>
+<span id="cb108-20"><a href="#cb108-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb108-21"><a href="#cb108-21" aria-hidden="true" tabindex="-1"></a><span class="co"># save(trf, file = "trf.Rdata")</span></span>
+<span id="cb108-22"><a href="#cb108-22" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"trf.Rdata"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="page-columns page-full">
+<div class="sourceCode cell-code" id="cb109"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb109-1"><a href="#cb109-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(trf, <span class="at">vars =</span> <span class="fu">yvars</span>(trf))</span>
+<span id="cb109-2"><a href="#cb109-2" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(rf, vars = yvars(rf))</span></span>
+<span id="cb109-3"><a href="#cb109-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb109-4"><a href="#cb109-4" aria-hidden="true" tabindex="-1"></a>trf_i <span class="ot">&lt;-</span> <span class="fu">impute</span>(trf, <span class="at">ancillaryData =</span> y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell column-page quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="2_Imputation_files/figure-html/unnamed-chunk-43-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="plots" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="plots">Plots</h2>
+<p>Best imp plot so far!</p>
+<p>The first one (trf_i) is this imputation. It is using Fpag as a predictor on the those FPAGs that have at least 120 plots. The second is from the test imp. It is on the whole dataset without FPAG as a predictor.</p>
+<p>Generally, I see the points coming away from the zero axis toward the 1:1 line. That is good news. I’d like to see these without the outliers.</p>
+<div class="page-columns page-full">
+<div class="sourceCode cell-code" id="cb110"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb110-1"><a href="#cb110-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="fl">3.2</span>,<span class="dv">1</span>))</span>
+<span id="cb110-2"><a href="#cb110-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(trf_i)</span>
+<span id="cb110-3"><a href="#cb110-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(frf2_set)</span>
+<span id="cb110-4"><a href="#cb110-4" aria-hidden="true" tabindex="-1"></a><span class="co"># xlim = c(1,10)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell column-page quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="2_Imputation_files/figure-html/unnamed-chunk-44-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="2_Imputation_files/figure-html/unnamed-chunk-44-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</div>
+</div>
+<p>Uncommon and rare species seem to be mostly unaffected. total_TD might be a little worse.</p>
+<div class="page-columns page-full">
+<div class="sourceCode cell-code" id="cb111"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb111-1"><a href="#cb111-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="fl">3.2</span>,<span class="dv">1</span>))</span>
+<span id="cb111-2"><a href="#cb111-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(trf_i, </span>
+<span id="cb111-3"><a href="#cb111-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10000</span>),</span>
+<span id="cb111-4"><a href="#cb111-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10000</span>))</span>
+<span id="cb111-5"><a href="#cb111-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(frf2_set, </span>
+<span id="cb111-6"><a href="#cb111-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10000</span>),</span>
+<span id="cb111-7"><a href="#cb111-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10000</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell column-page quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="2_Imputation_files/figure-html/unnamed-chunk-45-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="2_Imputation_files/figure-html/unnamed-chunk-45-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb112"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb112-1"><a href="#cb112-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="fl">3.2</span>,<span class="dv">1</span>))</span>
+<span id="cb112-2"><a href="#cb112-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(trf, <span class="at">vars =</span> <span class="fu">yvars</span>(yrf))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="2_Imputation_files/figure-html/unnamed-chunk-46-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+
+
 </section>
 
 </main> <!-- /main -->

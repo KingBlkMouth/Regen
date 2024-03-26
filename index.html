@@ -93,6 +93,10 @@ ul.task-list li input[type="checkbox"] {
     <a class="nav-link" href="./2_Imputation.html" rel="" target="">
  <span class="menu-text">Imputation</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./3_imputation_2.html" rel="" target="">
+ <span class="menu-text">Non-FVS variables</span></a>
+  </li>  
 </ul>
             <div class="quarto-navbar-tools ms-auto">
 </div>
@@ -182,20 +186,36 @@ ul.task-list li input[type="checkbox"] {
 </ul></li>
 <li><a href="https://kingblkmouth.github.io/Regen/2_Imputation.html">Imputation</a>
 <ul>
-<li></li>
+<li>Repeat of first set of imputations done on expanded set of plots
+<ul>
+<li>3 vs 6 variables</li>
+<li>full set vs set w/o seedlings</li>
+<li>Pretty much the same results.</li>
 </ul></li>
-<li></li>
+<li>Random Forest on fpa, where fpa is CDS.
+<ul>
+<li>This isn’t much different than before, almost the same number of plots.</li>
+</ul></li>
+<li>Random Forest on plots w/ seedlings only. No empty plots.</li>
+<li>Test Imp on full set
+<ul>
+<li>RF on full set not fpas.</li>
+</ul></li>
+<li>Stoch dist
+<ul>
+<li>Looking at how to get the full set of CNs to pull a plot at random</li>
+</ul></li>
+<li>RF w/ Categoricals.
+<ul>
+<li>Adding FPAG as a predictor.</li>
+<li>This was the best plot so far. The imputed vs observed came off the axis.</li>
+</ul></li>
+</ul></li>
+<li><a href="https://kingblkmouth.github.io/Regen/3_imputation_2.html">Imputation 2</a>
+<ul>
+<li>Exploring different categorical predictors.</li>
+</ul></li>
 </ol>
-<ul>
-<li>unordered list
-<ul>
-<li>sub-item 1</li>
-<li>sub-item 2
-<ul>
-<li>sub-sub-item 1</li>
-</ul></li>
-</ul></li>
-</ul>
 </section>
 <section id="plot-selection" class="level2">
 <h2 class="anchored" data-anchor-id="plot-selection">Plot Selection</h2>
