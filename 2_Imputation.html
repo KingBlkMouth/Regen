@@ -129,7 +129,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./3_imputation_2.html" rel="" target="">
- <span class="menu-text">Non-FVS variables</span></a>
+ <span class="menu-text">Imputation 2</span></a>
   </li>  
 </ul>
             <div class="quarto-navbar-tools ms-auto">
@@ -930,7 +930,7 @@ distances of 1671 references were set to 0.00000000000000001387779</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in notablyDistant(x, p = plg): when computing threshold, 441 zero
-distances of 4615 references were set to 0.000000000232622</code></pre>
+distances of 4615 references were set to 0.0000000002326219</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>yrf <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">whatsMax</span>(y[ ,<span class="dv">1</span><span class="sc">:</span>(<span class="fu">ncol</span>(y)<span class="sc">-</span><span class="dv">1</span>)]), y[, <span class="fu">ncol</span>(y)])</span>
 <span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -987,11 +987,11 @@ total_TD 428.91156</code></pre>
 <div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>rmsd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         mal.rmsdS msn.rmsdS gnn.rmsdS Full_set.rmsdS ica.rmsdS
-PSME_TD  0.9742293 1.0028254 1.0430676      0.8780024 0.9763443
+PSME_TD  0.9742293 1.0028254 1.0430676      0.8780024 0.9760192
 ABLA_TD  1.2163312 1.3051459 1.4111898      1.1805489 1.2163312
-common   0.9446253 1.0126262 0.8401424      0.7498232 0.9465007
-uncommon 1.4020282 1.3936819 1.4072269      1.0124991 1.4020973
-rare_TD  1.3471906 1.2835394 1.3637743      1.2004361 1.3663772
+common   0.9446253 1.0126262 0.8401424      0.7498232 0.9460919
+uncommon 1.4020282 1.3936819 1.4072269      1.0124991 1.4019150
+rare_TD  1.3471906 1.2835394 1.3637743      1.2004361 1.3613216
 total_TD 0.5857362 0.8211703 0.4994699      0.6581468 0.5857362</code></pre>
 </div>
 </div>
@@ -1116,7 +1116,7 @@ distances of 1671 references were set to 0.00000000000000005551115</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in notablyDistant(x, p = plg): when computing threshold, 144 zero
-distances of 1671 references were set to 0.0000000003455537</code></pre>
+distances of 1671 references were set to 0.0000000003455536</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>zyrf <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">whatsMax</span>(y[ ,<span class="dv">1</span><span class="sc">:</span>(<span class="fu">ncol</span>(y)<span class="sc">-</span><span class="dv">1</span>)]), y[, <span class="fu">ncol</span>(y)])</span>
 <span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -1231,21 +1231,21 @@ total_TD      gnn.rmsdS 0.4994699</code></pre>
 <div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>zrmsd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         zmal.rmsdS zmsn.rmsdS zgnn.rmsdS zFull_set.rmsdS zica.rmsdS
-PSME_TD   1.0307255  0.9949283  1.0455937       0.9559565  1.0328713
+PSME_TD   1.0307255  0.9949283  1.0455937       0.9559565  1.0339957
 ABLA_TD   1.4671745  1.2608720  1.4111898       1.1841441  1.4671745
-common    0.9436294  0.8770926  0.8384303       0.7420633  0.9392958
-uncommon  1.4064999  1.4029035  1.4069185       1.0143569  1.4066415
-rare_TD   1.4510371  1.2894068  1.3407893       1.2025893  1.3956067
+common    0.9436294  0.8770926  0.8384303       0.7420633  0.9393318
+uncommon  1.4064999  1.4029035  1.4069185       1.0143569  1.4064118
+rare_TD   1.4510371  1.2894068  1.3407893       1.2025893  1.3884054
 total_TD  0.5530212  0.6578850  0.4994699       0.6914508  0.5530212</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>rmsd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         mal.rmsdS msn.rmsdS gnn.rmsdS Full_set.rmsdS ica.rmsdS
-PSME_TD  0.9742293 1.0028254 1.0430676      0.8780024 0.9763443
+PSME_TD  0.9742293 1.0028254 1.0430676      0.8780024 0.9760192
 ABLA_TD  1.2163312 1.3051459 1.4111898      1.1805489 1.2163312
-common   0.9446253 1.0126262 0.8401424      0.7498232 0.9465007
-uncommon 1.4020282 1.3936819 1.4072269      1.0124991 1.4020973
-rare_TD  1.3471906 1.2835394 1.3637743      1.2004361 1.3663772
+common   0.9446253 1.0126262 0.8401424      0.7498232 0.9460919
+uncommon 1.4020282 1.3936819 1.4072269      1.0124991 1.4019150
+rare_TD  1.3471906 1.2835394 1.3637743      1.2004361 1.3613216
 total_TD 0.5857362 0.8211703 0.4994699      0.6581468 0.5857362</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>zrmsd<span class="sc">$</span>zFull_set.rmsdS <span class="sc">-</span> rmsd<span class="sc">$</span>Full_set.rmsdS</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
