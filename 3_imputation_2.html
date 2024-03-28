@@ -159,15 +159,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#aside-to-do-some-tree-math" id="toc-aside-to-do-some-tree-math" class="nav-link" data-scroll-target="#aside-to-do-some-tree-math">Aside to do some tree math</a></li>
   </ul></li>
-  <li><a href="#physclcd" id="toc-physclcd" class="nav-link" data-scroll-target="#physclcd">PHYSCLCD</a></li>
-  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section">*</a>
+  <li><a href="#physclcd" id="toc-physclcd" class="nav-link" data-scroll-target="#physclcd">PHYSCLCD</a>
   <ul class="collapse">
   <li><a href="#plots" id="toc-plots" class="nav-link" data-scroll-target="#plots">Plots</a></li>
-  <li><a href="#non-fvs-variables." id="toc-non-fvs-variables." class="nav-link" data-scroll-target="#non-fvs-variables.">Non-FVS Variables.</a></li>
-  <li><a href="#yaimpute-functions-again" id="toc-yaimpute-functions-again" class="nav-link" data-scroll-target="#yaimpute-functions-again">yaImpute functions again</a></li>
-  <li><a href="#warning-threshold-zero-distances" id="toc-warning-threshold-zero-distances" class="nav-link" data-scroll-target="#warning-threshold-zero-distances">Warning threshold zero distances</a></li>
-  <li><a href="#extra-trees" id="toc-extra-trees" class="nav-link" data-scroll-target="#extra-trees">extra trees</a></li>
   </ul></li>
+  <li><a href="#non-fvs-variables." id="toc-non-fvs-variables." class="nav-link" data-scroll-target="#non-fvs-variables.">Non-FVS Variables.</a></li>
+  <li><a href="#yaimpute-model-evaluation" id="toc-yaimpute-model-evaluation" class="nav-link" data-scroll-target="#yaimpute-model-evaluation">yaImpute model evaluation</a>
+  <ul class="collapse">
+  <li><a href="#warning-threshold-zero-distances" id="toc-warning-threshold-zero-distances" class="nav-link" data-scroll-target="#warning-threshold-zero-distances">Warning threshold zero distances</a></li>
+  </ul></li>
+  <li><a href="#lost" id="toc-lost" class="nav-link" data-scroll-target="#lost">lost</a></li>
   </ul>
 </nav>
     </div>
@@ -216,8 +217,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(vegan)</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">scipen =</span> <span class="dv">999</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">scipen =</span> <span class="dv">999</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p><strong>Setup yai</strong></p>
@@ -239,60 +241,59 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"sp_prevalence.Rdata"</span>)</span>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data <span class="sc">|&gt;</span> </span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">fpa =</span> <span class="fu">str_sub</span>(FPAG, <span class="dv">1</span>, <span class="dv">3</span>)</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span>  <span class="fu">mutate</span>(</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">common =</span> <span class="fu">rowSums</span>(imp_data_FPA[,sp_prevalence<span class="sc">$</span>common]),</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">uncommon =</span> <span class="fu">rowSums</span>(imp_data_FPA[,sp_prevalence<span class="sc">$</span>uncommon]),</span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">rare_TD =</span> <span class="fu">rowSums</span>(imp_data_FPA[,sp_prevalence<span class="sc">$</span>rare]),</span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">total_TD =</span> <span class="fu">rowSums</span>(imp_data_FPA[<span class="fu">grep</span>(<span class="st">"_TD"</span>, <span class="fu">names</span>(imp_data_FPA))])</span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>sp_prevalence<span class="sc">$</span>rare, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>uncommon, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>common)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data <span class="sc">|&gt;</span> </span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">fpa =</span> <span class="fu">str_sub</span>(FPAG, <span class="dv">1</span>, <span class="dv">3</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span>  <span class="fu">mutate</span>(</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">common =</span> <span class="fu">rowSums</span>(imp_data_FPA[,sp_prevalence<span class="sc">$</span>common]),</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">uncommon =</span> <span class="fu">rowSums</span>(imp_data_FPA[,sp_prevalence<span class="sc">$</span>uncommon]),</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">rare =</span> <span class="fu">rowSums</span>(imp_data_FPA[,sp_prevalence<span class="sc">$</span>rare]),</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">total_TD =</span> <span class="fu">rowSums</span>(imp_data_FPA[<span class="fu">grep</span>(<span class="st">"_TD"</span>, <span class="fu">names</span>(imp_data_FPA))])</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>sp_prevalence<span class="sc">$</span>rare, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>uncommon, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>common)</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span> </span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(fpa, <span class="at">.after =</span> FPAG)</span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="co"># I am removing the extra rows to speed up the imputation test. </span></span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>fpas <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span> </span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    total_TD <span class="sc">&gt;</span> <span class="dv">0</span></span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>refs <span class="ot">&lt;-</span> <span class="fu">rownames</span>(fpas[<span class="dv">1</span><span class="sc">:</span>(<span class="dv">3</span><span class="sc">*</span><span class="fu">nrow</span>(fpas)<span class="sc">/</span><span class="dv">4</span>),])</span>
-<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> fpas <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>)</span>
-<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(x)</span>
-<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(x, <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> fpas <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="dv">1</span>, <span class="dv">7</span><span class="sc">:</span><span class="fu">ncol</span>(fpas))</span>
-<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> yfull[refs,]</span>
-<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(y)</span>
-<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(y, <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(yfull)</span>
-<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(yfull, <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>k <span class="ot">=</span> <span class="dv">10</span></span>
-<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>yrf <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">whatsMax</span>(y[ ,<span class="dv">1</span><span class="sc">:</span>(<span class="fu">ncol</span>(y)<span class="sc">-</span><span class="dv">1</span>)]), y[, <span class="fu">ncol</span>(y)])</span>
-<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(yrf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'Max_SP'</span>, <span class="st">'sp_max_TD'</span>, <span class="st">'total_TD'</span>)</span>
-<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> fpas <span class="sc">|&gt;</span> <span class="fu">group_by</span>(FPAG) <span class="sc">|&gt;</span> </span>
-<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span> </span>
-<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n)) <span class="sc">|&gt;</span> </span>
-<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n <span class="sc">&gt;</span> <span class="dv">120</span>)</span>
-<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> t<span class="sc">$</span>FPAG</span>
-<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> fpas <span class="sc">|&gt;</span> </span>
-<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(FPAG <span class="sc">%in%</span> keep)</span>
-<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>t2<span class="sc">$</span>FPAG <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(t2<span class="sc">$</span>FPAG)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span> </span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(fpa, <span class="at">.after =</span> FPAG)</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="co"># I am removing the extra rows to speed up the imputation test. </span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>fpas <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span> </span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    total_TD <span class="sc">&gt;</span> <span class="dv">0</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>refs <span class="ot">&lt;-</span> <span class="fu">rownames</span>(fpas[<span class="dv">1</span><span class="sc">:</span>(<span class="dv">3</span><span class="sc">*</span><span class="fu">nrow</span>(fpas)<span class="sc">/</span><span class="dv">4</span>),])</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> fpas <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>)</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(x)</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(x, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> fpas <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="dv">1</span>, <span class="dv">7</span><span class="sc">:</span><span class="fu">ncol</span>(fpas))</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> yfull[refs,]</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(y)</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(y, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(yfull)</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(yfull, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>k <span class="ot">=</span> <span class="dv">10</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>yrf <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">whatsMax</span>(y[ ,<span class="dv">1</span><span class="sc">:</span>(<span class="fu">ncol</span>(y)<span class="sc">-</span><span class="dv">1</span>)]), y[, <span class="fu">ncol</span>(y)])</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(yrf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'Max_SP'</span>, <span class="st">'sp_max_TD'</span>, <span class="st">'total_TD'</span>)</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> fpas <span class="sc">|&gt;</span> <span class="fu">group_by</span>(FPAG) <span class="sc">|&gt;</span> </span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n)) <span class="sc">|&gt;</span> </span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n <span class="sc">&gt;</span> <span class="dv">120</span>)</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> t<span class="sc">$</span>FPAG</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> fpas <span class="sc">|&gt;</span> </span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(FPAG <span class="sc">%in%</span> keep)</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>t2<span class="sc">$</span>FPAG <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(t2<span class="sc">$</span>FPAG)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p><strong>Run yai</strong></p>
@@ -358,7 +359,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Check plot <strong>22399018010497_3</strong> the next time I run FVS. This stand is new, it’s not in the last sets I ran.</p>
 </section>
 </section>
-<section id="physclcd" class="level2">
+<section id="physclcd" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="physclcd">PHYSCLCD</h2>
 <p><strong>Note to self to add condid to the database next time</strong></p>
 <div class="cell">
@@ -386,52 +387,48 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data <span class="sc">|&gt;</span> </span>
 <span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">fpa =</span> <span class="fu">str_sub</span>(FPAG, <span class="dv">1</span>, <span class="dv">3</span>)</span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-<section id="section" class="level1 page-columns page-full">
-<h1>*</h1>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span>  <span class="fu">mutate</span>(</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">common =</span> <span class="fu">rowSums</span>(imp_data_FPA[,sp_prevalence<span class="sc">$</span>common]),</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">uncommon =</span> <span class="fu">rowSums</span>(imp_data_FPA[,sp_prevalence<span class="sc">$</span>uncommon]),</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">rare_TD =</span> <span class="fu">rowSums</span>(imp_data_FPA[,sp_prevalence<span class="sc">$</span>rare]),</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">total_TD =</span> <span class="fu">rowSums</span>((imp_data_FPA[<span class="fu">grep</span>(<span class="st">"_TD"</span>, <span class="fu">names</span>(imp_data_FPA))]))</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>sp_prevalence<span class="sc">$</span>rare, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>uncommon, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>common)</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span> </span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(fpa, <span class="at">.after =</span> FPAG)</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span> <span class="fu">relocate</span>(PHYSCLCD, <span class="at">.before =</span> FPAG)</span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co"># I am removing the extra rows to speed up the imputation test. </span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>fpas <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span> </span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    total_TD <span class="sc">&gt;</span> <span class="dv">0</span></span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> fpas <span class="sc">|&gt;</span> <span class="fu">group_by</span>(FPAG) <span class="sc">|&gt;</span> </span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span> </span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n)) <span class="sc">|&gt;</span> </span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n <span class="sc">&gt;</span> <span class="dv">120</span>)</span>
-<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> t<span class="sc">$</span>FPAG</span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> fpas <span class="sc">|&gt;</span> </span>
-<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(FPAG <span class="sc">%in%</span> keep)</span>
-<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>t2<span class="sc">$</span>FPAG <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(t2<span class="sc">$</span>FPAG)</span>
-<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>t2<span class="sc">$</span>PHYSCLCD <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(t2<span class="sc">$</span>PHYSCLCD)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span>  <span class="fu">mutate</span>(</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">common =</span> <span class="fu">rowSums</span>(imp_data_FPA[,sp_prevalence<span class="sc">$</span>common]),</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">uncommon =</span> <span class="fu">rowSums</span>(imp_data_FPA[,sp_prevalence<span class="sc">$</span>uncommon]),</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">rare =</span> <span class="fu">rowSums</span>(imp_data_FPA[,sp_prevalence<span class="sc">$</span>rare]),</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>  <span class="at">total_TD =</span> <span class="fu">rowSums</span>((imp_data_FPA[<span class="fu">grep</span>(<span class="st">"_TD"</span>, <span class="fu">names</span>(imp_data_FPA))]))</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>sp_prevalence<span class="sc">$</span>rare, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>uncommon, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>common)</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span> </span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(fpa, <span class="at">.after =</span> FPAG)</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span> <span class="fu">relocate</span>(PHYSCLCD, <span class="at">.before =</span> FPAG)</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a><span class="co"># I am removing the extra rows to speed up the imputation test. </span></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>fpas <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span> </span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>    total_TD <span class="sc">&gt;</span> <span class="dv">0</span></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> fpas <span class="sc">|&gt;</span> <span class="fu">group_by</span>(FPAG) <span class="sc">|&gt;</span> </span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n)) <span class="sc">|&gt;</span> </span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n <span class="sc">&gt;</span> <span class="dv">120</span>)</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> t<span class="sc">$</span>FPAG</span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> fpas <span class="sc">|&gt;</span> </span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(FPAG <span class="sc">%in%</span> keep)</span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>t2<span class="sc">$</span>FPAG <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(t2<span class="sc">$</span>FPAG)</span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>t2<span class="sc">$</span>PHYSCLCD <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(t2<span class="sc">$</span>PHYSCLCD)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">n_distinct</span>(t2<span class="sc">$</span>FPAG)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">n_distinct</span>(t2<span class="sc">$</span>FPAG)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 26</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">n_distinct</span>(t2<span class="sc">$</span>PHYSCLCD)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">n_distinct</span>(t2<span class="sc">$</span>PHYSCLCD)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 13</code></pre>
 </div>
@@ -439,40 +436,40 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>198 FPAGs in the full set of imp_data. 44 in t2, after filtering for only those with at least 120 subplots.</p>
 <p>15 distinct physcds in imp_data, and t2.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>refs <span class="ot">&lt;-</span> <span class="fu">rownames</span>(t2[<span class="dv">1</span><span class="sc">:</span>(<span class="dv">3</span><span class="sc">*</span><span class="fu">nrow</span>(t2)<span class="sc">/</span><span class="dv">4</span>),])</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> t2 <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>)</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(x)</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(x, <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> t2 <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="dv">1</span>, <span class="dv">8</span><span class="sc">:</span><span class="fu">ncol</span>(t2))</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> yfull[refs,]</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(y)</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(y, <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(yfull)</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(yfull, <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>k <span class="ot">=</span> <span class="dv">10</span></span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>yrf <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">whatsMax</span>(y[ ,<span class="dv">1</span><span class="sc">:</span>(<span class="fu">ncol</span>(y)<span class="sc">-</span><span class="dv">1</span>)]), y[, <span class="fu">ncol</span>(y)])</span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(yrf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'Max_SP'</span>, <span class="st">'sp_max_TD'</span>, <span class="st">'total_TD'</span>)</span>
-<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="co"># rf_phys &lt;- yai(x = x, y = yrf, method = "randomForest", k = k)</span></span>
-<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="co"># save(rf_phys, file = "rf_phys.Rdata")</span></span>
-<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"rf_phys.Rdata"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>refs <span class="ot">&lt;-</span> <span class="fu">rownames</span>(t2[<span class="dv">1</span><span class="sc">:</span>(<span class="dv">3</span><span class="sc">*</span><span class="fu">nrow</span>(t2)<span class="sc">/</span><span class="dv">4</span>),])</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> t2 <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(x)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(x, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> t2 <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="dv">1</span>, <span class="dv">8</span><span class="sc">:</span><span class="fu">ncol</span>(t2))</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> yfull[refs,]</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(y)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(y, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(yfull)</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(yfull, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>k <span class="ot">=</span> <span class="dv">10</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>yrf <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">whatsMax</span>(y[ ,<span class="dv">1</span><span class="sc">:</span>(<span class="fu">ncol</span>(y)<span class="sc">-</span><span class="dv">1</span>)]), y[, <span class="fu">ncol</span>(y)])</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(yrf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'Max_SP'</span>, <span class="st">'sp_max_TD'</span>, <span class="st">'total_TD'</span>)</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="co"># rf_phys &lt;- yai(x = x, y = yrf, method = "randomForest", k = k)</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="co"># save(rf_phys, file = "rf_phys.Rdata")</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"rf_phys.Rdata"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="page-columns page-full">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(rf_phys, <span class="at">vars =</span> <span class="fu">yvars</span>(rf_phys))</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(rf, vars = yvars(rf))</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>trf_i <span class="ot">&lt;-</span> <span class="fu">impute</span>(trf, <span class="at">ancillaryData =</span> y)</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>rf_phys_i <span class="ot">&lt;-</span> <span class="fu">impute</span>(rf_phys, <span class="at">ancillaryData =</span> y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(rf_phys, <span class="at">vars =</span> <span class="fu">yvars</span>(rf_phys))</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(rf, vars = yvars(rf))</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>trf_i <span class="ot">&lt;-</span> <span class="fu">impute</span>(trf, <span class="at">ancillaryData =</span> y)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>rf_phys_i <span class="ot">&lt;-</span> <span class="fu">impute</span>(rf_phys, <span class="at">ancillaryData =</span> y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell column-page quarto-layout-panel">
 <div class="quarto-layout-row quarto-layout-valign-top">
 <div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<p><img src="3_imputation_2_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+<p><img src="3_imputation_2_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </div>
@@ -481,102 +478,156 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="plots">Plots</h3>
 <p>Adding Physcd didn’t help as much as I thought it would, but it did do something. I need to compare the numbers.</p>
 <div class="page-columns page-full">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="fl">3.2</span>,<span class="dv">1</span>))</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(rf_phys_i)</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(trf_i)</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(frf2_set)</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co"># xlim = c(1,10)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="fl">3.2</span>,<span class="dv">1</span>))</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(rf_phys_i)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(trf_i)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(frf2_set)</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co"># xlim = c(1,10)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell column-page quarto-layout-panel">
 <div class="quarto-layout-row quarto-layout-valign-top">
 <div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<p><img src="3_imputation_2_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+<p><img src="3_imputation_2_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
 </div>
 <div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<p><img src="3_imputation_2_files/figure-html/unnamed-chunk-11-2.png" class="img-fluid" width="672"></p>
+<p><img src="3_imputation_2_files/figure-html/unnamed-chunk-10-2.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>trf_rmsd <span class="ot">&lt;-</span> <span class="fu">rmsd.yai</span>(trf_i)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>ph_rmsd <span class="ot">&lt;-</span> <span class="fu">rmsd.yai</span>(rf_phys_i)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>ph_rmsd <span class="ot">&lt;-</span> <span class="fu">rownames_to_column</span>(ph_rmsd, <span class="st">"spec"</span>)</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>trf_rmsd <span class="ot">&lt;-</span> trf_rmsd <span class="sc">|&gt;</span> <span class="fu">rownames_to_column</span>(<span class="st">"spec"</span>)</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">left_join</span>(ph_rmsd, trf_rmsd, <span class="at">by =</span> <span class="st">"spec"</span>, </span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">suffix =</span> <span class="fu">c</span>(<span class="st">".ph"</span>, <span class="st">".trf"</span>))</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> z <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">diff =</span> rmsd.ph <span class="sc">-</span> rmsd.trf)</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>z</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>      spec   rmsd.ph rmsd.trf      diff
-1  PSME_TD  297.5946 266.1156  31.47904
-2  ABLA_TD  384.9643 354.0954  30.86889
-3  ABAM_TD  410.7614 380.8726  29.88885
-4  TSHE_TD  720.9237 673.2647  47.65899
-5   common  713.6788 663.5073  50.17154
-6 uncommon  459.7389 427.1661  32.57280
-7  rare_TD  228.7634 217.4765  11.28688
-8 total_TD 1143.1015 996.9510 146.15054</code></pre>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>trf_rmsd <span class="ot">&lt;-</span> <span class="fu">rmsd.yai</span>(trf_i)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>ph_rmsd <span class="ot">&lt;-</span> <span class="fu">rmsd.yai</span>(rf_phys_i)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>ph_rmsd <span class="ot">&lt;-</span> <span class="fu">rownames_to_column</span>(ph_rmsd, <span class="st">"spec"</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>trf_rmsd <span class="ot">&lt;-</span> trf_rmsd <span class="sc">|&gt;</span> <span class="fu">rownames_to_column</span>(<span class="st">"spec"</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">left_join</span>(ph_rmsd, trf_rmsd, <span class="at">by =</span> <span class="st">"spec"</span>, </span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">suffix =</span> <span class="fu">c</span>(<span class="st">".ph"</span>, <span class="st">".trf"</span>))</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> z <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">diff =</span> rmsd.ph <span class="sc">-</span> rmsd.trf)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>z</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">spec</th>
+<th style="text-align: right;">rmsd.ph</th>
+<th style="text-align: right;">rmsd.trf</th>
+<th style="text-align: right;">diff</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">297.5946</td>
+<td style="text-align: right;">266.1156</td>
+<td style="text-align: right;">31.47904</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ABLA_TD</td>
+<td style="text-align: right;">384.9643</td>
+<td style="text-align: right;">354.0954</td>
+<td style="text-align: right;">30.86889</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ABAM_TD</td>
+<td style="text-align: right;">410.7614</td>
+<td style="text-align: right;">380.8726</td>
+<td style="text-align: right;">29.88885</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">TSHE_TD</td>
+<td style="text-align: right;">720.9237</td>
+<td style="text-align: right;">673.2647</td>
+<td style="text-align: right;">47.65899</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">common</td>
+<td style="text-align: right;">713.6788</td>
+<td style="text-align: right;">663.5073</td>
+<td style="text-align: right;">50.17154</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">uncommon</td>
+<td style="text-align: right;">459.7389</td>
+<td style="text-align: right;">427.1661</td>
+<td style="text-align: right;">32.57280</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">rare</td>
+<td style="text-align: right;">228.7634</td>
+<td style="text-align: right;">217.4765</td>
+<td style="text-align: right;">11.28688</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">1143.1015</td>
+<td style="text-align: right;">996.9510</td>
+<td style="text-align: right;">146.15054</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 <p>The imputation with physcode is lower in rmsd across the board.</p>
 <p>I am not sure what the distance is for RF, but I know it needs to be minimized.</p>
 </section>
+</section>
 <section id="non-fvs-variables." class="level2">
 <h2 class="anchored" data-anchor-id="non-fvs-variables.">Non-FVS Variables.</h2>
 <p>I was testing out if I could get the FVS variables without running FVS. It took a while for FVS to run the 25k plots I selected. So, I was trying to get the same variables straight from FIA while waiting to start the last set of imputations.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(writexl)</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">scipen =</span> <span class="dv">999</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(writexl)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">scipen =</span> <span class="dv">999</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">"C:/RxFire/Data/_FIADB_WA.db"</span>)</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>standlist <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"C:/RxFire/Regen/Regen_Notes/standlist03242024.csv"</span>, </span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">col_types =</span> <span class="fu">c</span>(<span class="st">"cccc"</span>)) </span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="fu">n_distinct</span>(standlist<span class="sc">$</span>STAND_CN)</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>STAND_CN <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>STAND_CN <span class="ot">&lt;-</span> <span class="fu">str_c</span>(<span class="st">"'"</span>, <span class="fu">unique</span>(standlist<span class="sc">$</span>STAND_CN), <span class="st">"'"</span>)</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>STAND_CN <span class="ot">&lt;-</span> <span class="fu">str_flatten_comma</span>(STAND_CN)</span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="co"># COND::BALIVE Basal area per acre of livetrees</span></span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>subcond <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="fu">str_c</span>(</span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"select * from subp_cond where PLT_CN IN ("</span>, STAND_CN, <span class="st">")"</span>))</span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>cond <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="fu">str_c</span>(</span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"select * from cond where PLT_CN IN ("</span>, STAND_CN, <span class="st">")"</span>))</span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="co"># P2VEG_STR::COVER_PCT, NT AND TT ARE TREES. </span></span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>veg <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="fu">str_c</span>(</span>
-<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">"select * from P2VEG_SUBP_STRUCTURE where PLT_CN IN ("</span>, STAND_CN, <span class="st">")"</span>))</span>
-<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="fu">str_c</span>(</span>
-<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>  <span class="st">"select * from FVS_TREEINIT_PLOT where STAND_CN IN ("</span>, STAND_CN, <span class="st">")"</span>))</span>
-<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>subcond <span class="ot">&lt;-</span> subcond <span class="sc">|&gt;</span> </span>
-<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">STANDPLOT_CN =</span> <span class="fu">str_c</span>(<span class="fu">as.character</span>(PLT_CN), <span class="st">"_"</span>, <span class="fu">as.character</span>(SUBP))</span>
-<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> subcond <span class="sc">|&gt;</span> <span class="fu">select</span>(PLT_CN, STANDPLOT_CN, SUBP, CONDID, )</span>
-<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="fu">left_join</span>(s, cond, <span class="fu">join_by</span>(PLT_CN, CONDID))</span>
-<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>c2 <span class="ot">&lt;-</span> c <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN, BALIVE) <span class="sc">|&gt;</span> <span class="fu">drop_na</span>()</span>
-<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>veg <span class="ot">&lt;-</span> veg <span class="sc">|&gt;</span> </span>
-<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">STANDPLOT_CN =</span> <span class="fu">str_c</span>(<span class="fu">as.character</span>(PLT_CN), <span class="st">"_"</span>, <span class="fu">as.character</span>(SUBP))</span>
-<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">"C:/RxFire/Data/_FIADB_WA.db"</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>standlist <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"C:/RxFire/Regen/Regen_Notes/standlist03242024.csv"</span>, </span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">col_types =</span> <span class="fu">c</span>(<span class="st">"cccc"</span>)) </span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="fu">n_distinct</span>(standlist<span class="sc">$</span>STAND_CN)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>STAND_CN <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>STAND_CN <span class="ot">&lt;-</span> <span class="fu">str_c</span>(<span class="st">"'"</span>, <span class="fu">unique</span>(standlist<span class="sc">$</span>STAND_CN), <span class="st">"'"</span>)</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>STAND_CN <span class="ot">&lt;-</span> <span class="fu">str_flatten_comma</span>(STAND_CN)</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="co"># COND::BALIVE Basal area per acre of livetrees</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>subcond <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="fu">str_c</span>(</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"select * from subp_cond where PLT_CN IN ("</span>, STAND_CN, <span class="st">")"</span>))</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>cond <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="fu">str_c</span>(</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"select * from cond where PLT_CN IN ("</span>, STAND_CN, <span class="st">")"</span>))</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a><span class="co"># P2VEG_STR::COVER_PCT, NT AND TT ARE TREES. </span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>veg <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="fu">str_c</span>(</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">"select * from P2VEG_SUBP_STRUCTURE where PLT_CN IN ("</span>, STAND_CN, <span class="st">")"</span>))</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="fu">str_c</span>(</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>  <span class="st">"select * from FVS_TREEINIT_PLOT where STAND_CN IN ("</span>, STAND_CN, <span class="st">")"</span>))</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>subcond <span class="ot">&lt;-</span> subcond <span class="sc">|&gt;</span> </span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">STANDPLOT_CN =</span> <span class="fu">str_c</span>(<span class="fu">as.character</span>(PLT_CN), <span class="st">"_"</span>, <span class="fu">as.character</span>(SUBP))</span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> subcond <span class="sc">|&gt;</span> <span class="fu">select</span>(PLT_CN, STANDPLOT_CN, SUBP, CONDID, )</span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="fu">left_join</span>(s, cond, <span class="fu">join_by</span>(PLT_CN, CONDID))</span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>c2 <span class="ot">&lt;-</span> c <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN, BALIVE) <span class="sc">|&gt;</span> <span class="fu">drop_na</span>()</span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>veg <span class="ot">&lt;-</span> veg <span class="sc">|&gt;</span> </span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">STANDPLOT_CN =</span> <span class="fu">str_c</span>(<span class="fu">as.character</span>(PLT_CN), <span class="st">"_"</span>, <span class="fu">as.character</span>(SUBP))</span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> veg <span class="sc">|&gt;</span> <span class="fu">filter</span>(LAYER <span class="sc">==</span> <span class="dv">5</span>)</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> v <span class="sc">|&gt;</span> <span class="fu">filter</span>(GROWTH_HABIT_CD <span class="sc">==</span> <span class="st">"TT"</span>)</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>v2 <span class="ot">&lt;-</span> v <span class="sc">|&gt;</span> <span class="fu">group_by</span>(STANDPLOT_CN) <span class="sc">|&gt;</span> </span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">CC =</span> <span class="fu">sum</span>(COVER_PCT))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> veg <span class="sc">|&gt;</span> <span class="fu">filter</span>(LAYER <span class="sc">==</span> <span class="dv">5</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> v <span class="sc">|&gt;</span> <span class="fu">filter</span>(GROWTH_HABIT_CD <span class="sc">==</span> <span class="st">"TT"</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>v2 <span class="ot">&lt;-</span> v <span class="sc">|&gt;</span> <span class="fu">group_by</span>(STANDPLOT_CN) <span class="sc">|&gt;</span> </span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">CC =</span> <span class="fu">sum</span>(COVER_PCT))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>p.&nbsp;183 FVS essentials.</p>
 <p><span class="math display">\[
@@ -585,35 +636,115 @@ SDI = \sum (TPA_i (\frac{DBH}{10})^{1.605})
 <p>SDI is the sum of Trees per acre times the DBH for those trees, divided by ten to the power of 1.605.</p>
 <p>DBH and tpa are in the tree table.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> standlist <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN)</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, tree, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, cond, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, veg, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>tpa <span class="ot">&lt;-</span> t <span class="sc">|&gt;</span> </span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sdi =</span> (TREE_COUNT <span class="sc">*</span> ((DIAMETER<span class="sc">/</span><span class="dv">10</span>)<span class="sc">^</span><span class="fl">1.605</span>)))</span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>sdi <span class="ot">&lt;-</span> tpa[tpa<span class="sc">$</span>HISTORY <span class="sc">==</span> <span class="dv">1</span>, ] <span class="sc">|&gt;</span> <span class="fu">group_by</span>(STANDPLOT_CN) <span class="sc">|&gt;</span> </span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">SDI =</span> <span class="fu">sum</span>(sdi)) <span class="sc">|&gt;</span> <span class="fu">drop_na</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> standlist <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, tree, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, cond, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, veg, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>tpa <span class="ot">&lt;-</span> t <span class="sc">|&gt;</span> </span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sdi =</span> (TREE_COUNT <span class="sc">*</span> ((DIAMETER<span class="sc">/</span><span class="dv">10</span>)<span class="sc">^</span><span class="fl">1.605</span>)))</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>sdi <span class="ot">&lt;-</span> tpa[tpa<span class="sc">$</span>HISTORY <span class="sc">==</span> <span class="dv">1</span>, ] <span class="sc">|&gt;</span> <span class="fu">group_by</span>(STANDPLOT_CN) <span class="sc">|&gt;</span> </span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">SDI =</span> <span class="fu">sum</span>(sdi)) <span class="sc">|&gt;</span> <span class="fu">drop_na</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, sdi, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">left_join</span>(y, c2, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">left_join</span>(y, v2, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, sdi, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">left_join</span>(y, c2, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">left_join</span>(y, v2, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Canopy cover is not well predicted by the p2veg tables.</p>
 </section>
-<section id="yaimpute-functions-again" class="level2">
-<h2 class="anchored" data-anchor-id="yaimpute-functions-again">yaImpute functions again</h2>
-<p>I have been referencing the yaImpute paper, but I am reading from the r forge now. There are functions and descriptions here that were not in the paper. Probably, the package has been updated since the paper was published.</p>
+<section id="yaimpute-model-evaluation" class="level2">
+<h2 class="anchored" data-anchor-id="yaimpute-model-evaluation">yaImpute model evaluation</h2>
+<section id="warning-threshold-zero-distances" class="level3">
+<h3 class="anchored" data-anchor-id="warning-threshold-zero-distances">Warning threshold zero distances</h3>
+<p>The warning about zero distances is in reference to plots that have the same predictors. For example, if two or more plots share cc = 1, ba = 2, sdi = 10, they are separated by zero distance. Given the way this data was made, I am surprised that there aren’t more sets with the same predictors.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 527 zero distances</span></span>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">summary</span>(imp_data[, <span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;">CC</th>
+<th style="text-align: left;">BA</th>
+<th style="text-align: left;">SDI</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Min. : 0.00</td>
+<td style="text-align: left;">Min. : 0.00</td>
+<td style="text-align: left;">Min. : 0.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">1st Qu.: 9.00</td>
+<td style="text-align: left;">1st Qu.: 15.36</td>
+<td style="text-align: left;">1st Qu.: 35.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Median :18.00</td>
+<td style="text-align: left;">Median : 33.84</td>
+<td style="text-align: left;">Median : 75.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Mean :20.28</td>
+<td style="text-align: left;">Mean : 40.11</td>
+<td style="text-align: left;">Mean : 86.91</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">3rd Qu.:29.00</td>
+<td style="text-align: left;">3rd Qu.: 58.47</td>
+<td style="text-align: left;">3rd Qu.:126.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Max. :97.00</td>
+<td style="text-align: left;">Max. :226.84</td>
+<td style="text-align: left;">Max. :497.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Canopy cover is an integer from 0:100, SDI is an int from 0 to 500 (in this set). Just them being integers makes them more likely to overlap.</p>
+<div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(imp_data<span class="sc">$</span>CC, <span class="at">breaks =</span> <span class="dv">100</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(imp_data<span class="sc">$</span>BA, <span class="at">breaks =</span> <span class="dv">100</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(imp_data<span class="sc">$</span>SDI, <span class="at">breaks =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
+<p><img src="3_imputation_2_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
+<p><img src="3_imputation_2_files/figure-html/unnamed-chunk-19-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
+<p><img src="3_imputation_2_files/figure-html/unnamed-chunk-19-3.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</div>
+</div>
+<p>All of them skew right and have lots of zeroes.</p>
+<section id="test-removing-zero-distances." class="level4">
+<h4 class="anchored" data-anchor-id="test-removing-zero-distances.">Test removing zero distances.</h4>
+<p>Here, I was trying to figure out some code to pull the sets of data with zero distance between predictors out of the data. The correct answer was to use unique on the set of predictors after setting standplot_cn to rownames.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 527 zero distances of 1884</span></span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>imp_zx <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span> </span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(CC <span class="sc">!=</span> <span class="dv">0</span> <span class="sc">&amp;</span> BA <span class="sc">!=</span> <span class="dv">0</span> <span class="sc">&amp;</span> SDI <span class="sc">&gt;</span> <span class="dv">1</span>)</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 40 zero distances</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 40 zero distances. It isn't in the ancillary data, but that did help.</span></span>
 <span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>imp_zx <span class="ot">&lt;-</span> imp_zx <span class="sc">|&gt;</span> </span>
 <span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(total_TD <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
 <span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="co">#  15</span></span>
@@ -623,21 +754,26 @@ SDI = \sum (TPA_i (\frac{DBH}{10})^{1.605})
 <span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>imp_zx <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span> </span>
 <span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(CC <span class="sc">!=</span> BA <span class="sc">&amp;</span> CC <span class="sc">!=</span> SDI <span class="sc">&amp;</span> BA <span class="sc">!=</span> SDI)</span>
 <span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>imp_zx <span class="ot">&lt;-</span> imp_zx <span class="sc">|&gt;</span> </span>
-<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(total_TD <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
-<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>imp_zx <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span> </span>
-<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">near</span>(CC, BA, <span class="at">tol =</span> .<span class="dv">01</span>) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">near</span>(CC, SDI, <span class="at">tol =</span> .<span class="dv">01</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>imp_zx <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span> </span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">near</span>(CC, BA, <span class="at">tol =</span> .<span class="dv">01</span>) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">near</span>(CC, SDI, <span class="at">tol =</span> .<span class="dv">01</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
+<p>Of the 1884 zero distances:</p>
+<ul>
+<li>All but 15, of the zero distances are where CC, BA, and SDI are all less than one.</li>
+<li>All but 40 are accounted for in the set where total tree density is zero.</li>
+</ul>
+<p>This is the code to run the imputation as usual, with all the data.</p>
+<p><em>It gives the errors, 1884 zero distances of 24621 references were set to 0.0…</em></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>imp_zx <span class="ot">&lt;-</span> imp_data_FPA</span>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>imp_ztest <span class="ot">&lt;-</span> imp_data_FPA</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> imp_zx <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN, CC, BA, SDI)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> imp_ztest <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN, CC, BA, SDI)</span>
 <span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(X)</span>
 <span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(X, <span class="st">"STANDPLOT_CN"</span>)</span>
 <span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> imp_zx <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN, total_TD)</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> imp_ztest  <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN, PSME_TD, common, total_TD)</span>
 <span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(Y)</span>
 <span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(Y, <span class="st">"STANDPLOT_CN"</span>)</span>
 <span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a></span>
@@ -645,349 +781,1091 @@ SDI = \sum (TPA_i (\frac{DBH}{10})^{1.605})
 <span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>msn <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> X, <span class="at">y =</span> Y, <span class="at">method =</span> <span class="st">"msn"</span>, <span class="at">k =</span> k)</span>
 <span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>ewz <span class="ot">&lt;-</span> <span class="fu">errorStats</span>(mal, msn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in notablyDistant(x, p = 1 - pzero): when computing threshold, 1884
-zero distances of 24621 references were set to 0.0000000001341627</code></pre>
 </div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in notablyDistant(x, p = plg): when computing threshold, 1884 zero
-distances of 24621 references were set to 0.0000000001341627</code></pre>
+<p>Here I am extracting the plots where there is zero distance in the predictors from the yai object, then joining the imputation data to those plots.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># msn$neiDstRefs rows of references with the distance to k neighbors</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="do">## This run is had everything as a reference. </span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>msn_0dist <span class="ot">&lt;-</span> msn<span class="sc">$</span>neiDstRefs <span class="sc">|&gt;</span> <span class="fu">as.data.frame</span>()</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Selecting only distances for the k = 1 neighbor. </span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>msn_0dist <span class="ot">&lt;-</span> msn_0dist[msn_0dist<span class="sc">$</span>Dst.k1 <span class="sc">==</span> <span class="dv">0</span>,]</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Getting the cns of those NN. </span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>msn_0dist<span class="sc">$</span>STANDPLOT_CN <span class="ot">&lt;-</span> <span class="fu">row.names</span>(msn_0dist)</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>cns_0d <span class="ot">&lt;-</span> msn_0dist <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN)</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Joining the imp data to the zero dist NN</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>test_all0s <span class="ot">&lt;-</span> <span class="fu">left_join</span>(cns_0d, imp_ztest, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>test_all0s <span class="sc">|&gt;</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(BA)) <span class="sc">|&gt;</span> <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 2%">
+<col style="width: 7%">
+<col style="width: 3%">
+<col style="width: 7%">
+<col style="width: 4%">
+<col style="width: 3%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 6%">
+<col style="width: 7%">
+<col style="width: 4%">
+<col style="width: 7%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">STANDPLOT_CN</th>
+<th style="text-align: right;">CC</th>
+<th style="text-align: right;">BA</th>
+<th style="text-align: right;">SDI</th>
+<th style="text-align: right;">PHYSCLCD</th>
+<th style="text-align: left;">FPAG</th>
+<th style="text-align: left;">fpa</th>
+<th style="text-align: right;">PSME_TD</th>
+<th style="text-align: right;">ABLA_TD</th>
+<th style="text-align: right;">ABAM_TD</th>
+<th style="text-align: right;">TSHE_TD</th>
+<th style="text-align: right;">common</th>
+<th style="text-align: right;">uncommon</th>
+<th style="text-align: right;">rare</th>
+<th style="text-align: right;">total_TD</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">346864308489998_1</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">17.66684</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: left;">CDS7</td>
+<td style="text-align: left;">CDS</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">40220510010497_1</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">17.66684</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: left;">CPG2</td>
+<td style="text-align: left;">CPG</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">22827756010497_1</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">17.36355</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: left;">CPS2</td>
+<td style="text-align: left;">CPS</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">24208121010900_3</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">17.36355</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: left;">CERR</td>
+<td style="text-align: left;">CER</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">484819578489998_2</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">15.31406</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: left;">CCF2</td>
+<td style="text-align: left;">CCF</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">8625909010901_2</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">15.31406</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: left;">CD</td>
+<td style="text-align: left;">CD</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
 </div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in notablyDistant(x, p = plg): when computing threshold, 1884 zero
-distances of 24621 references were set to 0.00000000006125145</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">summary</span>(test_all0s[,<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;">CC</th>
+<th style="text-align: left;">BA</th>
+<th style="text-align: left;">SDI</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Min. :0.0000</td>
+<td style="text-align: left;">Min. : 0.000000</td>
+<td style="text-align: left;">Min. : 0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">1st Qu.:0.0000</td>
+<td style="text-align: left;">1st Qu.: 0.000000</td>
+<td style="text-align: left;">1st Qu.: 0.000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Median :0.0000</td>
+<td style="text-align: left;">Median : 0.008177</td>
+<td style="text-align: left;">Median : 0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Mean :0.6279</td>
+<td style="text-align: left;">Mean : 1.057479</td>
+<td style="text-align: left;">Mean : 1.739</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">3rd Qu.:1.0000</td>
+<td style="text-align: left;">3rd Qu.: 1.029340</td>
+<td style="text-align: left;">3rd Qu.: 2.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Max. :8.0000</td>
+<td style="text-align: left;">Max. :17.666840</td>
+<td style="text-align: left;">Max. :34.000</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The above data frame shows that the zero distances are where the 3-D vector of<br>
+predictors overlap. Adding more predictors would help.</p>
+<p>I will now run the imputation data without those zero dist. NN.</p>
+<p>This code runs the distance matrices without zero distances by using <code>unique()</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>imp_ztest <span class="ot">&lt;-</span> imp_data_FPA</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">nrow</span>(imp_ztest)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="co"># selecting predictors only</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> imp_ztest <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN, CC, BA, SDI)</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Moving cns to get unique predictors</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(X)</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(X, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> X <span class="sc">|&gt;</span> <span class="fu">unique</span>()</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">nrow</span>(X)</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Before and after unique</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 24621</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>a</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 22969</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">str_c</span>(<span class="st">"before minus after unique = "</span>, (b<span class="sc">-</span>a)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "before minus after unique = 1652"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Finding cns where predictors are unique</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> X </span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rownames_to_column</span>(x, <span class="st">"STANDPLOT_CN"</span>) <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Filtering out the zero distances. </span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>imp_zx <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, imp_ztest, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Selecting ancillary data. </span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> imp_zx <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN, PSME_TD, common, total_TD)</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(Y)</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(Y, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>mal <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> X, <span class="at">y =</span> Y, <span class="at">method =</span> <span class="st">"mahalanobis"</span>, <span class="at">k =</span> k)</span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>msn <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> X, <span class="at">y =</span> Y, <span class="at">method =</span> <span class="st">"msn"</span>, <span class="at">k =</span> k)</span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>ewoz <span class="ot">&lt;-</span> <span class="fu">errorStats</span>(mal, msn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">mal.see</th>
+<th style="text-align: right;">mal.rmmsd0</th>
+<th style="text-align: right;">mal.mlf</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">221.8865</td>
+<td style="text-align: right;">151.03480</td>
+<td style="text-align: right;">194.4938</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">common</td>
+<td style="text-align: right;">477.7440</td>
+<td style="text-align: right;">621.49559</td>
+<td style="text-align: right;">187.3791</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">842.9472</td>
+<td style="text-align: right;">71.48992</td>
+<td style="text-align: right;">841.4301</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">mal.rmsd</th>
+<th style="text-align: right;">mal.rmsdlg</th>
+<th style="text-align: right;">mal.sei</th>
+<th style="text-align: right;">mal.dstc</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">321.9114</td>
+<td style="text-align: right;">398.3118</td>
+<td style="text-align: right;">303.6794</td>
+<td style="text-align: right;">284.2806</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">common</td>
+<td style="text-align: right;">523.8155</td>
+<td style="text-align: right;">596.5675</td>
+<td style="text-align: right;">285.0513</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">428.8956</td>
+<td style="text-align: right;">534.1788</td>
+<td style="text-align: right;">425.9061</td>
+<td style="text-align: right;">422.8955</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">msn.rmsd</th>
+<th style="text-align: right;">msn.rmsdlg</th>
+<th style="text-align: right;">msn.sei</th>
+<th style="text-align: right;">msn.dstc</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">261.1057</td>
+<td style="text-align: right;">330.3856</td>
+<td style="text-align: right;">238.2654</td>
+<td style="text-align: right;">212.9898</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">common</td>
+<td style="text-align: right;">575.4805</td>
+<td style="text-align: right;">679.7284</td>
+<td style="text-align: right;">371.5500</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">756.9970</td>
+<td style="text-align: right;">944.6343</td>
+<td style="text-align: right;">755.3073</td>
+<td style="text-align: right;">753.6138</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Of the 1884 zero distances of 24621 references in the original data, 1652 of those rows were not unique.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> test_all0s <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">t =</span> <span class="fu">round</span>(CC <span class="sc">+</span> BA <span class="sc">+</span> SDI, <span class="dv">4</span>))</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(t<span class="sc">$</span>t, <span class="at">breaks =</span> <span class="dv">209</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="3_imputation_2_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Distribution of t, the sum of CC, BA, and SDI. Trying to see where the values of matching matching vectors exist. Most of the overlap is below 10 and zero. Meaning the values of CC + are low.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> t <span class="sc">|&gt;</span> <span class="fu">filter</span>(CC <span class="sc">==</span> <span class="dv">0</span> <span class="sc">&amp;</span> BA <span class="sc">==</span> <span class="dv">0</span> <span class="sc">&amp;</span> SDI <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="co"># tt &lt;- t |&gt; filter(CC != 0 &amp; BA != 0 &amp; SDI != 0)</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> t <span class="sc">|&gt;</span> <span class="fu">filter</span>(t<span class="sc">&gt;</span><span class="dv">0</span>)</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="fu">n_distinct</span>(t<span class="sc">$</span>t)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 224</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(t<span class="sc">$</span>t, <span class="at">breaks =</span> <span class="dv">50</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="3_imputation_2_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>There are 224 distinct values (above zero) on 1205 plots. The rest of the 1884 plots were zero across the board, no BA, no trees in the over story or seedlings.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>t3 <span class="ot">&lt;-</span> t <span class="sc">|&gt;</span> <span class="fu">group_by</span>(t) <span class="sc">|&gt;</span> </span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_plots_per_t =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n_plots_per_t)) </span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">summary</span>(t[t<span class="sc">$</span>t <span class="sc">&lt;</span> <span class="dv">1</span>, <span class="fu">c</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">14</span><span class="sc">:</span><span class="dv">15</span>)]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;">CC</th>
+<th style="text-align: left;">BA</th>
+<th style="text-align: left;">SDI</th>
+<th style="text-align: left;">rare</th>
+<th style="text-align: left;">total_TD</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Min. :0</td>
+<td style="text-align: left;">Min. :0.004089</td>
+<td style="text-align: left;">Min. :0</td>
+<td style="text-align: left;">Min. : 0.00</td>
+<td style="text-align: left;">Min. : 74.97</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">1st Qu.:0</td>
+<td style="text-align: left;">1st Qu.:0.004089</td>
+<td style="text-align: left;">1st Qu.:0</td>
+<td style="text-align: left;">1st Qu.: 0.00</td>
+<td style="text-align: left;">1st Qu.: 74.97</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Median :0</td>
+<td style="text-align: left;">Median :0.008177</td>
+<td style="text-align: left;">Median :0</td>
+<td style="text-align: left;">Median : 0.00</td>
+<td style="text-align: left;">Median :149.93</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Mean :0</td>
+<td style="text-align: left;">Mean :0.012418</td>
+<td style="text-align: left;">Mean :0</td>
+<td style="text-align: left;">Mean : 22.45</td>
+<td style="text-align: left;">Mean :227.69</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">3rd Qu.:0</td>
+<td style="text-align: left;">3rd Qu.:0.016355</td>
+<td style="text-align: left;">3rd Qu.:0</td>
+<td style="text-align: left;">3rd Qu.: 0.00</td>
+<td style="text-align: left;">3rd Qu.:299.86</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Max. :0</td>
+<td style="text-align: left;">Max. :0.040887</td>
+<td style="text-align: left;">Max. :0</td>
+<td style="text-align: left;">Max. :749.65</td>
+<td style="text-align: left;">Max. :749.65</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The number of rows</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(t[t<span class="sc">$</span>t <span class="sc">&lt;</span> <span class="dv">1</span>, <span class="fu">c</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">14</span><span class="sc">:</span><span class="dv">15</span>)])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 591</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">head</span>(t3, <span class="at">n  =</span> <span class="dv">10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 10%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">t</th>
+<th style="text-align: right;">n_plots_per_t</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.0041</td>
+<td style="text-align: right;">230</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.0082</td>
+<td style="text-align: right;">96</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.0123</td>
+<td style="text-align: right;">64</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.0164</td>
+<td style="text-align: right;">54</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.0204</td>
+<td style="text-align: right;">51</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.0245</td>
+<td style="text-align: right;">32</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.0286</td>
+<td style="text-align: right;">25</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.0327</td>
+<td style="text-align: right;">18</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.0368</td>
+<td style="text-align: right;">11</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1.0450</td>
+<td style="text-align: right;">11</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(t3<span class="sc">$</span>n_plots_per_t, t3<span class="sc">$</span>t)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="3_imputation_2_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Here we apply the tbl-cap and tbl-colwidths options to a code cell that uses the knitr kable() function to write a There are 230 plots where t == 0.0041. 0.0368 &amp; 1.0450 both have 11 plots. For each set of t’s that match, like 0.0368 &amp; 1.0450, there are n_ts_per_nplots.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>tt <span class="ot">&lt;-</span> t3 <span class="sc">|&gt;</span> <span class="fu">group_by</span>(n_plots_per_t) <span class="sc">|&gt;</span> </span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">n_ts_per_nplots =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">n_that_match =</span> n_ts_per_nplots <span class="sc">*</span> n_plots_per_t) <span class="sc">|&gt;</span> </span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n_that_match))</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(tt, <span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">n_plots_per_t</th>
+<th style="text-align: right;">n_ts_per_nplots</th>
+<th style="text-align: right;">n_that_match</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">128</td>
+<td style="text-align: right;">256</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">230</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">230</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">114</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">96</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">96</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">80</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">75</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">64</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">64</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">54</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">54</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">51</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">51</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">42</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(tt<span class="sc">$</span>n_that_match)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1205</code></pre>
+</div>
+</div>
+<ul>
+<li>There are 256 plots that match twice, on 128 different values of t.</li>
+<li>There are 230 plots that match 230 times, on 1 value of t.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>t <span class="sc">|&gt;</span> <span class="fu">filter</span>(t <span class="sc">==</span> <span class="fl">0.0041</span>) <span class="sc">|&gt;</span> <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 2%">
+<col style="width: 8%">
+<col style="width: 3%">
+<col style="width: 7%">
+<col style="width: 4%">
+<col style="width: 3%">
+<col style="width: 7%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 4%">
+<col style="width: 7%">
+<col style="width: 5%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">STANDPLOT_CN</th>
+<th style="text-align: right;">CC</th>
+<th style="text-align: right;">BA</th>
+<th style="text-align: right;">SDI</th>
+<th style="text-align: right;">PHYSCLCD</th>
+<th style="text-align: left;">FPAG</th>
+<th style="text-align: left;">fpa</th>
+<th style="text-align: right;">PSME_TD</th>
+<th style="text-align: right;">ABLA_TD</th>
+<th style="text-align: right;">ABAM_TD</th>
+<th style="text-align: right;">TSHE_TD</th>
+<th style="text-align: right;">common</th>
+<th style="text-align: right;">uncommon</th>
+<th style="text-align: right;">rare</th>
+<th style="text-align: right;">total_TD</th>
+<th style="text-align: right;">t</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">13022435010497_4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0040887</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: left;">CAG1</td>
+<td style="text-align: left;">CAG</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">0.0041</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">13027544010497_3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0040887</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: left;">CEF4</td>
+<td style="text-align: left;">CEF</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">0.0041</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">13054971010497_2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0040887</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: left;">CFS6</td>
+<td style="text-align: left;">CFS</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">0.0041</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">174763129020004_2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0040887</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: left;">CES4</td>
+<td style="text-align: left;">CES</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">0.0041</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">174763290020004_2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0040887</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: left;">CDS6</td>
+<td style="text-align: left;">CDS</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">0.0041</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">174763542020004_2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0040887</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: left;">CES4</td>
+<td style="text-align: left;">CES</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">0.0041</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>imp_zx <span class="ot">&lt;-</span> imp_data_FPA</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> imp_zx <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN, CC, BA, SDI)</span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(X)</span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(X, <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> X <span class="sc">|&gt;</span> <span class="fu">unique</span>()</span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> X </span>
-<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rownames_to_column</span>(x, <span class="st">"STANDPLOT_CN"</span>) <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN)</span>
-<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>imp_zx <span class="ot">&lt;-</span> <span class="fu">left_join</span>(x, imp_zx, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> imp_zx <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN, total_TD)</span>
-<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(Y)</span>
-<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(Y, <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>mal <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> X, <span class="at">y =</span> Y, <span class="at">method =</span> <span class="st">"mahalanobis"</span>, <span class="at">k =</span> k)</span>
-<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>msn <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> X, <span class="at">y =</span> Y, <span class="at">method =</span> <span class="st">"msn"</span>, <span class="at">k =</span> k)</span>
-<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>ewoz <span class="ot">&lt;-</span> <span class="fu">errorStats</span>(mal, msn)</span>
-<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>ewoz</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>$common
-          mal.see mal.rmmsd0  mal.mlf
-total_TD 842.9472   71.48992 841.4301
-
-$mal
-         mal.rmsd mal.rmsdlg  mal.sei mal.dstc
-total_TD 428.8956   534.1788 425.9061 422.8955
-
-$msn
-         msn.rmsd msn.rmsdlg  msn.sei msn.dstc
-total_TD 1047.899   1278.775 1046.679 1045.458</code></pre>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ewoz is the second row</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>malw <span class="ot">&lt;-</span> <span class="fu">rbind</span>(ewz<span class="sc">$</span>mal, ewoz<span class="sc">$</span>mal)</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="co"># ewoz is the second row</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>msnw <span class="ot">&lt;-</span> <span class="fu">rbind</span>(ewz<span class="sc">$</span>msn, ewoz<span class="sc">$</span>msn)</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ewoz is the second row</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>commonw <span class="ot">&lt;-</span> <span class="fu">rbind</span>(ewz<span class="sc">$</span>common, ewoz<span class="sc">$</span>common)</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(malw) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"PSME_TD"</span>, <span class="st">"common"</span>, <span class="st">"total_TD"</span>, <span class="st">"PSME_TD_wo0"</span>, <span class="st">"common_wo0"</span>, <span class="st">"total_TD_wo0"</span>)</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>malw <span class="ot">&lt;-</span> <span class="fu">rownames_to_column</span>(malw, <span class="st">"source"</span>)</span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(msnw) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"PSME_TD"</span>, <span class="st">"common"</span>, <span class="st">"total_TD"</span>, <span class="st">"PSME_TD_wo0"</span>, <span class="st">"common_wo0"</span>, <span class="st">"total_TD_wo0"</span>)</span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(commonw) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"PSME_TD"</span>, <span class="st">"common"</span>, <span class="st">"total_TD"</span>, <span class="st">"PSME_TD_wo0"</span>, <span class="st">"common_wo0"</span>, <span class="st">"total_TD_wo0"</span>)</span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>malw</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">source</th>
+<th style="text-align: right;">mal.rmsd</th>
+<th style="text-align: right;">mal.rmsdlg</th>
+<th style="text-align: right;">mal.sei</th>
+<th style="text-align: right;">mal.dstc</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">312.0201</td>
+<td style="text-align: right;">338.3963</td>
+<td style="text-align: right;">297.0426</td>
+<td style="text-align: right;">281.2686</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">common</td>
+<td style="text-align: right;">510.7842</td>
+<td style="text-align: right;">524.6831</td>
+<td style="text-align: right;">472.1028</td>
+<td style="text-align: right;">429.9554</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">413.7486</td>
+<td style="text-align: right;">455.0015</td>
+<td style="text-align: right;">413.7486</td>
+<td style="text-align: right;">413.7486</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PSME_TD_wo0</td>
+<td style="text-align: right;">321.9114</td>
+<td style="text-align: right;">398.3118</td>
+<td style="text-align: right;">303.6794</td>
+<td style="text-align: right;">284.2806</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">common_wo0</td>
+<td style="text-align: right;">523.8155</td>
+<td style="text-align: right;">596.5675</td>
+<td style="text-align: right;">285.0513</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">total_TD_wo0</td>
+<td style="text-align: right;">428.8956</td>
+<td style="text-align: right;">534.1788</td>
+<td style="text-align: right;">425.9061</td>
+<td style="text-align: right;">422.8955</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> msn<span class="sc">$</span>neiDstRefs <span class="sc">|&gt;</span> <span class="fu">as.data.frame</span>()</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> x[x<span class="sc">$</span>Dst.k1 <span class="sc">==</span> <span class="dv">0</span>,]</span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>x<span class="sc">$</span>STANDPLOT_CN <span class="ot">&lt;-</span> <span class="fu">row.names</span>(x)</span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN)</span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> <span class="fu">left_join</span>(t, imp_zx, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>t2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code> [1] STANDPLOT_CN CC           BA           SDI          PHYSCLCD    
- [6] FPAG         fpa          PSME_TD      ABLA_TD      ABAM_TD     
-[11] TSHE_TD      common       uncommon     rare_TD      total_TD    
-&lt;0 rows&gt; (or 0-length row.names)</code></pre>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>msnw</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">msn.rmsd</th>
+<th style="text-align: right;">msn.rmsdlg</th>
+<th style="text-align: right;">msn.sei</th>
+<th style="text-align: right;">msn.dstc</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">264.9361</td>
+<td style="text-align: right;">285.4914</td>
+<td style="text-align: right;">247.1212</td>
+<td style="text-align: right;">227.9180</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">common</td>
+<td style="text-align: right;">625.0536</td>
+<td style="text-align: right;">676.6855</td>
+<td style="text-align: right;">593.8624</td>
+<td style="text-align: right;">560.9394</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">803.3972</td>
+<td style="text-align: right;">869.4654</td>
+<td style="text-align: right;">803.3972</td>
+<td style="text-align: right;">803.3972</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PSME_TD_wo0</td>
+<td style="text-align: right;">261.1057</td>
+<td style="text-align: right;">330.3856</td>
+<td style="text-align: right;">238.2654</td>
+<td style="text-align: right;">212.9898</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">common_wo0</td>
+<td style="text-align: right;">575.4805</td>
+<td style="text-align: right;">679.7284</td>
+<td style="text-align: right;">371.5500</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">total_TD_wo0</td>
+<td style="text-align: right;">756.9970</td>
+<td style="text-align: right;">944.6343</td>
+<td style="text-align: right;">755.3073</td>
+<td style="text-align: right;">753.6138</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>commonw</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">mal.see</th>
+<th style="text-align: right;">mal.rmmsd0</th>
+<th style="text-align: right;">mal.mlf</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">215.3464</td>
+<td style="text-align: right;">135.0722786</td>
+<td style="text-align: right;">193.0073</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">common</td>
+<td style="text-align: right;">466.4442</td>
+<td style="text-align: right;">275.7514975</td>
+<td style="text-align: right;">423.7343</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">819.0953</td>
+<td style="text-align: right;">0.0000003</td>
+<td style="text-align: right;">819.0953</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PSME_TD_wo0</td>
+<td style="text-align: right;">221.8865</td>
+<td style="text-align: right;">151.0348025</td>
+<td style="text-align: right;">194.4938</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">common_wo0</td>
+<td style="text-align: right;">477.7440</td>
+<td style="text-align: right;">621.4955878</td>
+<td style="text-align: right;">187.3791</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">total_TD_wo0</td>
+<td style="text-align: right;">842.9472</td>
+<td style="text-align: right;">71.4899191</td>
+<td style="text-align: right;">841.4301</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Removing the zero distance observations, rmsd is higher. In fact, all mal &amp; msn error stats are higher.</p>
+<p>As are the common error stats. The common stats are used to calculate some or all of the others.</p>
+<p>mal.rmmsd0 is the average of the squared differences where distance between X variables is near zero. It is an estimate of pure error and measurement error, plus bias. Meaning there is more variability when there are no zero distances. I would like to explore what the differences are in ancillary data where there are zero distance between X variable plots. I don’t like that the imputation gives me error rates based off of the distances between predictors. I want to know what the differences are between the ancillary data. What I care about is seedling densities.</p>
 </section>
-<section id="warning-threshold-zero-distances" class="level2">
-<h2 class="anchored" data-anchor-id="warning-threshold-zero-distances">Warning threshold zero distances</h2>
-<p>The warning about zero distances is in reference to plots that have the same predictors. For example, if two or more plots share cc = 1, ba = 2, sdi = 10, they are separated by zero distance. Given the way this data was made, I am surprised that there aren’t more sets with the same.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ewoz is the second row</span></span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(ewz<span class="sc">$</span>mal, ewoz<span class="sc">$</span>mal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>          mal.rmsd mal.rmsdlg  mal.sei mal.dstc
-total_TD  413.7486   455.0015 413.7486 413.7486
-total_TD1 428.8956   534.1788 425.9061 422.8955</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ewoz is the second row</span></span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(ewz<span class="sc">$</span>msn, ewoz<span class="sc">$</span>msn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>          msn.rmsd msn.rmsdlg  msn.sei msn.dstc
-total_TD  1005.301   1101.721 1005.301 1005.301
-total_TD1 1047.899   1278.775 1046.679 1045.458</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ewoz is the second row</span></span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(ewz<span class="sc">$</span>common, ewoz<span class="sc">$</span>common)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>           mal.see       mal.rmmsd0  mal.mlf
-total_TD  819.0953  0.0000003082842 819.0953
-total_TD1 842.9472 71.4899191291163 841.4301</code></pre>
-</div>
-</div>
-<p>Removing the zero distance observations, rmsd is higher. In fact, all mal error stats are higher. All msn error stats are higher as well. As are the common error stats. The common stats are used to calculate some or all of the others.</p>
-<p>mal.rmmsd0 is the average of the squared differences where distance between X variables is near zero. It is an estimate of pure error and measurement error, plus bias. Meaning there is more variability when there are no zero distances. I would like to explore what the differences are between the zero distance between X variable plots. I think it would give me a good idea of our error.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># t2 &lt;- left_join(t, imp_zx, by = "STANDPLOT_CN")</span></span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>t3 <span class="ot">&lt;-</span> t2 <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">idk =</span> CC <span class="sc">+</span> BA <span class="sc">+</span> SDI) <span class="sc">|&gt;</span> </span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(idk) <span class="sc">|&gt;</span> <span class="fu">arrange</span>(idk)</span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(t3<span class="sc">$</span>idk)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>numeric(0)</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>t3<span class="sc">$</span>idk <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(t3<span class="sc">$</span>idk)</span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>t4 <span class="ot">&lt;-</span> t3 <span class="sc">|&gt;</span> <span class="fu">group_by</span>(idk)</span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="fu">tapply</span>(t4<span class="sc">$</span>total_TD, t4<span class="sc">$</span>idk, summary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>logical(0)</code></pre>
-</div>
-</div>
+</section>
+</section>
+<section id="lost" class="level2">
+<h2 class="anchored" data-anchor-id="lost">lost</h2>
 <p>For each set, the total_TDs are the same. That is interesting.</p>
+<p>Explore the tree values for combinations of cc, ba, and sdi.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>t5 <span class="ot">&lt;-</span> <span class="fu">left_join</span>(t, imp_data, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>t5 <span class="ot">&lt;-</span> t5 <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">idk =</span> <span class="fu">round</span>(CC <span class="sc">+</span> BA <span class="sc">+</span> SDI, <span class="dv">1</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(idk) <span class="sc">|&gt;</span> <span class="fu">arrange</span>(idk)</span>
-<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>t5 <span class="ot">&lt;-</span> t5 <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">total_TD =</span> <span class="fu">rowSums</span>(t5[<span class="fu">grep</span>(<span class="st">"_TD"</span>, <span class="fu">names</span>(t5))]))</span>
-<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(t5<span class="sc">$</span>idk)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>numeric(0)</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>t5<span class="sc">$</span>idk <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(t5<span class="sc">$</span>idk)</span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>t5 <span class="ot">&lt;-</span> t5 <span class="sc">|&gt;</span> <span class="fu">group_by</span>(idk)</span>
-<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>t5 <span class="ot">&lt;-</span> t5 <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">where</span>(<span class="sc">~</span> <span class="fu">any</span>(. <span class="sc">!=</span> <span class="dv">0</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Adding missing grouping variables: `idk`</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co"># t6 &lt;- tapply(t5, t5$idk, summary)</span></span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="co"># t6$"8.4"</span></span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="co"># str(t6)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>t5 <span class="sc">|&gt;</span> <span class="fu">filter</span>(idk <span class="sc">==</span> <span class="fl">8.4</span>)<span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">where</span>(<span class="sc">~</span> <span class="fu">any</span>(. <span class="sc">!=</span> <span class="dv">0</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Adding missing grouping variables: `idk`</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 0 × 1
-# Groups:   idk [0]
-# ℹ 1 variable: idk &lt;fct&gt;</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>t5 <span class="sc">|&gt;</span> <span class="fu">filter</span>(idk <span class="sc">==</span> <span class="fl">9.2</span>)<span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">where</span>(<span class="sc">~</span> <span class="fu">any</span>(. <span class="sc">!=</span> <span class="dv">0</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Adding missing grouping variables: `idk`</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 0 × 1
-# Groups:   idk [0]
-# ℹ 1 variable: idk &lt;fct&gt;</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>t5 <span class="sc">|&gt;</span> <span class="fu">filter</span>(idk <span class="sc">==</span> <span class="fl">15.2</span>)<span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">where</span>(<span class="sc">~</span> <span class="fu">any</span>(. <span class="sc">!=</span> <span class="dv">0</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Adding missing grouping variables: `idk`</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 0 × 1
-# Groups:   idk [0]
-# ℹ 1 variable: idk &lt;fct&gt;</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>t5 <span class="sc">|&gt;</span> <span class="fu">filter</span>(idk <span class="sc">==</span> <span class="dv">19</span>)<span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">where</span>(<span class="sc">~</span> <span class="fu">any</span>(. <span class="sc">!=</span> <span class="dv">0</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Adding missing grouping variables: `idk`</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 0 × 1
-# Groups:   idk [0]
-# ℹ 1 variable: idk &lt;fct&gt;</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>t5 <span class="sc">|&gt;</span> <span class="fu">filter</span>(idk <span class="sc">==</span> <span class="fl">19.5</span>)<span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">where</span>(<span class="sc">~</span> <span class="fu">any</span>(. <span class="sc">!=</span> <span class="dv">0</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Adding missing grouping variables: `idk`</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 0 × 1
-# Groups:   idk [0]
-# ℹ 1 variable: idk &lt;fct&gt;</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>t5 <span class="sc">|&gt;</span> <span class="fu">filter</span>(idk <span class="sc">==</span> <span class="fl">21.1</span>)<span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">where</span>(<span class="sc">~</span> <span class="fu">any</span>(. <span class="sc">!=</span> <span class="dv">0</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Adding missing grouping variables: `idk`</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 0 × 1
-# Groups:   idk [0]
-# ℹ 1 variable: idk &lt;fct&gt;</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>t5 <span class="sc">|&gt;</span> <span class="fu">filter</span>(idk <span class="sc">==</span> <span class="fl">50.8</span>)<span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">where</span>(<span class="sc">~</span> <span class="fu">any</span>(. <span class="sc">!=</span> <span class="dv">0</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Adding missing grouping variables: `idk`</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 0 × 1
-# Groups:   idk [0]
-# ℹ 1 variable: idk &lt;fct&gt;</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">errorStats</span>(mal, msn, <span class="at">scale =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>$common
-           mal.see mal.rmmsd0   mal.mlf
-total_TD 0.8230136 0.06979936 0.8215324
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">errorStats</span>(mal, msn, <span class="at">scale =</span> T))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
 
-$mal
-          mal.rmsd mal.rmsdlg   mal.sei  mal.dstc
-total_TD 0.4187533  0.5215468 0.4158345 0.4128951
+<table class="kable_wrapper">
+<tbody>
+<tr>
+<td>
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">mal.see</th>
+<th style="text-align: right;">mal.rmmsd0</th>
+<th style="text-align: right;">mal.mlf</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">0.9872021</td>
+<td style="text-align: right;">0.6719737</td>
+<td style="text-align: right;">0.8653286</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">common</td>
+<td style="text-align: right;">0.9756580</td>
+<td style="text-align: right;">1.2692303</td>
+<td style="text-align: right;">0.3826693</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">0.8230136</td>
+<td style="text-align: right;">0.0697994</td>
+<td style="text-align: right;">0.8215324</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">mal.rmsd</th>
+<th style="text-align: right;">mal.rmsdlg</th>
+<th style="text-align: right;">mal.sei</th>
+<th style="text-align: right;">mal.dstc</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">1.4322261</td>
+<td style="text-align: right;">1.7721414</td>
+<td style="text-align: right;">1.3511096</td>
+<td style="text-align: right;">1.2648015</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">common</td>
+<td style="text-align: right;">1.0697461</td>
+<td style="text-align: right;">1.2183216</td>
+<td style="text-align: right;">0.5821373</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">0.4187533</td>
+<td style="text-align: right;">0.5215468</td>
+<td style="text-align: right;">0.4158345</td>
+<td style="text-align: right;">0.4128951</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">msn.rmsd</th>
+<th style="text-align: right;">msn.rmsdlg</th>
+<th style="text-align: right;">msn.sei</th>
+<th style="text-align: right;">msn.dstc</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">1.161693</td>
+<td style="text-align: right;">1.4699291</td>
+<td style="text-align: right;">1.0600742</td>
+<td style="text-align: right;">0.9476197</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">common</td>
+<td style="text-align: right;">1.175257</td>
+<td style="text-align: right;">1.3881544</td>
+<td style="text-align: right;">0.7587867</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">0.739096</td>
+<td style="text-align: right;">0.9222961</td>
+<td style="text-align: right;">0.7374462</td>
+<td style="text-align: right;">0.7357927</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
 
-$msn
-         msn.rmsd msn.rmsdlg  msn.sei msn.dstc
-total_TD 1.023119   1.248535 1.021928 1.020736</code></pre>
+</table>
 </div>
-<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="co"># errorStats(mal, trf)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-<section id="extra-trees" class="level2">
-<h2 class="anchored" data-anchor-id="extra-trees">extra trees</h2>
-<p>While trying to figure out if there is a way to get errorStats to work. I Noticed that there are some total_TDs where there are no trees in the other columns.</p>
-<p>There was a line that selected rowSums based on index.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>t1 <span class="ot">&lt;-</span> imp_zx <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN)</span>
-<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a>t1 <span class="ot">&lt;-</span> <span class="fu">left_join</span>(t1, imp_data, <span class="at">by =</span> <span class="fu">join_by</span>(STANDPLOT_CN))</span>
-<span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(t1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>      STANDPLOT_CN CC        BA SDI FPAG PHYSCLCD  ABGR_TD PIPO_TD PSME_TD
-1 12964130010497_1 27  65.68756 113 CWF4       23   0.0000       0       0
-2 12964130010497_2 16  40.77580  66 CWF4       23   0.0000       0       0
-3 12964130010497_3 22  45.24877 101 CWF4       23 149.9306       0       0
-4 12964130010497_4 61 111.67963 277 CWF4       23   0.0000       0       0
-5 12964449010497_1 13  35.05209  49 CDS6       12   0.0000       0       0
-6 12964449010497_2  0   0.00000   0 CDS6       12   0.0000       0       0
-  PIAL_TD ABLA_TD TSME_TD LALY_TD ABAM_TD THPL_TD PIEN_TD TSHE_TD ACGL_TD
-1       0       0       0       0       0       0       0       0       0
-2       0       0       0       0       0       0       0       0       0
-3       0       0       0       0       0       0       0       0       0
-4       0       0       0       0       0       0       0       0       0
-5       0       0       0       0       0       0       0       0       0
-6       0       0       0       0       0       0       0       0       0
-  PICO_TD LAOC_TD TABR2_TD CHNO_TD BEPA_TD PREM_TD ABPR_TD PIMO3_TD PRVI_TD
-1       0       0        0       0       0       0       0        0       0
-2       0       0        0       0       0       0       0        0       0
-3       0       0        0       0       0       0       0        0       0
-4       0       0        0       0       0       0       0        0       0
-5       0       0        0       0       0       0       0        0       0
-6       0       0        0       0       0       0       0        0       0
-  POTR5_TD ALRU2_TD QUGA4_TD CONU4_TD ACMA3_TD JUOC_TD FRLA_TD 2TB_TD POBAT_TD
-1        0        0        0        0        0       0       0      0        0
-2        0        0        0        0        0       0       0      0        0
-3        0        0        0        0        0       0       0      0        0
-4        0        0        0        0        0       0       0      0        0
-5        0        0        0        0        0       0       0      0        0
-6        0        0        0        0        0       0       0      0        0
-  MAFU_TD ARME_TD ABCO_TD PISI_TD PSMA_TD ALRH2_TD JUNI_TD BEUT_TD BEOC2_TD
-1       0       0       0       0       0        0       0       0        0
-2       0       0       0       0       0        0       0       0        0
-3       0       0       0       0       0        0       0       0        0
-4       0       0       0       0       0        0       0       0        0
-5       0       0       0       0       0        0       0       0        0
-6       0       0       0       0       0        0       0       0        0
-  PRPE2_TD JUHI_TD CHLA_TD PRAV_TD
-1        0       0       0       0
-2        0       0       0       0
-3        0       0       0       0
-4        0       0       0       0
-5        0       0       0       0
-6        0       0       0       0</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> t1 <span class="sc">|&gt;</span>  <span class="fu">mutate</span>(</span>
-<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">common =</span> <span class="fu">rowSums</span>(t1[,sp_prevalence<span class="sc">$</span>common]),</span>
-<span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">uncommon =</span> <span class="fu">rowSums</span>(t1[,sp_prevalence<span class="sc">$</span>uncommon]),</span>
-<span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">rare =</span> <span class="fu">rowSums</span>(t1[,sp_prevalence<span class="sc">$</span>rare]),</span>
-<span id="cb74-5"><a href="#cb74-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">total_TD =</span> <span class="fu">rowSums</span>(t1[<span class="fu">grep</span>(<span class="st">"_TD"</span>, <span class="fu">names</span>(t1))])</span>
-<span id="cb74-6"><a href="#cb74-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb74-7"><a href="#cb74-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>sp_prevalence<span class="sc">$</span>rare, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>uncommon, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>common)</span>
-<span id="cb74-8"><a href="#cb74-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb74-9"><a href="#cb74-9" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(t1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>      STANDPLOT_CN CC        BA SDI FPAG PHYSCLCD  ABGR_TD PIPO_TD PSME_TD
-1 12964130010497_1 27  65.68756 113 CWF4       23   0.0000       0       0
-2 12964130010497_2 16  40.77580  66 CWF4       23   0.0000       0       0
-3 12964130010497_3 22  45.24877 101 CWF4       23 149.9306       0       0
-4 12964130010497_4 61 111.67963 277 CWF4       23   0.0000       0       0
-5 12964449010497_1 13  35.05209  49 CDS6       12   0.0000       0       0
-6 12964449010497_2  0   0.00000   0 CDS6       12   0.0000       0       0
-  PIAL_TD ABLA_TD TSME_TD LALY_TD ABAM_TD THPL_TD PIEN_TD TSHE_TD ACGL_TD
-1       0       0       0       0       0       0       0       0       0
-2       0       0       0       0       0       0       0       0       0
-3       0       0       0       0       0       0       0       0       0
-4       0       0       0       0       0       0       0       0       0
-5       0       0       0       0       0       0       0       0       0
-6       0       0       0       0       0       0       0       0       0
-  PICO_TD LAOC_TD TABR2_TD CHNO_TD BEPA_TD PREM_TD ABPR_TD PIMO3_TD PRVI_TD
-1       0       0        0       0       0       0       0        0       0
-2       0       0        0       0       0       0       0        0       0
-3       0       0        0       0       0       0       0        0       0
-4       0       0        0       0       0       0       0        0       0
-5       0       0        0       0       0       0       0        0       0
-6       0       0        0       0       0       0       0        0       0
-  POTR5_TD ALRU2_TD QUGA4_TD CONU4_TD ACMA3_TD JUOC_TD FRLA_TD 2TB_TD POBAT_TD
-1        0        0        0        0        0       0       0      0        0
-2        0        0        0        0        0       0       0      0        0
-3        0        0        0        0        0       0       0      0        0
-4        0        0        0        0        0       0       0      0        0
-5        0        0        0        0        0       0       0      0        0
-6        0        0        0        0        0       0       0      0        0
-  MAFU_TD ARME_TD ABCO_TD PISI_TD PSMA_TD ALRH2_TD JUNI_TD BEUT_TD BEOC2_TD
-1       0       0       0       0       0        0       0       0        0
-2       0       0       0       0       0        0       0       0        0
-3       0       0       0       0       0        0       0       0        0
-4       0       0       0       0       0        0       0       0        0
-5       0       0       0       0       0        0       0       0        0
-6       0       0       0       0       0        0       0       0        0
-  PRPE2_TD JUHI_TD CHLA_TD PRAV_TD
-1        0       0       0       0
-2        0       0       0       0
-3        0       0       0       0
-4        0       0       0       0
-5        0       0       0       0
-6        0       0       0       0</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(t2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>      STANDPLOT_CN CC        BA SDI FPAG PHYSCLCD PSME_TD ABLA_TD ABAM_TD
-1 12964130010497_1 27  65.68756 113 CWF4       23       0       0       0
-2 12964130010497_2 16  40.77580  66 CWF4       23       0       0       0
-3 12964130010497_3 22  45.24877 101 CWF4       23       0       0       0
-4 12964130010497_4 61 111.67963 277 CWF4       23       0       0       0
-5 12964449010497_1 13  35.05209  49 CDS6       12       0       0       0
-6 12964449010497_2  0   0.00000   0 CDS6       12       0       0       0
-  TSHE_TD   common uncommon rare total_TD
-1       0   0.0000        0    0   0.0000
-2       0   0.0000        0    0   0.0000
-3       0 149.9306        0    0 149.9306
-4       0   0.0000        0    0   0.0000
-5       0   0.0000        0    0   0.0000
-6       0   0.0000        0    0   0.0000</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co"># errorStats(mal, trf)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Note to self, the magrittr pipe and native pipe are different. The magrittr pipe allows for substituting the position of the left hand side argument on the right with a “.”. The native pipe doesn’t. Curly braces overide the lhs to first argument rule. There is also an pipe called the exposition pipe, %$%.</p>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->
