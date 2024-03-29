@@ -164,11 +164,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#plots" id="toc-plots" class="nav-link" data-scroll-target="#plots">Plots</a></li>
   </ul></li>
   <li><a href="#non-fvs-variables." id="toc-non-fvs-variables." class="nav-link" data-scroll-target="#non-fvs-variables.">Non-FVS Variables.</a></li>
-  <li><a href="#yaimpute-model-evaluation" id="toc-yaimpute-model-evaluation" class="nav-link" data-scroll-target="#yaimpute-model-evaluation">yaImpute model evaluation</a>
-  <ul class="collapse">
   <li><a href="#warning-threshold-zero-distances" id="toc-warning-threshold-zero-distances" class="nav-link" data-scroll-target="#warning-threshold-zero-distances">Warning threshold zero distances</a></li>
-  </ul></li>
-  <li><a href="#lost" id="toc-lost" class="nav-link" data-scroll-target="#lost">lost</a></li>
+  <li><a href="#yaimpute-model-evaluation" id="toc-yaimpute-model-evaluation" class="nav-link" data-scroll-target="#yaimpute-model-evaluation">yaImpute model evaluation</a></li>
   </ul>
 </nav>
     </div>
@@ -657,10 +654,8 @@ SDI = \sum (TPA_i (\frac{DBH}{10})^{1.605})
 </div>
 <p>Canopy cover is not well predicted by the p2veg tables.</p>
 </section>
-<section id="yaimpute-model-evaluation" class="level2">
-<h2 class="anchored" data-anchor-id="yaimpute-model-evaluation">yaImpute model evaluation</h2>
-<section id="warning-threshold-zero-distances" class="level3">
-<h3 class="anchored" data-anchor-id="warning-threshold-zero-distances">Warning threshold zero distances</h3>
+<section id="warning-threshold-zero-distances" class="level2">
+<h2 class="anchored" data-anchor-id="warning-threshold-zero-distances">Warning threshold zero distances</h2>
 <p>The warning about zero distances is in reference to plots that have the same predictors. For example, if two or more plots share cc = 1, ba = 2, sdi = 10, they are separated by zero distance. Given the way this data was made, I am surprised that there aren’t more sets with the same predictors.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">summary</span>(imp_data[, <span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -780,7 +775,8 @@ SDI = \sum (TPA_i (\frac{DBH}{10})^{1.605})
 <span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>mal <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> X, <span class="at">y =</span> Y, <span class="at">method =</span> <span class="st">"mahalanobis"</span>, <span class="at">k =</span> k)</span>
 <span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>msn <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> X, <span class="at">y =</span> Y, <span class="at">method =</span> <span class="st">"msn"</span>, <span class="at">k =</span> k)</span>
 <span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>ewz <span class="ot">&lt;-</span> <span class="fu">errorStats</span>(mal, msn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>ewz <span class="ot">&lt;-</span> <span class="fu">errorStats</span>(mal, msn)</span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>scaled_ewz <span class="ot">&lt;-</span> <span class="fu">errorStats</span>(mal, msn, <span class="at">scale =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Here I am extracting the plots where there is zero distance in the predictors from the yai object, then joining the imputation data to those plots.</p>
 <div class="cell">
@@ -1035,10 +1031,12 @@ predictors overlap. Adding more predictors would help.</p>
 <span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>mal <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> X, <span class="at">y =</span> Y, <span class="at">method =</span> <span class="st">"mahalanobis"</span>, <span class="at">k =</span> k)</span>
 <span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>msn <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> X, <span class="at">y =</span> Y, <span class="at">method =</span> <span class="st">"msn"</span>, <span class="at">k =</span> k)</span>
 <span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>ewoz <span class="ot">&lt;-</span> <span class="fu">errorStats</span>(mal, msn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>ewoz <span class="ot">&lt;-</span> <span class="fu">errorStats</span>(mal, msn)</span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>scaled_ewoz <span class="ot">&lt;-</span> <span class="fu">errorStats</span>(mal, msn, <span class="at">scale =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="cell-output-display">
+<div class="kable-table">
 <table class="table table-sm table-striped small">
 <thead>
 <tr class="header">
@@ -1070,7 +1068,9 @@ predictors overlap. Adding more predictors would help.</p>
 </tbody>
 </table>
 </div>
+</div>
 <div class="cell-output-display">
+<div class="kable-table">
 <table class="table table-sm table-striped small">
 <thead>
 <tr class="header">
@@ -1106,7 +1106,9 @@ predictors overlap. Adding more predictors would help.</p>
 </tbody>
 </table>
 </div>
+</div>
 <div class="cell-output-display">
+<div class="kable-table">
 <table class="table table-sm table-striped small">
 <thead>
 <tr class="header">
@@ -1143,6 +1145,7 @@ predictors overlap. Adding more predictors would help.</p>
 </table>
 </div>
 </div>
+</div>
 <p>Of the 1884 zero distances of 24621 references in the original data, 1652 of those rows were not unique.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> test_all0s <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">t =</span> <span class="fu">round</span>(CC <span class="sc">+</span> BA <span class="sc">+</span> SDI, <span class="dv">4</span>))</span>
@@ -1171,20 +1174,22 @@ predictors overlap. Adding more predictors would help.</p>
 <span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
 <span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_plots_per_t =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span> </span>
 <span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n_plots_per_t)) </span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">summary</span>(t[t<span class="sc">$</span>t <span class="sc">&lt;</span> <span class="dv">1</span>, <span class="fu">c</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">14</span><span class="sc">:</span><span class="dv">15</span>)]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">summary</span>(t[t<span class="sc">$</span>t <span class="sc">&lt;</span> <span class="dv">1</span>, <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">14</span><span class="sc">:</span><span class="dv">15</span>)]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="table table-sm table-striped small">
 <colgroup>
-<col style="width: 10%">
-<col style="width: 10%">
-<col style="width: 10%">
-<col style="width: 10%">
-<col style="width: 10%">
-<col style="width: 10%">
+<col style="width: 3%">
+<col style="width: 19%">
+<col style="width: 11%">
+<col style="width: 19%">
+<col style="width: 11%">
+<col style="width: 17%">
+<col style="width: 17%">
 </colgroup>
 <thead>
 <tr class="header">
 <th style="text-align: left;"></th>
+<th style="text-align: left;">STANDPLOT_CN</th>
 <th style="text-align: left;">CC</th>
 <th style="text-align: left;">BA</th>
 <th style="text-align: left;">SDI</th>
@@ -1195,6 +1200,7 @@ predictors overlap. Adding more predictors would help.</p>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;"></td>
+<td style="text-align: left;">Length:591</td>
 <td style="text-align: left;">Min. :0</td>
 <td style="text-align: left;">Min. :0.004089</td>
 <td style="text-align: left;">Min. :0</td>
@@ -1203,6 +1209,7 @@ predictors overlap. Adding more predictors would help.</p>
 </tr>
 <tr class="even">
 <td style="text-align: left;"></td>
+<td style="text-align: left;">Class :character</td>
 <td style="text-align: left;">1st Qu.:0</td>
 <td style="text-align: left;">1st Qu.:0.004089</td>
 <td style="text-align: left;">1st Qu.:0</td>
@@ -1211,6 +1218,7 @@ predictors overlap. Adding more predictors would help.</p>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"></td>
+<td style="text-align: left;">Mode :character</td>
 <td style="text-align: left;">Median :0</td>
 <td style="text-align: left;">Median :0.008177</td>
 <td style="text-align: left;">Median :0</td>
@@ -1219,6 +1227,7 @@ predictors overlap. Adding more predictors would help.</p>
 </tr>
 <tr class="even">
 <td style="text-align: left;"></td>
+<td style="text-align: left;">NA</td>
 <td style="text-align: left;">Mean :0</td>
 <td style="text-align: left;">Mean :0.012418</td>
 <td style="text-align: left;">Mean :0</td>
@@ -1227,6 +1236,7 @@ predictors overlap. Adding more predictors would help.</p>
 </tr>
 <tr class="odd">
 <td style="text-align: left;"></td>
+<td style="text-align: left;">NA</td>
 <td style="text-align: left;">3rd Qu.:0</td>
 <td style="text-align: left;">3rd Qu.:0.016355</td>
 <td style="text-align: left;">3rd Qu.:0</td>
@@ -1235,6 +1245,7 @@ predictors overlap. Adding more predictors would help.</p>
 </tr>
 <tr class="even">
 <td style="text-align: left;"></td>
+<td style="text-align: left;">NA</td>
 <td style="text-align: left;">Max. :0</td>
 <td style="text-align: left;">Max. :0.040887</td>
 <td style="text-align: left;">Max. :0</td>
@@ -1244,18 +1255,20 @@ predictors overlap. Adding more predictors would help.</p>
 </tbody>
 </table>
 </div>
+</div>
+<p>In the set of 1205 where the combined preds are above zero and less than one, there are 591 plots and only BA has values.</p>
+<div class="cell">
 <div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The number of rows</span></span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(t[t<span class="sc">$</span>t <span class="sc">&lt;</span> <span class="dv">1</span>, <span class="fu">c</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">14</span><span class="sc">:</span><span class="dv">15</span>)])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 591</code></pre>
 </div>
+</div>
+<p>The number of rows between 0 and 1 is 591.</p>
+<div class="cell">
 <div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">head</span>(t3, <span class="at">n  =</span> <span class="dv">10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="table table-sm table-striped small">
-<colgroup>
-<col style="width: 10%">
-<col style="width: 10%">
-</colgroup>
 <thead>
 <tr class="header">
 <th style="text-align: right;">t</th>
@@ -1306,12 +1319,15 @@ predictors overlap. Adding more predictors would help.</p>
 </tbody>
 </table>
 </div>
+</div>
+<p>There are 230 plots where t == 0.0041. 0.0368 &amp; 1.0450 both have 11 plots. For each set of t’s that match, like 0.0368 &amp; 1.0450, there are n_ts_per_nplots.</p>
+<div class="cell">
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(t3<span class="sc">$</span>n_plots_per_t, t3<span class="sc">$</span>t)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="3_imputation_2_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid" width="672"></p>
+<p><img src="3_imputation_2_files/figure-html/unnamed-chunk-30-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>Here we apply the tbl-cap and tbl-colwidths options to a code cell that uses the knitr kable() function to write a There are 230 plots where t == 0.0041. 0.0368 &amp; 1.0450 both have 11 plots. For each set of t’s that match, like 0.0368 &amp; 1.0450, there are n_ts_per_nplots.</p>
+<p>The majority of zero distances plots only share a small number of values.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>tt <span class="ot">&lt;-</span> t3 <span class="sc">|&gt;</span> <span class="fu">group_by</span>(n_plots_per_t) <span class="sc">|&gt;</span> </span>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">n_ts_per_nplots =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span> </span>
@@ -1389,179 +1405,61 @@ predictors overlap. Adding more predictors would help.</p>
 </div>
 </div>
 <ul>
-<li>There are 256 plots that match twice, on 128 different values of t.</li>
+<li>There are 256 plots that match 2 times, on 128 different values of t.</li>
 <li>There are 230 plots that match 230 times, on 1 value of t.</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>t <span class="sc">|&gt;</span> <span class="fu">filter</span>(t <span class="sc">==</span> <span class="fl">0.0041</span>) <span class="sc">|&gt;</span> <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div class="kable-table">
-<table class="table table-sm table-striped small">
-<colgroup>
-<col style="width: 14%">
-<col style="width: 2%">
-<col style="width: 8%">
-<col style="width: 3%">
-<col style="width: 7%">
-<col style="width: 4%">
-<col style="width: 3%">
-<col style="width: 7%">
-<col style="width: 6%">
-<col style="width: 6%">
-<col style="width: 6%">
-<col style="width: 7%">
-<col style="width: 7%">
-<col style="width: 4%">
-<col style="width: 7%">
-<col style="width: 5%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">STANDPLOT_CN</th>
-<th style="text-align: right;">CC</th>
-<th style="text-align: right;">BA</th>
-<th style="text-align: right;">SDI</th>
-<th style="text-align: right;">PHYSCLCD</th>
-<th style="text-align: left;">FPAG</th>
-<th style="text-align: left;">fpa</th>
-<th style="text-align: right;">PSME_TD</th>
-<th style="text-align: right;">ABLA_TD</th>
-<th style="text-align: right;">ABAM_TD</th>
-<th style="text-align: right;">TSHE_TD</th>
-<th style="text-align: right;">common</th>
-<th style="text-align: right;">uncommon</th>
-<th style="text-align: right;">rare</th>
-<th style="text-align: right;">total_TD</th>
-<th style="text-align: right;">t</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">13022435010497_4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0.0040887</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">12</td>
-<td style="text-align: left;">CAG1</td>
-<td style="text-align: left;">CAG</td>
-<td style="text-align: right;">0.00000</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0.00000</td>
-<td style="text-align: right;">74.96528</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">74.96528</td>
-<td style="text-align: right;">0.0041</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">13027544010497_3</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0.0040887</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">23</td>
-<td style="text-align: left;">CEF4</td>
-<td style="text-align: left;">CEF</td>
-<td style="text-align: right;">0.00000</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0.00000</td>
-<td style="text-align: right;">74.96528</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">74.96528</td>
-<td style="text-align: right;">0.0041</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">13054971010497_2</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0.0040887</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">23</td>
-<td style="text-align: left;">CFS6</td>
-<td style="text-align: left;">CFS</td>
-<td style="text-align: right;">74.96528</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0.00000</td>
-<td style="text-align: right;">0.00000</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">74.96528</td>
-<td style="text-align: right;">0.0041</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">174763129020004_2</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0.0040887</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">23</td>
-<td style="text-align: left;">CES4</td>
-<td style="text-align: left;">CES</td>
-<td style="text-align: right;">0.00000</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">74.96528</td>
-<td style="text-align: right;">0.00000</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">74.96528</td>
-<td style="text-align: right;">0.0041</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">174763290020004_2</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0.0040887</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">12</td>
-<td style="text-align: left;">CDS6</td>
-<td style="text-align: left;">CDS</td>
-<td style="text-align: right;">74.96528</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0.00000</td>
-<td style="text-align: right;">0.00000</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">74.96528</td>
-<td style="text-align: right;">0.0041</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">174763542020004_2</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0.0040887</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">12</td>
-<td style="text-align: left;">CES4</td>
-<td style="text-align: left;">CES</td>
-<td style="text-align: right;">0.00000</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">74.96528</td>
-<td style="text-align: right;">0.00000</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">74.96528</td>
-<td style="text-align: right;">0.0041</td>
-</tr>
-</tbody>
-</table>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> t <span class="sc">|&gt;</span> <span class="fu">filter</span>(t <span class="sc">==</span> <span class="fl">0.0041</span>)</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> STANDPLOT_CN             CC          BA                SDI       PHYSCLCD    
+ Length:230         Min.   :0   Min.   :0.004089   Min.   :0   Min.   :11.00  
+ Class :character   1st Qu.:0   1st Qu.:0.004089   1st Qu.:0   1st Qu.:12.00  
+ Mode  :character   Median :0   Median :0.004089   Median :0   Median :21.00  
+                    Mean   :0   Mean   :0.004089   Mean   :0   Mean   :17.57  
+                    3rd Qu.:0   3rd Qu.:0.004089   3rd Qu.:0   3rd Qu.:23.00  
+                    Max.   :0   Max.   :0.004089   Max.   :0   Max.   :32.00  
+     FPAG               fpa               PSME_TD         ABLA_TD      
+ Length:230         Length:230         Min.   : 0.00   Min.   : 0.000  
+ Class :character   Class :character   1st Qu.: 0.00   1st Qu.: 0.000  
+ Mode  :character   Mode  :character   Median : 0.00   Median : 0.000  
+                                       Mean   :14.67   Mean   : 6.193  
+                                       3rd Qu.: 0.00   3rd Qu.: 0.000  
+                                       Max.   :74.97   Max.   :74.965  
+    ABAM_TD          TSHE_TD            common         uncommon    
+ Min.   : 0.000   Min.   : 0.0000   Min.   : 0.00   Min.   : 0.00  
+ 1st Qu.: 0.000   1st Qu.: 0.0000   1st Qu.: 0.00   1st Qu.: 0.00  
+ Median : 0.000   Median : 0.0000   Median : 0.00   Median : 0.00  
+ Mean   : 1.956   Mean   : 0.3259   Mean   :34.22   Mean   : 8.80  
+ 3rd Qu.: 0.000   3rd Qu.: 0.0000   3rd Qu.:74.97   3rd Qu.: 0.00  
+ Max.   :74.965   Max.   :74.9653   Max.   :74.97   Max.   :74.97  
+      rare          total_TD           t         
+ Min.   : 0.00   Min.   :74.97   Min.   :0.0041  
+ 1st Qu.: 0.00   1st Qu.:74.97   1st Qu.:0.0041  
+ Median : 0.00   Median :74.97   Median :0.0041  
+ Mean   : 8.80   Mean   :74.97   Mean   :0.0041  
+ 3rd Qu.: 0.00   3rd Qu.:74.97   3rd Qu.:0.0041  
+ Max.   :74.97   Max.   :74.97   Max.   :0.0041  </code></pre>
 </div>
 </div>
+<p>Of those 230 that share one value of t, there is no variation in predictors. There is variation at the species level, but not at the total tree level. These three predictors seem to be good at predicting the total tree density, but not the species present.</p>
+<hr>
+<p>Following are comparisons between the yai objects and distances for a yai with zeros and one without.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ewoz is the second row</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>malw <span class="ot">&lt;-</span> <span class="fu">rbind</span>(ewz<span class="sc">$</span>mal, ewoz<span class="sc">$</span>mal)</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="co"># malw</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>msnw <span class="ot">&lt;-</span> <span class="fu">rbind</span>(ewz<span class="sc">$</span>msn, ewoz<span class="sc">$</span>msn)</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>commonw <span class="ot">&lt;-</span> <span class="fu">rbind</span>(ewz<span class="sc">$</span>common, ewoz<span class="sc">$</span>common)</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(malw) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"PSME_TD"</span>, <span class="st">"common"</span>, <span class="st">"total_TD"</span>, <span class="st">"PSME_TD_wo0"</span>, <span class="st">"common_wo0"</span>, <span class="st">"total_TD_wo0"</span>)</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>malw <span class="ot">&lt;-</span> <span class="fu">rownames_to_column</span>(malw, <span class="st">"source"</span>)</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(msnw) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"PSME_TD"</span>, <span class="st">"common"</span>, <span class="st">"total_TD"</span>, <span class="st">"PSME_TD_wo0"</span>, <span class="st">"common_wo0"</span>, <span class="st">"total_TD_wo0"</span>)</span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>msnw <span class="ot">&lt;-</span> <span class="fu">rownames_to_column</span>(msnw, <span class="st">"source"</span>)</span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(commonw) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"PSME_TD"</span>, <span class="st">"common"</span>, <span class="st">"total_TD"</span>, <span class="st">"PSME_TD_wo0"</span>, <span class="st">"common_wo0"</span>, <span class="st">"total_TD_wo0"</span>)</span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>commonw <span class="ot">&lt;-</span> <span class="fu">rownames_to_column</span>(commonw, <span class="st">"source"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ewoz is the second row</span></span>
-<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>malw <span class="ot">&lt;-</span> <span class="fu">rbind</span>(ewz<span class="sc">$</span>mal, ewoz<span class="sc">$</span>mal)</span>
-<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="co"># ewoz is the second row</span></span>
-<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>msnw <span class="ot">&lt;-</span> <span class="fu">rbind</span>(ewz<span class="sc">$</span>msn, ewoz<span class="sc">$</span>msn)</span>
-<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ewoz is the second row</span></span>
-<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>commonw <span class="ot">&lt;-</span> <span class="fu">rbind</span>(ewz<span class="sc">$</span>common, ewoz<span class="sc">$</span>common)</span>
-<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(malw) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"PSME_TD"</span>, <span class="st">"common"</span>, <span class="st">"total_TD"</span>, <span class="st">"PSME_TD_wo0"</span>, <span class="st">"common_wo0"</span>, <span class="st">"total_TD_wo0"</span>)</span>
-<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>malw <span class="ot">&lt;-</span> <span class="fu">rownames_to_column</span>(malw, <span class="st">"source"</span>)</span>
-<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(msnw) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"PSME_TD"</span>, <span class="st">"common"</span>, <span class="st">"total_TD"</span>, <span class="st">"PSME_TD_wo0"</span>, <span class="st">"common_wo0"</span>, <span class="st">"total_TD_wo0"</span>)</span>
-<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(commonw) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"PSME_TD"</span>, <span class="st">"common"</span>, <span class="st">"total_TD"</span>, <span class="st">"PSME_TD_wo0"</span>, <span class="st">"common_wo0"</span>, <span class="st">"total_TD_wo0"</span>)</span>
-<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>malw</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>malw <span class="sc">|&gt;</span> <span class="fu">arrange</span>(source)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="table table-sm table-striped small">
@@ -1583,20 +1481,6 @@ predictors overlap. Adding more predictors would help.</p>
 <td style="text-align: right;">281.2686</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">common</td>
-<td style="text-align: right;">510.7842</td>
-<td style="text-align: right;">524.6831</td>
-<td style="text-align: right;">472.1028</td>
-<td style="text-align: right;">429.9554</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">total_TD</td>
-<td style="text-align: right;">413.7486</td>
-<td style="text-align: right;">455.0015</td>
-<td style="text-align: right;">413.7486</td>
-<td style="text-align: right;">413.7486</td>
-</tr>
-<tr class="even">
 <td style="text-align: left;">PSME_TD_wo0</td>
 <td style="text-align: right;">321.9114</td>
 <td style="text-align: right;">398.3118</td>
@@ -1604,11 +1488,25 @@ predictors overlap. Adding more predictors would help.</p>
 <td style="text-align: right;">284.2806</td>
 </tr>
 <tr class="odd">
+<td style="text-align: left;">common</td>
+<td style="text-align: right;">510.7842</td>
+<td style="text-align: right;">524.6831</td>
+<td style="text-align: right;">472.1028</td>
+<td style="text-align: right;">429.9554</td>
+</tr>
+<tr class="even">
 <td style="text-align: left;">common_wo0</td>
 <td style="text-align: right;">523.8155</td>
 <td style="text-align: right;">596.5675</td>
 <td style="text-align: right;">285.0513</td>
 <td style="text-align: right;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">413.7486</td>
+<td style="text-align: right;">455.0015</td>
+<td style="text-align: right;">413.7486</td>
+<td style="text-align: right;">413.7486</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">total_TD_wo0</td>
@@ -1621,13 +1519,16 @@ predictors overlap. Adding more predictors would help.</p>
 </table>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>msnw</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>For mahalonobis (read as euclidian distance), the yai without zeroes was higher in all categories except for common trees standard error of imputation. I don’t know why the distance component is NA.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>msnw <span class="sc">|&gt;</span> <span class="fu">arrange</span>(source)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="table table-sm table-striped small">
 <thead>
 <tr class="header">
-<th style="text-align: left;"></th>
+<th style="text-align: left;">source</th>
 <th style="text-align: right;">msn.rmsd</th>
 <th style="text-align: right;">msn.rmsdlg</th>
 <th style="text-align: right;">msn.sei</th>
@@ -1643,20 +1544,6 @@ predictors overlap. Adding more predictors would help.</p>
 <td style="text-align: right;">227.9180</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">common</td>
-<td style="text-align: right;">625.0536</td>
-<td style="text-align: right;">676.6855</td>
-<td style="text-align: right;">593.8624</td>
-<td style="text-align: right;">560.9394</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">total_TD</td>
-<td style="text-align: right;">803.3972</td>
-<td style="text-align: right;">869.4654</td>
-<td style="text-align: right;">803.3972</td>
-<td style="text-align: right;">803.3972</td>
-</tr>
-<tr class="even">
 <td style="text-align: left;">PSME_TD_wo0</td>
 <td style="text-align: right;">261.1057</td>
 <td style="text-align: right;">330.3856</td>
@@ -1664,11 +1551,25 @@ predictors overlap. Adding more predictors would help.</p>
 <td style="text-align: right;">212.9898</td>
 </tr>
 <tr class="odd">
+<td style="text-align: left;">common</td>
+<td style="text-align: right;">625.0536</td>
+<td style="text-align: right;">676.6855</td>
+<td style="text-align: right;">593.8624</td>
+<td style="text-align: right;">560.9394</td>
+</tr>
+<tr class="even">
 <td style="text-align: left;">common_wo0</td>
 <td style="text-align: right;">575.4805</td>
 <td style="text-align: right;">679.7284</td>
 <td style="text-align: right;">371.5500</td>
 <td style="text-align: right;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">803.3972</td>
+<td style="text-align: right;">869.4654</td>
+<td style="text-align: right;">803.3972</td>
+<td style="text-align: right;">803.3972</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">total_TD_wo0</td>
@@ -1681,13 +1582,16 @@ predictors overlap. Adding more predictors would help.</p>
 </table>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>commonw</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>For msn (canonical correlation) without zeros was generally lower, except root mean square error of the observations with larger distances (rmsdlg) and common trees SEI.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>commonw <span class="sc">|&gt;</span> <span class="fu">arrange</span>(source)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="kable-table">
 <table class="table table-sm table-striped small">
 <thead>
 <tr class="header">
-<th style="text-align: left;"></th>
+<th style="text-align: left;">source</th>
 <th style="text-align: right;">mal.see</th>
 <th style="text-align: right;">mal.rmmsd0</th>
 <th style="text-align: right;">mal.mlf</th>
@@ -1701,28 +1605,28 @@ predictors overlap. Adding more predictors would help.</p>
 <td style="text-align: right;">193.0073</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">common</td>
-<td style="text-align: right;">466.4442</td>
-<td style="text-align: right;">275.7514975</td>
-<td style="text-align: right;">423.7343</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">total_TD</td>
-<td style="text-align: right;">819.0953</td>
-<td style="text-align: right;">0.0000003</td>
-<td style="text-align: right;">819.0953</td>
-</tr>
-<tr class="even">
 <td style="text-align: left;">PSME_TD_wo0</td>
 <td style="text-align: right;">221.8865</td>
 <td style="text-align: right;">151.0348025</td>
 <td style="text-align: right;">194.4938</td>
 </tr>
 <tr class="odd">
+<td style="text-align: left;">common</td>
+<td style="text-align: right;">466.4442</td>
+<td style="text-align: right;">275.7514975</td>
+<td style="text-align: right;">423.7343</td>
+</tr>
+<tr class="even">
 <td style="text-align: left;">common_wo0</td>
 <td style="text-align: right;">477.7440</td>
 <td style="text-align: right;">621.4955878</td>
 <td style="text-align: right;">187.3791</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">819.0953</td>
+<td style="text-align: right;">0.0000003</td>
+<td style="text-align: right;">819.0953</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">total_TD_wo0</td>
@@ -1735,24 +1639,50 @@ predictors overlap. Adding more predictors would help.</p>
 </div>
 </div>
 </div>
-<p>Removing the zero distance observations, rmsd is higher. In fact, all mal &amp; msn error stats are higher.</p>
-<p>As are the common error stats. The common stats are used to calculate some or all of the others.</p>
-<p>mal.rmmsd0 is the average of the squared differences where distance between X variables is near zero. It is an estimate of pure error and measurement error, plus bias. Meaning there is more variability when there are no zero distances. I would like to explore what the differences are in ancillary data where there are zero distance between X variable plots. I don’t like that the imputation gives me error rates based off of the distances between predictors. I want to know what the differences are between the ancillary data. What I care about is seedling densities.</p>
+<p>For the common stats that are used to compute the others, model lack of fit is much better for common trees. There is also an expectedly large difference for rmsd near 0. rmmsd0 is a measure of variability, pure error, measurement error, and bias. Bias is the squraed average distance compoents in that group.</p>
 </section>
 </section>
-</section>
-<section id="lost" class="level2">
-<h2 class="anchored" data-anchor-id="lost">lost</h2>
-<p>For each set, the total_TDs are the same. That is interesting.</p>
-<p>Explore the tree values for combinations of cc, ba, and sdi.</p>
+<section id="yaimpute-model-evaluation" class="level2">
+<h2 class="anchored" data-anchor-id="yaimpute-model-evaluation">yaImpute model evaluation</h2>
+<p>For each set, the total_TDs are the same. That is interesting. Explore the tree values for combinations of cc, ba, and sdi. Do the predictors do well at finding total td, but not per species.</p>
+<hr>
+<p>This was a test to see what they look like when scaled.</p>
+<p><strong>With zeroes</strong></p>
+<p><strong>Without zeroes</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">errorStats</span>(mal, msn, <span class="at">scale =</span> T))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-
-<table class="kable_wrapper">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">mal.see</th>
+<th style="text-align: right;">mal.rmmsd0</th>
+<th style="text-align: right;">mal.mlf</th>
+</tr>
+</thead>
 <tbody>
-<tr>
-<td>
+<tr class="odd">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">0.9878199</td>
+<td style="text-align: right;">0.6195928</td>
+<td style="text-align: right;">0.8853476</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">common</td>
+<td style="text-align: right;">0.9762440</td>
+<td style="text-align: right;">0.5771339</td>
+<td style="text-align: right;">0.8868543</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">0.8234868</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">0.8234868</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output-display">
 <table class="table table-sm table-striped small">
 <thead>
 <tr class="header">
@@ -1783,8 +1713,48 @@ predictors overlap. Adding more predictors would help.</p>
 </tr>
 </tbody>
 </table>
-</td>
-<td>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(scaled_ewz<span class="sc">$</span>mal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">mal.rmsd</th>
+<th style="text-align: right;">mal.rmsdlg</th>
+<th style="text-align: right;">mal.sei</th>
+<th style="text-align: right;">mal.dstc</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">1.4312740</td>
+<td style="text-align: right;">1.552265</td>
+<td style="text-align: right;">1.3625703</td>
+<td style="text-align: right;">1.2902132</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">common</td>
+<td style="text-align: right;">1.0690455</td>
+<td style="text-align: right;">1.098135</td>
+<td style="text-align: right;">0.9880873</td>
+<td style="text-align: right;">0.8998749</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">0.4159669</td>
+<td style="text-align: right;">0.457441</td>
+<td style="text-align: right;">0.4159669</td>
+<td style="text-align: right;">0.4159669</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(scaled_ewoz<span class="sc">$</span>mal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
 <table class="table table-sm table-striped small">
 <thead>
 <tr class="header">
@@ -1819,8 +1789,48 @@ predictors overlap. Adding more predictors would help.</p>
 </tr>
 </tbody>
 </table>
-</td>
-<td>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(scaled_ewz<span class="sc">$</span>msn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">msn.rmsd</th>
+<th style="text-align: right;">msn.rmsdlg</th>
+<th style="text-align: right;">msn.sei</th>
+<th style="text-align: right;">msn.dstc</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">1.2152940</td>
+<td style="text-align: right;">1.309583</td>
+<td style="text-align: right;">1.1335748</td>
+<td style="text-align: right;">1.0454876</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">common</td>
+<td style="text-align: right;">1.3082054</td>
+<td style="text-align: right;">1.416268</td>
+<td style="text-align: right;">1.2429238</td>
+<td style="text-align: right;">1.1740178</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">0.8077045</td>
+<td style="text-align: right;">0.874127</td>
+<td style="text-align: right;">0.8077045</td>
+<td style="text-align: right;">0.8077045</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(scaled_ewoz<span class="sc">$</span>msn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
 <table class="table table-sm table-striped small">
 <thead>
 <tr class="header">
@@ -1855,14 +1865,9 @@ predictors overlap. Adding more predictors would help.</p>
 </tr>
 </tbody>
 </table>
-</td>
-</tr>
-</tbody>
-
-</table>
 </div>
-<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co"># errorStats(mal, trf)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<hr>
 <p>Note to self, the magrittr pipe and native pipe are different. The magrittr pipe allows for substituting the position of the left hand side argument on the right with a “.”. The native pipe doesn’t. Curly braces overide the lhs to first argument rule. There is also an pipe called the exposition pipe, %$%.</p>
 
 
