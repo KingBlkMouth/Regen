@@ -1,0 +1,3178 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Regen_Notes - Model Eval 2</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Regen_Notes</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html" rel="" target="">
+ <span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./1_Copied_Code.html" rel="" target="">
+ <span class="menu-text">Plot Selection</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./2_Imputation.html" rel="" target="">
+ <span class="menu-text">Imputation</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./3_imputation_2.html" rel="" target="">
+ <span class="menu-text">Imputation 2</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./5_Model_Eval.html" rel="" target="">
+ <span class="menu-text">Model Eval</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="./6_Model_Eval_2.html" rel="" target="" aria-current="page">
+ <span class="menu-text">Model Eval 2</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./4_Visualization.html" rel="" target="">
+ <span class="menu-text">Visualization</span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools ms-auto">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#summary" id="toc-summary" class="nav-link active" data-scroll-target="#summary">Summary</a></li>
+  <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes">Notes</a></li>
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a>
+  <ul class="collapse">
+  <li><a href="#pull-in-data" id="toc-pull-in-data" class="nav-link" data-scroll-target="#pull-in-data">Pull in data</a></li>
+  </ul></li>
+  <li><a href="#yai-objects" id="toc-yai-objects" class="nav-link" data-scroll-target="#yai-objects">yai objects</a>
+  <ul class="collapse">
+  <li><a href="#kralicek-3-msn-mal" id="toc-kralicek-3-msn-mal" class="nav-link" data-scroll-target="#kralicek-3-msn-mal">Kralicek 3 msn &amp; mal</a></li>
+  </ul></li>
+  <li><a href="#imputations" id="toc-imputations" class="nav-link" data-scroll-target="#imputations">imputations</a></li>
+  <li><a href="#checking-for-nas" id="toc-checking-for-nas" class="nav-link" data-scroll-target="#checking-for-nas">Checking for NAs</a></li>
+  <li><a href="#evaluation" id="toc-evaluation" class="nav-link" data-scroll-target="#evaluation">Evaluation</a>
+  <ul class="collapse">
+  <li><a href="#msn-and-mal" id="toc-msn-and-mal" class="nav-link" data-scroll-target="#msn-and-mal">msn and mal</a></li>
+  <li><a href="#rfs" id="toc-rfs" class="nav-link" data-scroll-target="#rfs">RFs</a></li>
+  <li><a href="#rf-vs-msn" id="toc-rf-vs-msn" class="nav-link" data-scroll-target="#rf-vs-msn">rf vs msn</a></li>
+  </ul></li>
+  <li><a href="#narrative-summary" id="toc-narrative-summary" class="nav-link" data-scroll-target="#narrative-summary">Narrative Summary</a></li>
+  <li><a href="#what-does-it-all-mean" id="toc-what-does-it-all-mean" class="nav-link" data-scroll-target="#what-does-it-all-mean">What does it all mean</a></li>
+  <li><a href="#scratch" id="toc-scratch" class="nav-link" data-scroll-target="#scratch">Scratch</a>
+  <ul class="collapse">
+  <li><a href="#testing-rmsd" id="toc-testing-rmsd" class="nav-link" data-scroll-target="#testing-rmsd">testing rmsd</a></li>
+  <li><a href="#ploting-differences." id="toc-ploting-differences." class="nav-link" data-scroll-target="#ploting-differences.">ploting differences.</a></li>
+  </ul></li>
+  <li><a href="#ci-on-diff" id="toc-ci-on-diff" class="nav-link" data-scroll-target="#ci-on-diff">CI on diff</a></li>
+  <li><a href="#imp-fix" id="toc-imp-fix" class="nav-link" data-scroll-target="#imp-fix">Imp fix?</a>
+  <ul class="collapse">
+  <li><a href="#eval" id="toc-eval" class="nav-link" data-scroll-target="#eval">eval</a></li>
+  </ul></li>
+  <li><a href="#now-what-does-it-mean." id="toc-now-what-does-it-mean." class="nav-link" data-scroll-target="#now-what-does-it-mean.">Now what does it mean.</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Model Eval 2</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<p>There were several peculiarities that popped up in the last Model Eval section.</p>
+<p>The rmsds between the distance matrices and the random forests didn’t make a lot of sense. There were NAs in the RF imputations that I didn’t think should have been there. The physical cd that I added a while back is being listed as a negatively important variable. I think that means that it is hurting the process. I am going to get all of these onto the same page. That should take care of the NAs and give me a better understanding of the rmsds.</p>
+</section>
+<section id="notes" class="level2">
+<h2 class="anchored" data-anchor-id="notes">Notes</h2>
+<p><a href="https://www.jstatsoft.org/article/view/v023i10">yaImpute Paper</a></p>
+<p><a href="https://rdrr.io/rforge/yaImpute/">yaImpute package info</a></p>
+<p>Breiman L (2001). “Random Forests.” Machine Learning, <a href="https://link.springer.com/article/10.1023/A:1010933404324">Breiman L 2001</a></p>
+<p>Classification and Regression by randomForest <a href="https://cran.r-project.org/doc/Rnews/Rnews_2002-3.pdf">Liam &amp; Wiener, p.18</a></p>
+</section>
+<section id="setup" class="level2">
+<h2 class="anchored" data-anchor-id="setup">Setup</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Data tidying and access</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse, <span class="at">quietly =</span> T)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># library(readxl)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># library(writexl)</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># yaImpute and related </span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(yaImpute)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(vegan)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># plots and tables</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(esquisse)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co"># No sci-notation. </span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">scipen =</span> <span class="dv">999</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="pull-in-data" class="level3">
+<h3 class="anchored" data-anchor-id="pull-in-data">Pull in data</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>KEEP <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"KEEP"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>()[<span class="sc">!</span><span class="fu">ls</span>() <span class="sc">%in%</span> KEEP])</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Pulling from my new interim save point</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">"./attempt_032524.db"</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>imp_data <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"select * from imp_data"</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># zimp_data &lt;- dbGetQuery(con, "select * from regen_only_imp_data")</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>plots <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"select * from fvs_plotinit_plot"</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>plants_ref <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"select * from plants_ref"</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co"># sp_prev was saved from imutation 1</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"sp_prevalence.Rdata"</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">"../../Data/_FIADB_WA.db"</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>cond <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"select PLT_CN, CONDID, PHYSCLCD from cond"</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>KEEP <span class="ot">&lt;-</span> <span class="fu">append</span>(KEEP, <span class="fu">c</span>(<span class="st">"cond"</span>, <span class="st">'plots'</span>, <span class="st">'plants_ref'</span>, <span class="st">'imp_data'</span>, <span class="st">"sp_prevalence"</span>))</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"./good_SUB_plots2.csv"</span>, </span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>              <span class="at">col_types =</span> <span class="fu">c</span>(<span class="st">"cccci"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="add-predictors" class="level4">
+<h4 class="anchored" data-anchor-id="add-predictors">Add predictors</h4>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>pred_topo <span class="ot">&lt;-</span> plots <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN, ELEVFT, SLOPE, ASPECT)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>pred_Kral <span class="ot">&lt;-</span> imp_data <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN, CC, BA, SDI, FPAG)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>response <span class="ot">&lt;-</span> imp_data <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(CC, BA, SDI, FPAG))</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>predictors <span class="ot">&lt;-</span> <span class="fu">left_join</span>(pred_Kral, pred_topo, <span class="fu">join_by</span>(STANDPLOT_CN))<span class="sc">|&gt;</span> </span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(FPAG, <span class="at">.after =</span> STANDPLOT_CN)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="fu">left_join</span>(g, cond, <span class="fu">join_by</span>(PLT_CN, CONDID))</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> g <span class="sc">|&gt;</span> <span class="fu">mutate</span>(</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">STANDPLOT_CN =</span> <span class="fu">str_c</span>(PLT_CN, <span class="st">"_"</span>, SUBP)) <span class="sc">|&gt;</span> </span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>SUBPLOT_CN)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">left_join</span>(plots, g, <span class="fu">join_by</span>(STANDPLOT_CN))</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN, PHYSCLCD)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>imp_data <span class="ot">&lt;-</span> <span class="fu">left_join</span>(imp_data, y, <span class="fu">join_by</span>(STANDPLOT_CN))</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>imp_data <span class="ot">&lt;-</span> imp_data <span class="sc">|&gt;</span> <span class="fu">relocate</span>(PHYSCLCD, <span class="at">.after =</span> FPAG)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> predictors <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN, ELEVFT, SLOPE, ASPECT)</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>imp_data <span class="ot">&lt;-</span> <span class="fu">left_join</span>(imp_data, y, <span class="fu">join_by</span>(STANDPLOT_CN))</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>imp_data <span class="ot">&lt;-</span> imp_data <span class="sc">|&gt;</span> <span class="fu">relocate</span>(ELEVFT, SLOPE, ASPECT, <span class="at">.after =</span> SDI)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="fpa-and-species" class="level4">
+<h4 class="anchored" data-anchor-id="fpa-and-species">fpa and species</h4>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>()[<span class="sc">!</span><span class="fu">ls</span>() <span class="sc">%in%</span> KEEP])</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data <span class="sc">|&gt;</span> </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">fpa =</span> <span class="fu">str_sub</span>(FPAG, <span class="dv">1</span>, <span class="dv">3</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>KEEP <span class="ot">&lt;-</span> <span class="fu">append</span>(KEEP, <span class="st">"imp_data_FPA"</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span>  <span class="fu">mutate</span>(</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># common = rowSums(imp_data_FPA[,sp_prevalence$common]),</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">uncommon =</span> <span class="fu">rowSums</span>(imp_data_FPA[,sp_prevalence<span class="sc">$</span>uncommon]),</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">rare =</span> <span class="fu">rowSums</span>(imp_data_FPA[,sp_prevalence<span class="sc">$</span>rare]),</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">total_TD =</span> <span class="fu">rowSums</span>(imp_data_FPA[<span class="fu">grep</span>(<span class="st">"_TD"</span>, <span class="fu">names</span>(imp_data_FPA))])</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>sp_prevalence<span class="sc">$</span>rare, <span class="sc">-</span>sp_prevalence<span class="sc">$</span>uncommon) <span class="co">#, -sp_prevalence$common</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span> </span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(fpa, <span class="at">.after =</span> FPAG)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>imp_data_FPA <span class="ot">&lt;-</span> imp_data_FPA <span class="sc">|&gt;</span> <span class="fu">relocate</span>(PHYSCLCD, <span class="at">.before =</span> FPAG)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="correcting-for-levels." class="level4">
+<h4 class="anchored" data-anchor-id="correcting-for-levels.">Correcting for levels.</h4>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fpas <span class="ot">&lt;-</span> imp_data_FPA</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>KEEP <span class="ot">&lt;-</span> <span class="fu">append</span>(KEEP, <span class="st">"fpas"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Removing the fpags with less than 120 plots. </span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co"># This needs to happen for RF. Must be less than 53. </span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> fpas <span class="sc">|&gt;</span> <span class="fu">group_by</span>(FPAG) <span class="sc">|&gt;</span> </span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n)) <span class="sc">|&gt;</span> </span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n <span class="sc">&gt;</span> <span class="dv">64</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> t<span class="sc">$</span>FPAG</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>fpas <span class="ot">&lt;-</span> fpas <span class="sc">|&gt;</span> </span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(FPAG <span class="sc">%in%</span> keep)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co"># I am not sure this is the way to set levels. </span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>fpas<span class="sc">$</span>FPAG <span class="ot">&lt;-</span> <span class="fu">factor</span>(fpas<span class="sc">$</span>FPAG, <span class="at">levels =</span> keep)</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>fpas<span class="sc">$</span>fpa <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(fpas<span class="sc">$</span>fpa)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>fpas<span class="sc">$</span>PHYSCLCD <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(fpas<span class="sc">$</span>PHYSCLCD)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>I could do it via fpa instead of FPAG.</p>
+<p>1900 rows lost due to factor levels.</p>
+</section>
+</section>
+</section>
+<section id="yai-objects" class="level2">
+<h2 class="anchored" data-anchor-id="yai-objects">yai objects</h2>
+<p>K is being set to one for this iteration. I don’t want there to be additional error due to the averaging of y variables. I just want to know which imputation has the smallest difference.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>()[<span class="sc">!</span><span class="fu">ls</span>() <span class="sc">%in%</span> KEEP])</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>refs <span class="ot">&lt;-</span> <span class="fu">rownames</span>(fpas[<span class="dv">1</span><span class="sc">:</span>(<span class="dv">3</span><span class="sc">*</span><span class="fu">nrow</span>(fpas)<span class="sc">/</span><span class="dv">4</span>),])</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># X variables</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(fpas)[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "STANDPLOT_CN" "CC"           "BA"           "SDI"          "ELEVFT"      
+ [6] "SLOPE"        "ASPECT"       "PHYSCLCD"     "FPAG"         "fpa"         </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> fpas <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN, CC, BA, SDI, ELEVFT, SLOPE, ASPECT, PHYSCLCD, FPAG)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(x)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(x, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Y variables</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(fpas)[<span class="dv">11</span><span class="sc">:</span><span class="fu">ncol</span>(fpas)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "ABGR_TD"  "PIPO_TD"  "PSME_TD"  "ABLA_TD"  "TSME_TD"  "ABAM_TD" 
+ [7] "THPL_TD"  "PIEN_TD"  "TSHE_TD"  "PICO_TD"  "PIMO3_TD" "uncommon"
+[13] "rare"     "total_TD"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> fpas <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="dv">1</span>, <span class="dv">11</span><span class="sc">:</span><span class="fu">ncol</span>(fpas))</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> yfull[refs,]</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(y)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(y, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co"># can't have factors in msn or mal</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>x6 <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span>FPAG, <span class="sc">-</span>PHYSCLCD)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>k <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>yrf <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">whatsMax</span>(y[ ,<span class="dv">1</span><span class="sc">:</span>(<span class="fu">ncol</span>(y)<span class="sc">-</span><span class="dv">1</span>)]), y[, <span class="fu">ncol</span>(y)])</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(yrf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'Max_SP'</span>, <span class="st">'sp_max_TD'</span>, <span class="st">'total_TD'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="msn-mal-6" class="level4">
+<h4 class="anchored" data-anchor-id="msn-mal-6">msn &amp; mal 6</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>msn_x6_ps <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> x6, <span class="at">y =</span> y, <span class="at">method =</span> <span class="st">"msn"</span>, <span class="at">k =</span> k)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>mal_x6_ps <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> x6, <span class="at">y =</span> y, <span class="at">method =</span> <span class="st">"mahalanobis"</span>, <span class="at">k =</span> k)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>KEEP <span class="ot">&lt;-</span> KEEP <span class="sc">|&gt;</span> <span class="fu">append</span>(<span class="fu">c</span>(<span class="st">"refs"</span>, <span class="st">'msn_x6_ps'</span>, <span class="st">'mal_x6_ps'</span>, <span class="st">'rf_all_ps'</span>, <span class="st">'k'</span>))</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>KEEP <span class="ot">&lt;-</span> KEEP <span class="sc">|&gt;</span> <span class="fu">unique</span>() <span class="sc">|&gt;</span> <span class="fu">sort</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="rf-all" class="level4">
+<h4 class="anchored" data-anchor-id="rf-all">RF all</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Separating this because it takes a long time and I don't want to run in by accident. </span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># rf_all_ps &lt;- yai(x = x, y = yrf, method = "randomForest", k = k)</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># save(rf_all_ps, file = "imps_0402/rf_all_ps.Rdata")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="rf-6" class="level4">
+<h4 class="anchored" data-anchor-id="rf-6">RF 6</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Separating this because it takes a long time and I don't want to run in by accident. </span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># rf_k6_ps &lt;- yai(x = x6, y = yrf, method = "randomForest", k = k)</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># save(rf_k6_ps, file = "imps_0402/rf_k6_ps.Rdata")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="kralicek-3-msn-mal" class="level3">
+<h3 class="anchored" data-anchor-id="kralicek-3-msn-mal">Kralicek 3 msn &amp; mal</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>x3 <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span> <span class="fu">select</span>(CC, BA, SDI)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>msn_k3_ps <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> x3, <span class="at">y =</span> y, <span class="at">method =</span> <span class="st">"msn"</span>, <span class="at">k =</span> k)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>mal_k3_ps <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> x3, <span class="at">y =</span> y, <span class="at">method =</span> <span class="st">"mahalanobis"</span>, <span class="at">k =</span> k)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>KEEP <span class="ot">&lt;-</span> KEEP <span class="sc">|&gt;</span> <span class="fu">append</span>(<span class="fu">c</span>(<span class="st">'mal_k3_ps'</span>, <span class="st">'msn_k3_ps'</span>, <span class="st">'rf_k3_ps'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="rf-k3" class="level4">
+<h4 class="anchored" data-anchor-id="rf-k3">RF k3</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Separating this because it takes a long time and I don't want to run in by accident. </span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co"># rf_k3_ps &lt;- yai(x = x, y = yrf, method = "randomForest", k = k)</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co"># save(rf_k3_ps, file = "imps_0402/rf_k3_ps.Rdata")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="imputations" class="level2">
+<h2 class="anchored" data-anchor-id="imputations">imputations</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"imps_0402/rf_all_ps.Rdata"</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"imps_0402/rf_k6_ps.Rdata"</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"imps_0402/rf_k3_ps.Rdata"</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>rf_all_ps_i <span class="ot">&lt;-</span> <span class="fu">impute</span>(rf_all_ps, <span class="at">ancillaryData =</span> y)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>rf_x6_ps_i <span class="ot">&lt;-</span> <span class="fu">impute</span>(rf_k6_ps, <span class="at">ancillaryData =</span> y)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>rf_k3_ps_i <span class="ot">&lt;-</span> <span class="fu">impute</span>(rf_k3_ps, <span class="at">ancillaryData =</span> y)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>KEEP <span class="ot">&lt;-</span> <span class="fu">append</span>(KEEP, <span class="fu">c</span>(<span class="st">'rf_k3_ps_i'</span>, <span class="st">'rf_all_ps_i'</span>, <span class="st">'rf_x6_ps_i'</span>))</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>KEEP <span class="ot">&lt;-</span> KEEP <span class="sc">|&gt;</span> <span class="fu">unique</span>() <span class="sc">|&gt;</span> <span class="fu">sort</span>()</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>()[<span class="sc">!</span><span class="fu">ls</span>() <span class="sc">%in%</span> KEEP])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>msn_x6_i <span class="ot">&lt;-</span> <span class="fu">impute</span>(msn_x6_ps)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>msn_k3_i <span class="ot">&lt;-</span> <span class="fu">impute</span>(msn_k3_ps)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>mal_x6_i <span class="ot">&lt;-</span> <span class="fu">impute</span>(mal_x6_ps)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>mal_k3_i <span class="ot">&lt;-</span> <span class="fu">impute</span>(mal_k3_ps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="checking-for-nas" class="level2">
+<h2 class="anchored" data-anchor-id="checking-for-nas">Checking for NAs</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(rf_all_ps_i<span class="sc">$</span>PSME_TD))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(rf_k3_ps_i<span class="sc">$</span>PSME_TD))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(rf_x6_ps_i<span class="sc">$</span>PSME_TD))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># sum(is.na(msn_all_i$PSME_TD))</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(msn_k3_i<span class="sc">$</span>PSME_TD))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(msn_x6_i<span class="sc">$</span>PSME_TD))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># sum(is.na(mal_all_i$PSME_TD))</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(mal_k3_i<span class="sc">$</span>PSME_TD))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(mal_x6_i<span class="sc">$</span>PSME_TD))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<p>Whatever happened on the last page, isn’t on this one. Crisis averted!</p>
+</section>
+<section id="evaluation" class="level2">
+<h2 class="anchored" data-anchor-id="evaluation">Evaluation</h2>
+<section id="msn-and-mal" class="level3">
+<h3 class="anchored" data-anchor-id="msn-and-mal">msn and mal</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>t_ns <span class="ot">&lt;-</span> <span class="fu">compare.yai</span>(msn_k3_i, mal_k3_i, msn_x6_i, mal_x6_i,  <span class="at">scale =</span> F)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="fu">compare.yai</span>(msn_k3_i, mal_k3_i, msn_x6_i, mal_x6_i)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(t_ns, <span class="at">main =</span> <span class="st">"Not Scaled"</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(t, <span class="at">main =</span> <span class="st">"Scaled"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="6_Model_Eval_2_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="6_Model_Eval_2_files/figure-html/unnamed-chunk-17-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>t_ns<span class="sc">$</span>min <span class="ot">&lt;-</span> <span class="fu">names</span>(t_ns)[<span class="fu">apply</span>(t_ns, <span class="dv">1</span>, which.min)]</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>t_ns<span class="sc">$</span>min <span class="ot">&lt;-</span> t_ns<span class="sc">$</span>min <span class="sc">|&gt;</span> <span class="fu">str_sub</span>(<span class="dv">1</span>, <span class="dv">6</span>)</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>t_ns<span class="sc">|&gt;</span> <span class="fu">arrange</span>(min)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 19%">
+<col style="width: 19%">
+<col style="width: 19%">
+<col style="width: 19%">
+<col style="width: 9%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">msn_k3_i.rmsdS</th>
+<th style="text-align: right;">mal_k3_i.rmsdS</th>
+<th style="text-align: right;">msn_x6_i.rmsdS</th>
+<th style="text-align: right;">mal_x6_i.rmsdS</th>
+<th style="text-align: left;">min</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">585.07073</td>
+<td style="text-align: right;">461.64113</td>
+<td style="text-align: right;">701.41423</td>
+<td style="text-align: right;">754.46481</td>
+<td style="text-align: left;">mal_k3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ABGR_TD</td>
+<td style="text-align: right;">319.72928</td>
+<td style="text-align: right;">304.96928</td>
+<td style="text-align: right;">309.58660</td>
+<td style="text-align: right;">277.73063</td>
+<td style="text-align: left;">mal_x6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">299.15199</td>
+<td style="text-align: right;">319.17541</td>
+<td style="text-align: right;">289.30718</td>
+<td style="text-align: right;">274.08248</td>
+<td style="text-align: left;">mal_x6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ABLA_TD</td>
+<td style="text-align: right;">354.62707</td>
+<td style="text-align: right;">364.07637</td>
+<td style="text-align: right;">282.62389</td>
+<td style="text-align: right;">261.73287</td>
+<td style="text-align: left;">mal_x6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">TSME_TD</td>
+<td style="text-align: right;">100.29573</td>
+<td style="text-align: right;">95.66929</td>
+<td style="text-align: right;">98.06111</td>
+<td style="text-align: right;">88.05078</td>
+<td style="text-align: left;">mal_x6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ABAM_TD</td>
+<td style="text-align: right;">350.82582</td>
+<td style="text-align: right;">355.36147</td>
+<td style="text-align: right;">318.73906</td>
+<td style="text-align: right;">289.84361</td>
+<td style="text-align: left;">mal_x6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">THPL_TD</td>
+<td style="text-align: right;">216.63917</td>
+<td style="text-align: right;">218.29978</td>
+<td style="text-align: right;">231.77892</td>
+<td style="text-align: right;">183.14742</td>
+<td style="text-align: left;">mal_x6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PICO_TD</td>
+<td style="text-align: right;">351.38847</td>
+<td style="text-align: right;">324.29968</td>
+<td style="text-align: right;">325.26841</td>
+<td style="text-align: right;">315.22969</td>
+<td style="text-align: left;">mal_x6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PIMO3_TD</td>
+<td style="text-align: right;">53.32482</td>
+<td style="text-align: right;">55.05028</td>
+<td style="text-align: right;">52.79650</td>
+<td style="text-align: right;">51.02393</td>
+<td style="text-align: left;">mal_x6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">rare</td>
+<td style="text-align: right;">197.38858</td>
+<td style="text-align: right;">203.64440</td>
+<td style="text-align: right;">206.30725</td>
+<td style="text-align: right;">190.10477</td>
+<td style="text-align: left;">mal_x6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">uncommon</td>
+<td style="text-align: right;">264.60082</td>
+<td style="text-align: right;">323.76737</td>
+<td style="text-align: right;">301.79829</td>
+<td style="text-align: right;">309.27698</td>
+<td style="text-align: left;">msn_k3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PIPO_TD</td>
+<td style="text-align: right;">115.15612</td>
+<td style="text-align: right;">113.16129</td>
+<td style="text-align: right;">106.67592</td>
+<td style="text-align: right;">125.99836</td>
+<td style="text-align: left;">msn_x6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PIEN_TD</td>
+<td style="text-align: right;">300.69036</td>
+<td style="text-align: right;">299.00754</td>
+<td style="text-align: right;">293.53857</td>
+<td style="text-align: right;">300.22660</td>
+<td style="text-align: left;">msn_x6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">TSHE_TD</td>
+<td style="text-align: right;">521.38882</td>
+<td style="text-align: right;">402.57062</td>
+<td style="text-align: right;">401.49311</td>
+<td style="text-align: right;">508.01034</td>
+<td style="text-align: left;">msn_x6</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">qplot</span>(t_ns<span class="sc">$</span>min)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: `qplot()` was deprecated in ggplot2 3.4.0.</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="6_Model_Eval_2_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="rfs" class="level3">
+<h3 class="anchored" data-anchor-id="rfs">RFs</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># msn_k3_i, mal_k3_i, msn_x6_i, mal_x6_i, msn_all_i, mal_all_i,</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>t_ns <span class="ot">&lt;-</span> <span class="fu">compare.yai</span>(rf_k3_ps_i, rf_x6_ps_i, rf_all_ps_i , <span class="at">scale =</span> F)</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="fu">compare.yai</span>(rf_k3_ps_i, rf_x6_ps_i, rf_all_ps_i)</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>t</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">rf_k3_ps_i.rmsdS</th>
+<th style="text-align: right;">rf_x6_ps_i.rmsdS</th>
+<th style="text-align: right;">rf_all_ps_i.rmsdS</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">ABGR_TD</td>
+<td style="text-align: right;">0.9357818</td>
+<td style="text-align: right;">0.9561259</td>
+<td style="text-align: right;">0.9303990</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PIPO_TD</td>
+<td style="text-align: right;">0.9525472</td>
+<td style="text-align: right;">1.0574433</td>
+<td style="text-align: right;">0.9735447</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">1.0336982</td>
+<td style="text-align: right;">1.0387179</td>
+<td style="text-align: right;">1.0214409</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ABLA_TD</td>
+<td style="text-align: right;">0.8715753</td>
+<td style="text-align: right;">0.9154921</td>
+<td style="text-align: right;">0.8826580</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">TSME_TD</td>
+<td style="text-align: right;">1.0695598</td>
+<td style="text-align: right;">1.1640388</td>
+<td style="text-align: right;">1.0426396</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ABAM_TD</td>
+<td style="text-align: right;">0.8400696</td>
+<td style="text-align: right;">0.8292489</td>
+<td style="text-align: right;">0.8588616</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">THPL_TD</td>
+<td style="text-align: right;">0.8931089</td>
+<td style="text-align: right;">0.9433035</td>
+<td style="text-align: right;">0.9146314</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PIEN_TD</td>
+<td style="text-align: right;">0.9913967</td>
+<td style="text-align: right;">1.0137402</td>
+<td style="text-align: right;">0.9795178</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">TSHE_TD</td>
+<td style="text-align: right;">0.9908758</td>
+<td style="text-align: right;">0.9478163</td>
+<td style="text-align: right;">0.9972419</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PICO_TD</td>
+<td style="text-align: right;">0.8409484</td>
+<td style="text-align: right;">0.9047692</td>
+<td style="text-align: right;">0.8193283</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PIMO3_TD</td>
+<td style="text-align: right;">1.3297653</td>
+<td style="text-align: right;">1.2056393</td>
+<td style="text-align: right;">1.2933039</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">uncommon</td>
+<td style="text-align: right;">1.0322185</td>
+<td style="text-align: right;">1.2693361</td>
+<td style="text-align: right;">1.0582116</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">rare</td>
+<td style="text-align: right;">1.0215080</td>
+<td style="text-align: right;">1.2091474</td>
+<td style="text-align: right;">1.0251585</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">0.8804059</td>
+<td style="text-align: right;">0.7769208</td>
+<td style="text-align: right;">0.8819280</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(t_ns, <span class="at">main =</span> <span class="st">"Not Scaled"</span>)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(t, <span class="at">main =</span> <span class="st">"Scaled"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="6_Model_Eval_2_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="6_Model_Eval_2_files/figure-html/unnamed-chunk-20-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>t_ns<span class="sc">$</span>min <span class="ot">&lt;-</span> <span class="fu">names</span>(t_ns)[<span class="fu">apply</span>(t_ns, <span class="dv">1</span>, which.min)]</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>t_ns<span class="sc">$</span>min <span class="ot">&lt;-</span> t_ns<span class="sc">$</span>min <span class="sc">|&gt;</span> <span class="fu">str_sub</span>(<span class="dv">1</span>, <span class="dv">6</span>)</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>t_ns<span class="sc">|&gt;</span> <span class="fu">arrange</span>(min)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 26%">
+<col style="width: 10%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">rf_k3_ps_i.rmsdS</th>
+<th style="text-align: right;">rf_x6_ps_i.rmsdS</th>
+<th style="text-align: right;">rf_all_ps_i.rmsdS</th>
+<th style="text-align: left;">min</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">ABGR_TD</td>
+<td style="text-align: right;">239.49222</td>
+<td style="text-align: right;">244.69883</td>
+<td style="text-align: right;">238.11462</td>
+<td style="text-align: left;">rf_all</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">243.54849</td>
+<td style="text-align: right;">244.73117</td>
+<td style="text-align: right;">240.66058</td>
+<td style="text-align: left;">rf_all</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">TSME_TD</td>
+<td style="text-align: right;">77.74687</td>
+<td style="text-align: right;">84.61460</td>
+<td style="text-align: right;">75.79003</td>
+<td style="text-align: left;">rf_all</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PIEN_TD</td>
+<td style="text-align: right;">279.91061</td>
+<td style="text-align: right;">286.21907</td>
+<td style="text-align: right;">276.55670</td>
+<td style="text-align: left;">rf_all</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PICO_TD</td>
+<td style="text-align: right;">269.42713</td>
+<td style="text-align: right;">289.87433</td>
+<td style="text-align: right;">262.50039</td>
+<td style="text-align: left;">rf_all</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PIPO_TD</td>
+<td style="text-align: right;">92.76392</td>
+<td style="text-align: right;">102.97923</td>
+<td style="text-align: right;">94.80876</td>
+<td style="text-align: left;">rf_k3_</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ABLA_TD</td>
+<td style="text-align: right;">259.30735</td>
+<td style="text-align: right;">272.37329</td>
+<td style="text-align: right;">262.60464</td>
+<td style="text-align: left;">rf_k3_</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">THPL_TD</td>
+<td style="text-align: right;">167.83196</td>
+<td style="text-align: right;">177.26447</td>
+<td style="text-align: right;">171.87645</td>
+<td style="text-align: left;">rf_k3_</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">uncommon</td>
+<td style="text-align: right;">280.03253</td>
+<td style="text-align: right;">344.36063</td>
+<td style="text-align: right;">287.08426</td>
+<td style="text-align: left;">rf_k3_</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">rare</td>
+<td style="text-align: right;">152.21296</td>
+<td style="text-align: right;">180.17276</td>
+<td style="text-align: right;">152.75692</td>
+<td style="text-align: left;">rf_k3_</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ABAM_TD</td>
+<td style="text-align: right;">257.22524</td>
+<td style="text-align: right;">253.91199</td>
+<td style="text-align: right;">262.97926</td>
+<td style="text-align: left;">rf_x6_</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">TSHE_TD</td>
+<td style="text-align: right;">479.05363</td>
+<td style="text-align: right;">458.23585</td>
+<td style="text-align: right;">482.13140</td>
+<td style="text-align: left;">rf_x6_</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PIMO3_TD</td>
+<td style="text-align: right;">52.03200</td>
+<td style="text-align: right;">47.17511</td>
+<td style="text-align: right;">50.60531</td>
+<td style="text-align: left;">rf_x6_</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">874.71763</td>
+<td style="text-align: right;">771.90113</td>
+<td style="text-align: right;">876.22994</td>
+<td style="text-align: left;">rf_x6_</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">qplot</span>(t_ns<span class="sc">$</span>min)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="6_Model_Eval_2_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="rf-vs-msn" class="level3">
+<h3 class="anchored" data-anchor-id="rf-vs-msn">rf vs msn</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># msn_k3_i, mal_k3_i, msn_x6_i, mal_x6_i, msn_all_i, mal_all_i,</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>t_ns <span class="ot">&lt;-</span> <span class="fu">compare.yai</span>(rf_k3_ps_i, rf_all_ps_i, msn_x6_i, mal_x6_i, <span class="at">scale =</span> F)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="fu">compare.yai</span>(rf_k3_ps_i, rf_all_ps_i, msn_x6_i, mal_x6_i)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(t_ns, <span class="at">main =</span> <span class="st">"Not Scaled"</span>)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(t, <span class="at">main =</span> <span class="st">"Scaled"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="6_Model_Eval_2_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="6_Model_Eval_2_files/figure-html/unnamed-chunk-23-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>t_ns<span class="sc">$</span>min <span class="ot">&lt;-</span> <span class="fu">names</span>(t_ns)[<span class="fu">apply</span>(t_ns, <span class="dv">1</span>, which.min)]</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>t_ns<span class="sc">$</span>min <span class="ot">&lt;-</span> t_ns<span class="sc">$</span>min <span class="sc">|&gt;</span> <span class="fu">str_sub</span>(<span class="dv">1</span>, <span class="dv">6</span>)</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>t_ns <span class="sc">|&gt;</span> <span class="fu">arrange</span>(min)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 20%">
+<col style="width: 22%">
+<col style="width: 18%">
+<col style="width: 18%">
+<col style="width: 8%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">rf_k3_ps_i.rmsdS</th>
+<th style="text-align: right;">rf_all_ps_i.rmsdS</th>
+<th style="text-align: right;">msn_x6_i.rmsdS</th>
+<th style="text-align: right;">mal_x6_i.rmsdS</th>
+<th style="text-align: left;">min</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">TSHE_TD</td>
+<td style="text-align: right;">479.05363</td>
+<td style="text-align: right;">482.13140</td>
+<td style="text-align: right;">401.49311</td>
+<td style="text-align: right;">508.01034</td>
+<td style="text-align: left;">msn_x6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">874.71763</td>
+<td style="text-align: right;">876.22994</td>
+<td style="text-align: right;">701.41423</td>
+<td style="text-align: right;">754.46481</td>
+<td style="text-align: left;">msn_x6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ABGR_TD</td>
+<td style="text-align: right;">239.49222</td>
+<td style="text-align: right;">238.11462</td>
+<td style="text-align: right;">309.58660</td>
+<td style="text-align: right;">277.73063</td>
+<td style="text-align: left;">rf_all</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">243.54849</td>
+<td style="text-align: right;">240.66058</td>
+<td style="text-align: right;">289.30718</td>
+<td style="text-align: right;">274.08248</td>
+<td style="text-align: left;">rf_all</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">TSME_TD</td>
+<td style="text-align: right;">77.74687</td>
+<td style="text-align: right;">75.79003</td>
+<td style="text-align: right;">98.06111</td>
+<td style="text-align: right;">88.05078</td>
+<td style="text-align: left;">rf_all</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PIEN_TD</td>
+<td style="text-align: right;">279.91061</td>
+<td style="text-align: right;">276.55670</td>
+<td style="text-align: right;">293.53857</td>
+<td style="text-align: right;">300.22660</td>
+<td style="text-align: left;">rf_all</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PICO_TD</td>
+<td style="text-align: right;">269.42713</td>
+<td style="text-align: right;">262.50039</td>
+<td style="text-align: right;">325.26841</td>
+<td style="text-align: right;">315.22969</td>
+<td style="text-align: left;">rf_all</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PIMO3_TD</td>
+<td style="text-align: right;">52.03200</td>
+<td style="text-align: right;">50.60531</td>
+<td style="text-align: right;">52.79650</td>
+<td style="text-align: right;">51.02393</td>
+<td style="text-align: left;">rf_all</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PIPO_TD</td>
+<td style="text-align: right;">92.76392</td>
+<td style="text-align: right;">94.80876</td>
+<td style="text-align: right;">106.67592</td>
+<td style="text-align: right;">125.99836</td>
+<td style="text-align: left;">rf_k3_</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ABLA_TD</td>
+<td style="text-align: right;">259.30735</td>
+<td style="text-align: right;">262.60464</td>
+<td style="text-align: right;">282.62389</td>
+<td style="text-align: right;">261.73287</td>
+<td style="text-align: left;">rf_k3_</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ABAM_TD</td>
+<td style="text-align: right;">257.22524</td>
+<td style="text-align: right;">262.97926</td>
+<td style="text-align: right;">318.73906</td>
+<td style="text-align: right;">289.84361</td>
+<td style="text-align: left;">rf_k3_</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">THPL_TD</td>
+<td style="text-align: right;">167.83196</td>
+<td style="text-align: right;">171.87645</td>
+<td style="text-align: right;">231.77892</td>
+<td style="text-align: right;">183.14742</td>
+<td style="text-align: left;">rf_k3_</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">uncommon</td>
+<td style="text-align: right;">280.03253</td>
+<td style="text-align: right;">287.08426</td>
+<td style="text-align: right;">301.79829</td>
+<td style="text-align: right;">309.27698</td>
+<td style="text-align: left;">rf_k3_</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">rare</td>
+<td style="text-align: right;">152.21296</td>
+<td style="text-align: right;">152.75692</td>
+<td style="text-align: right;">206.30725</td>
+<td style="text-align: right;">190.10477</td>
+<td style="text-align: left;">rf_k3_</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">qplot</span>(t_ns<span class="sc">$</span>min)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="6_Model_Eval_2_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="narrative-summary" class="level2">
+<h2 class="anchored" data-anchor-id="narrative-summary">Narrative Summary</h2>
+<p>Within the msn and mal imputations, The plot comparisons are messy. The scaled version looks to me like mal x6 is best. For the un-scaled one, they mostly look the same.</p>
+<p>mal_x6 had the most species with the lowest rmsd. However, there were no major winners. All of the imputations had similar outcomes by category. mal k3 was pretty far below the others in total TD.</p>
+<p>In Random Forests, The scaled plots look to favor the all predictors rf or the Kralicek 3 with the all set winning. The un-scaled one doesn’t tell me anything.</p>
+<p>In the versus plots, it seems that rf_all is the winner by a hair. rf_k3 is a close runner up.</p>
+</section>
+<section id="what-does-it-all-mean" class="level2">
+<h2 class="anchored" data-anchor-id="what-does-it-all-mean">What does it all mean</h2>
+</section>
+<section id="scratch" class="level2">
+<h2 class="anchored" data-anchor-id="scratch">Scratch</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>all_dist <span class="ot">&lt;-</span> <span class="fu">rmsd</span>(rf_all_ps_i) </span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>zall_dist <span class="ot">&lt;-</span> <span class="fu">rmsd</span>(rf_all_ps_i[rf_all_ps_i<span class="sc">$</span>total_TD.o <span class="sc">&gt;</span> <span class="dv">0</span>,]) </span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>all_dist <span class="sc">|&gt;</span> <span class="fu">arrange</span>(rmsd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">rmsd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">PIMO3_TD</td>
+<td style="text-align: right;">50.60531</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">TSME_TD</td>
+<td style="text-align: right;">75.79003</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PIPO_TD</td>
+<td style="text-align: right;">94.80876</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">rare</td>
+<td style="text-align: right;">152.75692</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">THPL_TD</td>
+<td style="text-align: right;">171.87645</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ABGR_TD</td>
+<td style="text-align: right;">238.11462</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">240.66058</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PICO_TD</td>
+<td style="text-align: right;">262.50039</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ABLA_TD</td>
+<td style="text-align: right;">262.60464</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ABAM_TD</td>
+<td style="text-align: right;">262.97926</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PIEN_TD</td>
+<td style="text-align: right;">276.55670</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">uncommon</td>
+<td style="text-align: right;">287.08426</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">TSHE_TD</td>
+<td style="text-align: right;">482.13140</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">876.22994</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>zall_dist <span class="sc">|&gt;</span> <span class="fu">arrange</span>(rmsd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">rmsd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">PIMO3_TD</td>
+<td style="text-align: right;">68.31418</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">TSME_TD</td>
+<td style="text-align: right;">105.63613</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PIPO_TD</td>
+<td style="text-align: right;">128.84170</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">rare</td>
+<td style="text-align: right;">212.66540</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">THPL_TD</td>
+<td style="text-align: right;">238.03004</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ABGR_TD</td>
+<td style="text-align: right;">326.77793</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">332.61066</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ABAM_TD</td>
+<td style="text-align: right;">360.38604</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ABLA_TD</td>
+<td style="text-align: right;">360.87860</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PICO_TD</td>
+<td style="text-align: right;">361.21077</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PIEN_TD</td>
+<td style="text-align: right;">386.07111</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">uncommon</td>
+<td style="text-align: right;">398.04037</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">TSHE_TD</td>
+<td style="text-align: right;">661.18279</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">1202.28214</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>observed <span class="ot">&lt;-</span> rf_all_ps_i <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">ends_with</span>(<span class="st">".o"</span>)) <span class="sc">|&gt;</span> <span class="fu">drop_na</span>()</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>zobserved <span class="ot">&lt;-</span> rf_all_ps_i[rf_all_ps_i<span class="sc">$</span>total_TD.o <span class="sc">&gt;</span> <span class="dv">0</span>,] <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">ends_with</span>(<span class="st">".o"</span>)) <span class="sc">|&gt;</span> <span class="fu">drop_na</span>()</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(observed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "ABGR_TD.o"  "PIPO_TD.o"  "PSME_TD.o"  "ABLA_TD.o"  "TSME_TD.o" 
+ [6] "ABAM_TD.o"  "THPL_TD.o"  "PIEN_TD.o"  "TSHE_TD.o"  "PICO_TD.o" 
+[11] "PIMO3_TD.o" "uncommon.o" "rare.o"     "total_TD.o"</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>all_dist<span class="sc">$</span>sd <span class="ot">&lt;-</span> <span class="fu">apply</span>(observed, <span class="dv">2</span>, sd)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>all_dist<span class="sc">$</span>mean <span class="ot">&lt;-</span> <span class="fu">apply</span>(observed, <span class="dv">2</span>, mean)</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>all_dist<span class="sc">$</span>med <span class="ot">&lt;-</span> <span class="fu">apply</span>(observed, <span class="dv">2</span>, median)</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>all_dist<span class="sc">$</span>iqr <span class="ot">&lt;-</span> <span class="fu">apply</span>(observed, <span class="dv">2</span>, IQR)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>zall_dist<span class="sc">$</span>sd <span class="ot">&lt;-</span> <span class="fu">apply</span>(zobserved, <span class="dv">2</span>, sd)</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>zall_dist<span class="sc">$</span>mean <span class="ot">&lt;-</span> <span class="fu">apply</span>(zobserved, <span class="dv">2</span>, mean)</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>zall_dist<span class="sc">$</span>med <span class="ot">&lt;-</span> <span class="fu">apply</span>(zobserved, <span class="dv">2</span>, median)</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>zall_dist<span class="sc">$</span>iqr <span class="ot">&lt;-</span> <span class="fu">apply</span>(zobserved, <span class="dv">2</span>, IQR)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>std dev is uniformly higher than the mean. Makes sense because of zeroes.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>all_dist</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">rmsd</th>
+<th style="text-align: right;">sd</th>
+<th style="text-align: right;">mean</th>
+<th style="text-align: right;">med</th>
+<th style="text-align: right;">iqr</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">ABGR_TD</td>
+<td style="text-align: right;">238.11462</td>
+<td style="text-align: right;">255.92742</td>
+<td style="text-align: right;">37.500239</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PIPO_TD</td>
+<td style="text-align: right;">94.80876</td>
+<td style="text-align: right;">97.38511</td>
+<td style="text-align: right;">8.600770</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">240.66058</td>
+<td style="text-align: right;">235.60890</td>
+<td style="text-align: right;">42.255959</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ABLA_TD</td>
+<td style="text-align: right;">262.60464</td>
+<td style="text-align: right;">297.51573</td>
+<td style="text-align: right;">53.685525</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">TSME_TD</td>
+<td style="text-align: right;">75.79003</td>
+<td style="text-align: right;">72.69053</td>
+<td style="text-align: right;">5.895157</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ABAM_TD</td>
+<td style="text-align: right;">262.97926</td>
+<td style="text-align: right;">306.19517</td>
+<td style="text-align: right;">50.284811</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">THPL_TD</td>
+<td style="text-align: right;">171.87645</td>
+<td style="text-align: right;">187.91881</td>
+<td style="text-align: right;">21.662503</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PIEN_TD</td>
+<td style="text-align: right;">276.55670</td>
+<td style="text-align: right;">282.33965</td>
+<td style="text-align: right;">13.096928</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">TSHE_TD</td>
+<td style="text-align: right;">482.13140</td>
+<td style="text-align: right;">483.46485</td>
+<td style="text-align: right;">30.531635</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PICO_TD</td>
+<td style="text-align: right;">262.50039</td>
+<td style="text-align: right;">320.38485</td>
+<td style="text-align: right;">27.438877</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PIMO3_TD</td>
+<td style="text-align: right;">50.60531</td>
+<td style="text-align: right;">39.12871</td>
+<td style="text-align: right;">3.343522</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">uncommon</td>
+<td style="text-align: right;">287.08426</td>
+<td style="text-align: right;">271.29191</td>
+<td style="text-align: right;">22.687556</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">rare</td>
+<td style="text-align: right;">152.75692</td>
+<td style="text-align: right;">149.00810</td>
+<td style="text-align: right;">11.992685</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">876.22994</td>
+<td style="text-align: right;">993.53904</td>
+<td style="text-align: right;">328.976167</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">299.8611</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>zall_dist</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">rmsd</th>
+<th style="text-align: right;">sd</th>
+<th style="text-align: right;">mean</th>
+<th style="text-align: right;">med</th>
+<th style="text-align: right;">iqr</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">ABGR_TD</td>
+<td style="text-align: right;">326.77793</td>
+<td style="text-align: right;">354.16540</td>
+<td style="text-align: right;">73.31391</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.00000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PIPO_TD</td>
+<td style="text-align: right;">128.84170</td>
+<td style="text-align: right;">135.66169</td>
+<td style="text-align: right;">16.81472</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.00000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">332.61066</td>
+<td style="text-align: right;">324.34297</td>
+<td style="text-align: right;">82.61147</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">74.96528</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ABLA_TD</td>
+<td style="text-align: right;">360.87860</td>
+<td style="text-align: right;">409.48517</td>
+<td style="text-align: right;">104.95656</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.00000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">TSME_TD</td>
+<td style="text-align: right;">105.63613</td>
+<td style="text-align: right;">101.32062</td>
+<td style="text-align: right;">11.52518</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.00000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ABAM_TD</td>
+<td style="text-align: right;">360.38604</td>
+<td style="text-align: right;">422.59081</td>
+<td style="text-align: right;">98.30807</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.00000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">THPL_TD</td>
+<td style="text-align: right;">238.03004</td>
+<td style="text-align: right;">261.08687</td>
+<td style="text-align: right;">42.35074</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.00000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PIEN_TD</td>
+<td style="text-align: right;">386.07111</td>
+<td style="text-align: right;">394.37875</td>
+<td style="text-align: right;">25.60482</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.00000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">TSHE_TD</td>
+<td style="text-align: right;">661.18279</td>
+<td style="text-align: right;">674.72153</td>
+<td style="text-align: right;">59.69012</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.00000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PICO_TD</td>
+<td style="text-align: right;">361.21077</td>
+<td style="text-align: right;">446.40986</td>
+<td style="text-align: right;">53.64370</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.00000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PIMO3_TD</td>
+<td style="text-align: right;">68.31418</td>
+<td style="text-align: right;">54.52106</td>
+<td style="text-align: right;">6.53667</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.00000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">uncommon</td>
+<td style="text-align: right;">398.04037</td>
+<td style="text-align: right;">378.06799</td>
+<td style="text-align: right;">44.35475</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.00000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">rare</td>
+<td style="text-align: right;">212.66540</td>
+<td style="text-align: right;">207.70677</td>
+<td style="text-align: right;">23.44600</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.00000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">1202.28214</td>
+<td style="text-align: right;">1314.48158</td>
+<td style="text-align: right;">643.15671</td>
+<td style="text-align: right;">299.8611</td>
+<td style="text-align: right;">524.75698</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>This is the best I’ve done, lol. Feeling a bit defeated. rmsd is very close to sd. Perhaps a bit better in total TD.</p>
+<p>There is a chance that running the rf or msn x6 per FPAG would work better.</p>
+<section id="testing-rmsd" class="level3">
+<h3 class="anchored" data-anchor-id="testing-rmsd">testing rmsd</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> rf_all_ps_i <span class="sc">|&gt;</span> <span class="fu">select</span>(total_TD, total_TD.o) <span class="sc">|&gt;</span> <span class="fu">drop_na</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">diff =</span> (total_TD <span class="sc">-</span> total_TD.o),</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">squared =</span> diff<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>) </span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>tr <span class="ot">&lt;-</span> <span class="fu">sqrt</span>((<span class="fu">sum</span>(t<span class="sc">$</span>squared))<span class="sc">/</span><span class="fu">nrow</span>(t))</span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>tr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 876.2299</code></pre>
+</div>
+</div>
+<p>That is the correct value of rmsd. 0.8819280 is the scaled one. 993.53904 is the sd of the reference rows above.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>tr<span class="sc">/</span><span class="fl">993.53904</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.881928</code></pre>
+</div>
+</div>
+<p>Normalizing by the sd in this case isn’t great. There is just too many zeroes.</p>
+<p>Obviously what I am about to do isn’t great. However, it’s easier than running another imputation.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>cns_ref <span class="ot">&lt;-</span> <span class="fu">rownames_to_column</span>(t, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>ref_fpags <span class="ot">&lt;-</span> <span class="fu">left_join</span>(cns_ref, imp_data, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>ref_fpags <span class="ot">&lt;-</span> ref_fpags <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN, FPAG)</span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ref_fpags &lt;- unique(ref_fpags$FPAG)</span></span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rownames_to_column</span>(t, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">left_join</span>(ref_fpags, x, <span class="at">by =</span> <span class="st">"STANDPLOT_CN"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>x2 <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span> <span class="fu">group_by</span>(FPAG) <span class="sc">|&gt;</span> </span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">rmsd_t_TD =</span> <span class="fu">sqrt</span>((<span class="fu">sum</span>(squared))<span class="sc">/</span>n),</span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean =</span> <span class="fu">mean</span>(total_TD.o), </span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd =</span> <span class="fu">sd</span>(total_TD.o), </span>
+<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">iqr =</span> <span class="fu">IQR</span>(total_TD.o)) <span class="sc">|&gt;</span> </span>
+<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(rmsd_t_TD)</span>
+<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-10"><a href="#cb58-10" aria-hidden="true" tabindex="-1"></a>x2 <span class="ot">&lt;-</span> x2 <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">id =</span> <span class="fu">row_number</span>())</span>
+<span id="cb58-11"><a href="#cb58-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-12"><a href="#cb58-12" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(x2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">FPAG</th>
+<th style="text-align: right;">n</th>
+<th style="text-align: right;">rmsd_t_TD</th>
+<th style="text-align: right;">mean</th>
+<th style="text-align: right;">sd</th>
+<th style="text-align: right;">iqr</th>
+<th style="text-align: right;">id</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">CPS2</td>
+<td style="text-align: right;">257</td>
+<td style="text-align: right;">137.4518</td>
+<td style="text-align: right;">49.58793</td>
+<td style="text-align: right;">197.2045</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CHS3</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">189.7414</td>
+<td style="text-align: right;">60.90929</td>
+<td style="text-align: right;">178.0505</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CP</td>
+<td style="text-align: right;">195</td>
+<td style="text-align: right;">203.1489</td>
+<td style="text-align: right;">96.49377</td>
+<td style="text-align: right;">176.7064</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CDG3</td>
+<td style="text-align: right;">293</td>
+<td style="text-align: right;">232.6922</td>
+<td style="text-align: right;">85.71116</td>
+<td style="text-align: right;">249.4038</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CPG1</td>
+<td style="text-align: right;">169</td>
+<td style="text-align: right;">326.8678</td>
+<td style="text-align: right;">112.22613</td>
+<td style="text-align: right;">318.0638</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CES1</td>
+<td style="text-align: right;">236</td>
+<td style="text-align: right;">369.2902</td>
+<td style="text-align: right;">190.90735</td>
+<td style="text-align: right;">403.6852</td>
+<td style="text-align: right;">149.93057</td>
+<td style="text-align: right;">6</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span>(x2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">FPAG</th>
+<th style="text-align: right;">n</th>
+<th style="text-align: right;">rmsd_t_TD</th>
+<th style="text-align: right;">mean</th>
+<th style="text-align: right;">sd</th>
+<th style="text-align: right;">iqr</th>
+<th style="text-align: right;">id</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">CEF4</td>
+<td style="text-align: right;">397</td>
+<td style="text-align: right;">1232.219</td>
+<td style="text-align: right;">451.6800</td>
+<td style="text-align: right;">1307.486</td>
+<td style="text-align: right;">374.82641</td>
+<td style="text-align: right;">45</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CFS5</td>
+<td style="text-align: right;">239</td>
+<td style="text-align: right;">1346.715</td>
+<td style="text-align: right;">734.9107</td>
+<td style="text-align: right;">1535.391</td>
+<td style="text-align: right;">749.65282</td>
+<td style="text-align: right;">46</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CHF1</td>
+<td style="text-align: right;">416</td>
+<td style="text-align: right;">1371.617</td>
+<td style="text-align: right;">231.7436</td>
+<td style="text-align: right;">1389.242</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">47</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CFS2</td>
+<td style="text-align: right;">877</td>
+<td style="text-align: right;">1613.041</td>
+<td style="text-align: right;">610.4926</td>
+<td style="text-align: right;">1907.733</td>
+<td style="text-align: right;">674.68754</td>
+<td style="text-align: right;">48</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CES2</td>
+<td style="text-align: right;">464</td>
+<td style="text-align: right;">1780.572</td>
+<td style="text-align: right;">749.8144</td>
+<td style="text-align: right;">1863.135</td>
+<td style="text-align: right;">749.65283</td>
+<td style="text-align: right;">49</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CH</td>
+<td style="text-align: right;">118</td>
+<td style="text-align: right;">1865.804</td>
+<td style="text-align: right;">536.1924</td>
+<td style="text-align: right;">1407.621</td>
+<td style="text-align: right;">299.86113</td>
+<td style="text-align: right;">50</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>I was wishing I could scale by iqr due to the outliers.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>x2 <span class="ot">&lt;-</span> x2 <span class="sc">|&gt;</span> <span class="fu">mutate</span>(</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">scaled =</span> rmsd_t_TD<span class="sc">/</span>sd, </span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">sc_iqr =</span> rmsd_t_TD<span class="sc">/</span>iqr</span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>x2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 4%">
+<col style="width: 13%">
+<col style="width: 13%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">FPAG</th>
+<th style="text-align: right;">n</th>
+<th style="text-align: right;">rmsd_t_TD</th>
+<th style="text-align: right;">mean</th>
+<th style="text-align: right;">sd</th>
+<th style="text-align: right;">iqr</th>
+<th style="text-align: right;">id</th>
+<th style="text-align: right;">scaled</th>
+<th style="text-align: right;">sc_iqr</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">CPS2</td>
+<td style="text-align: right;">257</td>
+<td style="text-align: right;">137.4518</td>
+<td style="text-align: right;">49.58793</td>
+<td style="text-align: right;">197.2045</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.6970016</td>
+<td style="text-align: right;">Inf</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CHS3</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">189.7414</td>
+<td style="text-align: right;">60.90929</td>
+<td style="text-align: right;">178.0505</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1.0656606</td>
+<td style="text-align: right;">2.531057</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CP</td>
+<td style="text-align: right;">195</td>
+<td style="text-align: right;">203.1489</td>
+<td style="text-align: right;">96.49377</td>
+<td style="text-align: right;">176.7064</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">1.1496409</td>
+<td style="text-align: right;">2.709906</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CDG3</td>
+<td style="text-align: right;">293</td>
+<td style="text-align: right;">232.6922</td>
+<td style="text-align: right;">85.71116</td>
+<td style="text-align: right;">249.4038</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.9329938</td>
+<td style="text-align: right;">3.103999</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CPG1</td>
+<td style="text-align: right;">169</td>
+<td style="text-align: right;">326.8678</td>
+<td style="text-align: right;">112.22613</td>
+<td style="text-align: right;">318.0638</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">1.0276800</td>
+<td style="text-align: right;">4.360256</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CES1</td>
+<td style="text-align: right;">236</td>
+<td style="text-align: right;">369.2902</td>
+<td style="text-align: right;">190.90735</td>
+<td style="text-align: right;">403.6852</td>
+<td style="text-align: right;">149.93057</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0.9147974</td>
+<td style="text-align: right;">2.463075</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CFS1</td>
+<td style="text-align: right;">96</td>
+<td style="text-align: right;">381.1759</td>
+<td style="text-align: right;">310.01268</td>
+<td style="text-align: right;">499.5920</td>
+<td style="text-align: right;">374.82641</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">0.7629744</td>
+<td style="text-align: right;">1.016940</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CPG2</td>
+<td style="text-align: right;">141</td>
+<td style="text-align: right;">390.1955</td>
+<td style="text-align: right;">127.06881</td>
+<td style="text-align: right;">307.2588</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">1.2699247</td>
+<td style="text-align: right;">5.205017</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CHS1</td>
+<td style="text-align: right;">556</td>
+<td style="text-align: right;">402.8608</td>
+<td style="text-align: right;">192.40190</td>
+<td style="text-align: right;">450.1353</td>
+<td style="text-align: right;">224.89585</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">0.8949771</td>
+<td style="text-align: right;">1.791322</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CDS6</td>
+<td style="text-align: right;">2371</td>
+<td style="text-align: right;">439.4012</td>
+<td style="text-align: right;">125.49018</td>
+<td style="text-align: right;">455.5564</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0.9645376</td>
+<td style="text-align: right;">5.861396</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CD</td>
+<td style="text-align: right;">260</td>
+<td style="text-align: right;">441.9872</td>
+<td style="text-align: right;">151.94886</td>
+<td style="text-align: right;">413.3093</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">1.0693859</td>
+<td style="text-align: right;">5.895892</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CAS3</td>
+<td style="text-align: right;">160</td>
+<td style="text-align: right;">473.0838</td>
+<td style="text-align: right;">292.83313</td>
+<td style="text-align: right;">488.3555</td>
+<td style="text-align: right;">393.56773</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0.9687283</td>
+<td style="text-align: right;">1.202039</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CWS5</td>
+<td style="text-align: right;">507</td>
+<td style="text-align: right;">480.2429</td>
+<td style="text-align: right;">197.68951</td>
+<td style="text-align: right;">533.5848</td>
+<td style="text-align: right;">149.93057</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">0.9000310</td>
+<td style="text-align: right;">3.203102</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CWS2</td>
+<td style="text-align: right;">339</td>
+<td style="text-align: right;">482.2000</td>
+<td style="text-align: right;">280.84339</td>
+<td style="text-align: right;">580.9388</td>
+<td style="text-align: right;">299.86113</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">0.8300358</td>
+<td style="text-align: right;">1.608078</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CHS5</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">501.4275</td>
+<td style="text-align: right;">161.92501</td>
+<td style="text-align: right;">343.1533</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">1.4612348</td>
+<td style="text-align: right;">6.688797</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CDS2</td>
+<td style="text-align: right;">63</td>
+<td style="text-align: right;">516.1011</td>
+<td style="text-align: right;">168.96937</td>
+<td style="text-align: right;">494.1491</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">1.0444239</td>
+<td style="text-align: right;">6.884535</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CHF2</td>
+<td style="text-align: right;">170</td>
+<td style="text-align: right;">561.4011</td>
+<td style="text-align: right;">204.61112</td>
+<td style="text-align: right;">491.5989</td>
+<td style="text-align: right;">149.93057</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">1.1419902</td>
+<td style="text-align: right;">3.744408</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CWS3</td>
+<td style="text-align: right;">304</td>
+<td style="text-align: right;">565.8775</td>
+<td style="text-align: right;">227.85500</td>
+<td style="text-align: right;">566.6718</td>
+<td style="text-align: right;">149.93057</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">0.9985982</td>
+<td style="text-align: right;">3.774264</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CHS6</td>
+<td style="text-align: right;">80</td>
+<td style="text-align: right;">615.3892</td>
+<td style="text-align: right;">374.82641</td>
+<td style="text-align: right;">572.1632</td>
+<td style="text-align: right;">468.53302</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">1.0755483</td>
+<td style="text-align: right;">1.313438</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CHF4</td>
+<td style="text-align: right;">47</td>
+<td style="text-align: right;">616.7272</td>
+<td style="text-align: right;">314.21618</td>
+<td style="text-align: right;">621.4590</td>
+<td style="text-align: right;">224.89585</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">0.9923859</td>
+<td style="text-align: right;">2.742279</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CWS4</td>
+<td style="text-align: right;">194</td>
+<td style="text-align: right;">642.4680</td>
+<td style="text-align: right;">273.97106</td>
+<td style="text-align: right;">516.8418</td>
+<td style="text-align: right;">299.86113</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">1.2430652</td>
+<td style="text-align: right;">2.142552</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CHS2</td>
+<td style="text-align: right;">133</td>
+<td style="text-align: right;">643.1042</td>
+<td style="text-align: right;">236.16882</td>
+<td style="text-align: right;">502.0772</td>
+<td style="text-align: right;">299.86113</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">1.2808872</td>
+<td style="text-align: right;">2.144673</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CPS5</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">653.1646</td>
+<td style="text-align: right;">235.14751</td>
+<td style="text-align: right;">560.4623</td>
+<td style="text-align: right;">224.89585</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">1.1654033</td>
+<td style="text-align: right;">2.904298</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CDS8</td>
+<td style="text-align: right;">410</td>
+<td style="text-align: right;">661.3194</td>
+<td style="text-align: right;">325.27619</td>
+<td style="text-align: right;">887.0002</td>
+<td style="text-align: right;">224.89585</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">0.7455684</td>
+<td style="text-align: right;">2.940558</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CHM1</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">668.5349</td>
+<td style="text-align: right;">268.99307</td>
+<td style="text-align: right;">614.2231</td>
+<td style="text-align: right;">149.93057</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">1.0884236</td>
+<td style="text-align: right;">4.458963</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CDG1</td>
+<td style="text-align: right;">1090</td>
+<td style="text-align: right;">681.1180</td>
+<td style="text-align: right;">188.10096</td>
+<td style="text-align: right;">701.7175</td>
+<td style="text-align: right;">149.93056</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">0.9706441</td>
+<td style="text-align: right;">4.542889</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CES3</td>
+<td style="text-align: right;">404</td>
+<td style="text-align: right;">693.5968</td>
+<td style="text-align: right;">449.42058</td>
+<td style="text-align: right;">832.4863</td>
+<td style="text-align: right;">449.79170</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">0.8331631</td>
+<td style="text-align: right;">1.542040</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CDS7</td>
+<td style="text-align: right;">1352</td>
+<td style="text-align: right;">726.7382</td>
+<td style="text-align: right;">141.22528</td>
+<td style="text-align: right;">729.4341</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: right;">0.9963041</td>
+<td style="text-align: right;">9.694330</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CFS3</td>
+<td style="text-align: right;">119</td>
+<td style="text-align: right;">738.1305</td>
+<td style="text-align: right;">405.69447</td>
+<td style="text-align: right;">843.4850</td>
+<td style="text-align: right;">449.79170</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">0.8750961</td>
+<td style="text-align: right;">1.641050</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CCS3</td>
+<td style="text-align: right;">170</td>
+<td style="text-align: right;">754.0935</td>
+<td style="text-align: right;">604.13198</td>
+<td style="text-align: right;">1028.9620</td>
+<td style="text-align: right;">674.68754</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">0.7328681</td>
+<td style="text-align: right;">1.117693</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CFF2</td>
+<td style="text-align: right;">62</td>
+<td style="text-align: right;">754.8942</td>
+<td style="text-align: right;">392.96317</td>
+<td style="text-align: right;">768.5475</td>
+<td style="text-align: right;">374.82641</td>
+<td style="text-align: right;">31</td>
+<td style="text-align: right;">0.9822349</td>
+<td style="text-align: right;">2.013983</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CW</td>
+<td style="text-align: right;">79</td>
+<td style="text-align: right;">781.4781</td>
+<td style="text-align: right;">443.14920</td>
+<td style="text-align: right;">879.1844</td>
+<td style="text-align: right;">524.75698</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">0.8888671</td>
+<td style="text-align: right;">1.489219</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CCF2</td>
+<td style="text-align: right;">621</td>
+<td style="text-align: right;">865.9590</td>
+<td style="text-align: right;">473.45223</td>
+<td style="text-align: right;">1065.2447</td>
+<td style="text-align: right;">449.79170</td>
+<td style="text-align: right;">33</td>
+<td style="text-align: right;">0.8129202</td>
+<td style="text-align: right;">1.925245</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CWG1</td>
+<td style="text-align: right;">296</td>
+<td style="text-align: right;">893.4207</td>
+<td style="text-align: right;">402.17861</td>
+<td style="text-align: right;">1112.2111</td>
+<td style="text-align: right;">374.82641</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">0.8032834</td>
+<td style="text-align: right;">2.383558</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CFF1</td>
+<td style="text-align: right;">106</td>
+<td style="text-align: right;">898.0203</td>
+<td style="text-align: right;">388.26359</td>
+<td style="text-align: right;">979.9322</td>
+<td style="text-align: right;">299.86113</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">0.9164106</td>
+<td style="text-align: right;">2.994787</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CES4</td>
+<td style="text-align: right;">938</td>
+<td style="text-align: right;">901.6323</td>
+<td style="text-align: right;">575.34655</td>
+<td style="text-align: right;">1356.4323</td>
+<td style="text-align: right;">580.98094</td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;">0.6647087</td>
+<td style="text-align: right;">1.551914</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CMS2</td>
+<td style="text-align: right;">376</td>
+<td style="text-align: right;">905.8420</td>
+<td style="text-align: right;">662.32625</td>
+<td style="text-align: right;">996.5273</td>
+<td style="text-align: right;">749.65283</td>
+<td style="text-align: right;">37</td>
+<td style="text-align: right;">0.9089986</td>
+<td style="text-align: right;">1.208349</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CAC1</td>
+<td style="text-align: right;">145</td>
+<td style="text-align: right;">978.0025</td>
+<td style="text-align: right;">601.27327</td>
+<td style="text-align: right;">870.4114</td>
+<td style="text-align: right;">674.68754</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">1.1236095</td>
+<td style="text-align: right;">1.449564</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CWF4</td>
+<td style="text-align: right;">172</td>
+<td style="text-align: right;">1015.8177</td>
+<td style="text-align: right;">331.67779</td>
+<td style="text-align: right;">800.3695</td>
+<td style="text-align: right;">374.82641</td>
+<td style="text-align: right;">39</td>
+<td style="text-align: right;">1.2691859</td>
+<td style="text-align: right;">2.710102</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CMS3</td>
+<td style="text-align: right;">371</td>
+<td style="text-align: right;">1018.0696</td>
+<td style="text-align: right;">788.24681</td>
+<td style="text-align: right;">1191.8140</td>
+<td style="text-align: right;">899.58339</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">0.8542185</td>
+<td style="text-align: right;">1.131712</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CEF2</td>
+<td style="text-align: right;">163</td>
+<td style="text-align: right;">1024.2937</td>
+<td style="text-align: right;">428.63585</td>
+<td style="text-align: right;">973.8903</td>
+<td style="text-align: right;">412.30905</td>
+<td style="text-align: right;">41</td>
+<td style="text-align: right;">1.0517547</td>
+<td style="text-align: right;">2.484286</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CDS4</td>
+<td style="text-align: right;">310</td>
+<td style="text-align: right;">1052.6960</td>
+<td style="text-align: right;">236.74520</td>
+<td style="text-align: right;">1056.3131</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">42</td>
+<td style="text-align: right;">0.9965757</td>
+<td style="text-align: right;">14.042447</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CHF3</td>
+<td style="text-align: right;">358</td>
+<td style="text-align: right;">1209.7200</td>
+<td style="text-align: right;">653.11932</td>
+<td style="text-align: right;">1202.3242</td>
+<td style="text-align: right;">749.65283</td>
+<td style="text-align: right;">43</td>
+<td style="text-align: right;">1.0061512</td>
+<td style="text-align: right;">1.613707</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CEG3</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: right;">1219.0332</td>
+<td style="text-align: right;">445.29378</td>
+<td style="text-align: right;">1348.2998</td>
+<td style="text-align: right;">243.63717</td>
+<td style="text-align: right;">44</td>
+<td style="text-align: right;">0.9041263</td>
+<td style="text-align: right;">5.003478</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CEF4</td>
+<td style="text-align: right;">397</td>
+<td style="text-align: right;">1232.2189</td>
+<td style="text-align: right;">451.67999</td>
+<td style="text-align: right;">1307.4864</td>
+<td style="text-align: right;">374.82641</td>
+<td style="text-align: right;">45</td>
+<td style="text-align: right;">0.9424335</td>
+<td style="text-align: right;">3.287439</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CFS5</td>
+<td style="text-align: right;">239</td>
+<td style="text-align: right;">1346.7150</td>
+<td style="text-align: right;">734.91070</td>
+<td style="text-align: right;">1535.3914</td>
+<td style="text-align: right;">749.65282</td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">0.8771151</td>
+<td style="text-align: right;">1.796452</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CHF1</td>
+<td style="text-align: right;">416</td>
+<td style="text-align: right;">1371.6173</td>
+<td style="text-align: right;">231.74364</td>
+<td style="text-align: right;">1389.2420</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">47</td>
+<td style="text-align: right;">0.9873135</td>
+<td style="text-align: right;">18.296700</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CFS2</td>
+<td style="text-align: right;">877</td>
+<td style="text-align: right;">1613.0407</td>
+<td style="text-align: right;">610.49264</td>
+<td style="text-align: right;">1907.7328</td>
+<td style="text-align: right;">674.68754</td>
+<td style="text-align: right;">48</td>
+<td style="text-align: right;">0.8455276</td>
+<td style="text-align: right;">2.390797</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CES2</td>
+<td style="text-align: right;">464</td>
+<td style="text-align: right;">1780.5717</td>
+<td style="text-align: right;">749.81439</td>
+<td style="text-align: right;">1863.1351</td>
+<td style="text-align: right;">749.65283</td>
+<td style="text-align: right;">49</td>
+<td style="text-align: right;">0.9556858</td>
+<td style="text-align: right;">2.375195</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CH</td>
+<td style="text-align: right;">118</td>
+<td style="text-align: right;">1865.8038</td>
+<td style="text-align: right;">536.19236</td>
+<td style="text-align: right;">1407.6213</td>
+<td style="text-align: right;">299.86113</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">1.3255013</td>
+<td style="text-align: right;">6.222226</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="ploting-differences." class="level3">
+<h3 class="anchored" data-anchor-id="ploting-differences.">ploting differences.</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(diff))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(t2<span class="sc">$</span>diff)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="6_Model_Eval_2_files/figure-html/unnamed-chunk-37-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(t2<span class="sc">$</span>diff, <span class="at">breaks =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="6_Model_Eval_2_files/figure-html/unnamed-chunk-37-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(t2<span class="sc">$</span>diff, <span class="at">breaks =</span> <span class="dv">100</span>,</span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3000</span>, <span class="dv">3000</span>),</span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">200</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="6_Model_Eval_2_files/figure-html/unnamed-chunk-37-3.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>t3 <span class="ot">&lt;-</span> t2 <span class="sc">|&gt;</span> <span class="fu">filter</span>(total_TD.o <span class="sc">&lt;</span> <span class="dv">5000</span> <span class="sc">&amp;</span> total_TD <span class="sc">&lt;</span> <span class="dv">5000</span>)</span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(t3<span class="sc">$</span>diff)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="6_Model_Eval_2_files/figure-html/unnamed-chunk-38-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(t3<span class="sc">$</span>diff, <span class="at">breaks =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="6_Model_Eval_2_files/figure-html/unnamed-chunk-38-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>((<span class="fu">sum</span>(t3<span class="sc">$</span>squared))<span class="sc">/</span><span class="fu">nrow</span>(t3))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 526.5958</code></pre>
+</div>
+</div>
+<p>rmsd could be as low as 526 if there weren’t so many outliers.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>t4 <span class="ot">&lt;-</span> t2 <span class="sc">|&gt;</span> <span class="fu">filter</span>(diff <span class="sc">&lt;</span> <span class="dv">2000</span> <span class="sc">&amp;</span> diff <span class="sc">&gt;</span> <span class="sc">-</span><span class="dv">2000</span>)</span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(t4<span class="sc">$</span>diff)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="6_Model_Eval_2_files/figure-html/unnamed-chunk-40-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(t4<span class="sc">$</span>diff, <span class="at">breaks =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="6_Model_Eval_2_files/figure-html/unnamed-chunk-40-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="ci-on-diff" class="level2">
+<h2 class="anchored" data-anchor-id="ci-on-diff">CI on diff</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>mean <span class="ot">&lt;-</span> <span class="fu">mean</span>(t2<span class="sc">$</span>diff)</span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>sd <span class="ot">&lt;-</span> <span class="fu">sd</span>(t2<span class="sc">$</span>diff)</span>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a>ts <span class="ot">&lt;-</span> sd<span class="sc">/</span><span class="fu">sqrt</span>(<span class="fu">nrow</span>(t2))</span>
+<span id="cb71-4"><a href="#cb71-4" aria-hidden="true" tabindex="-1"></a>dfr <span class="ot">&lt;-</span> <span class="fu">nrow</span>(t2)<span class="sc">-</span><span class="dv">1</span></span>
+<span id="cb71-5"><a href="#cb71-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-6"><a href="#cb71-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-7"><a href="#cb71-7" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">qt</span>(<span class="at">p =</span> (.<span class="dv">05</span><span class="sc">/</span><span class="dv">2</span>), <span class="at">df =</span>dfr, )</span>
+<span id="cb71-8"><a href="#cb71-8" aria-hidden="true" tabindex="-1"></a>mar <span class="ot">&lt;-</span> z<span class="sc">*</span>ts</span>
+<span id="cb71-9"><a href="#cb71-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-10"><a href="#cb71-10" aria-hidden="true" tabindex="-1"></a>ci <span class="ot">&lt;-</span> <span class="fu">c</span>(mean<span class="sc">+</span>mar, mean<span class="sc">-</span>mar)</span>
+<span id="cb71-11"><a href="#cb71-11" aria-hidden="true" tabindex="-1"></a>ci</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -83.64118 -57.41146</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>med <span class="ot">&lt;-</span> <span class="fu">median</span>(t2<span class="sc">$</span>diff)</span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a>t2 <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="fu">near</span>(diff, <span class="dv">0</span>, <span class="at">tol =</span> .<span class="dv">5</span>)) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 8293</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>t2 <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="fu">near</span>(diff, <span class="dv">0</span>, <span class="at">tol =</span> <span class="dv">75</span><span class="sc">*</span><span class="dv">30</span>)) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 16746</code></pre>
+</div>
+</div>
+<p>of 17,040</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">num subplots</th>
+<th style="text-align: center;">diff of trees</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">8293</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">10751</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">12051</td>
+<td style="text-align: center;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">13013</td>
+<td style="text-align: center;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">13667</td>
+<td style="text-align: center;">4</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">14141</td>
+<td style="text-align: center;">5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">14593</td>
+<td style="text-align: center;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">15572</td>
+<td style="text-align: center;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">16455</td>
+<td style="text-align: center;">20</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">16746</td>
+<td style="text-align: center;">30</td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="dv">16746</span><span class="sc">/</span><span class="fu">nrow</span>(t2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.9827465</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a>((<span class="dv">1</span><span class="fl">-.975</span>)<span class="sc">/</span><span class="dv">2</span>)<span class="sc">*</span><span class="fu">nrow</span>(t2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 213</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a>tt <span class="ot">&lt;-</span> t2[<span class="dv">213</span><span class="sc">:</span>(<span class="fu">nrow</span>(t2)<span class="sc">-</span><span class="dv">213</span>),]</span>
+<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a>look <span class="ot">&lt;-</span> t2[<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">213</span>, (<span class="fu">nrow</span>(t2)<span class="sc">-</span><span class="dv">213</span>)<span class="sc">:</span><span class="fu">nrow</span>(t2)),]</span>
+<span id="cb81-3"><a href="#cb81-3" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(tt<span class="sc">$</span>diff, <span class="at">breaks =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="6_Model_Eval_2_files/figure-html/unnamed-chunk-43-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="fu">range</span>(tt<span class="sc">$</span>diff)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -2248.958  1499.306</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(tt<span class="sc">$</span>diff)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -42.87211</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>mean <span class="ot">&lt;-</span> <span class="fu">mean</span>(t4<span class="sc">$</span>diff)</span>
+<span id="cb86-2"><a href="#cb86-2" aria-hidden="true" tabindex="-1"></a>sd <span class="ot">&lt;-</span> <span class="fu">sd</span>(t4<span class="sc">$</span>diff)</span>
+<span id="cb86-3"><a href="#cb86-3" aria-hidden="true" tabindex="-1"></a>ts <span class="ot">&lt;-</span> sd<span class="sc">/</span><span class="fu">sqrt</span>(<span class="fu">nrow</span>(t4))</span>
+<span id="cb86-4"><a href="#cb86-4" aria-hidden="true" tabindex="-1"></a>dfr <span class="ot">&lt;-</span> <span class="fu">nrow</span>(t4)<span class="sc">-</span><span class="dv">1</span></span>
+<span id="cb86-5"><a href="#cb86-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb86-6"><a href="#cb86-6" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">qt</span>(<span class="at">p =</span> (.<span class="dv">05</span><span class="sc">/</span><span class="dv">2</span>), <span class="at">df =</span>dfr, )</span>
+<span id="cb86-7"><a href="#cb86-7" aria-hidden="true" tabindex="-1"></a>mar <span class="ot">&lt;-</span> z<span class="sc">*</span>ts</span>
+<span id="cb86-8"><a href="#cb86-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb86-9"><a href="#cb86-9" aria-hidden="true" tabindex="-1"></a>ci <span class="ot">&lt;-</span> <span class="fu">c</span>(mean<span class="sc">+</span>mar, mean<span class="sc">-</span>mar)</span>
+<span id="cb86-10"><a href="#cb86-10" aria-hidden="true" tabindex="-1"></a>ci</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -33.71306 -22.20835</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(t4<span class="sc">$</span>diff) <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span><span class="fu">sd</span>(t4<span class="sc">$</span>diff)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 729.6965</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(t4<span class="sc">$</span>diff) <span class="sc">-</span> <span class="dv">2</span><span class="sc">*</span><span class="fu">sd</span>(t4<span class="sc">$</span>diff)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -785.6179</code></pre>
+</div>
+</div>
+<p>Looks like the iputation is biased. The 95% confident</p>
+</section>
+<section id="imp-fix" class="level2">
+<h2 class="anchored" data-anchor-id="imp-fix">Imp fix?</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb92"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>()[<span class="sc">!</span><span class="fu">ls</span>() <span class="sc">%in%</span> KEEP])</span>
+<span id="cb92-2"><a href="#cb92-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb92-3"><a href="#cb92-3" aria-hidden="true" tabindex="-1"></a>fpas2 <span class="ot">&lt;-</span> fpas  <span class="sc">|&gt;</span> <span class="fu">filter</span>(total_TD <span class="sc">&lt;</span> <span class="dv">2900</span>)</span>
+<span id="cb92-4"><a href="#cb92-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb92-5"><a href="#cb92-5" aria-hidden="true" tabindex="-1"></a>refs2 <span class="ot">&lt;-</span> <span class="fu">rownames</span>(fpas2[<span class="dv">1</span><span class="sc">:</span>(<span class="dv">3</span><span class="sc">*</span><span class="fu">nrow</span>(fpas2)<span class="sc">/</span><span class="dv">4</span>),])</span>
+<span id="cb92-6"><a href="#cb92-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb92-7"><a href="#cb92-7" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> fpas2 <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN, CC, BA, SDI, ELEVFT, SLOPE, ASPECT, PHYSCLCD, FPAG)</span>
+<span id="cb92-8"><a href="#cb92-8" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(x)</span>
+<span id="cb92-9"><a href="#cb92-9" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(x, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb92-10"><a href="#cb92-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb92-11"><a href="#cb92-11" aria-hidden="true" tabindex="-1"></a>yfull <span class="ot">&lt;-</span> fpas2 <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="dv">1</span>, <span class="dv">11</span><span class="sc">:</span><span class="fu">ncol</span>(fpas2))</span>
+<span id="cb92-12"><a href="#cb92-12" aria-hidden="true" tabindex="-1"></a><span class="co"># That is the same number of rows as the 95% of the data from before. </span></span>
+<span id="cb92-13"><a href="#cb92-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb92-14"><a href="#cb92-14" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> yfull[refs2,]</span>
+<span id="cb92-15"><a href="#cb92-15" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">remove_rownames</span>(y)</span>
+<span id="cb92-16"><a href="#cb92-16" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">column_to_rownames</span>(y, <span class="st">"STANDPLOT_CN"</span>)</span>
+<span id="cb92-17"><a href="#cb92-17" aria-hidden="true" tabindex="-1"></a><span class="co"># can't have factors in msn or mal</span></span>
+<span id="cb92-18"><a href="#cb92-18" aria-hidden="true" tabindex="-1"></a>x6 <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span>FPAG, <span class="sc">-</span>PHYSCLCD)</span>
+<span id="cb92-19"><a href="#cb92-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb92-20"><a href="#cb92-20" aria-hidden="true" tabindex="-1"></a>k <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb92-21"><a href="#cb92-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb92-22"><a href="#cb92-22" aria-hidden="true" tabindex="-1"></a>yrf <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">whatsMax</span>(y[ ,<span class="dv">1</span><span class="sc">:</span>(<span class="fu">ncol</span>(y)<span class="sc">-</span><span class="dv">1</span>)]), y[, <span class="fu">ncol</span>(y)])</span>
+<span id="cb92-23"><a href="#cb92-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb92-24"><a href="#cb92-24" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(yrf) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'Max_SP'</span>, <span class="st">'sp_max_TD'</span>, <span class="st">'total_TD'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="msn-mal-6-1" class="level4">
+<h4 class="anchored" data-anchor-id="msn-mal-6-1">msn &amp; mal 6</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb93"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a>msn_x6_ref2 <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> x6, <span class="at">y =</span> y, <span class="at">method =</span> <span class="st">"msn"</span>, <span class="at">k =</span> k)</span>
+<span id="cb93-2"><a href="#cb93-2" aria-hidden="true" tabindex="-1"></a>mal_x6_ref2 <span class="ot">&lt;-</span> <span class="fu">yai</span>(<span class="at">x =</span> x6, <span class="at">y =</span> y, <span class="at">method =</span> <span class="st">"mahalanobis"</span>, <span class="at">k =</span> k)</span>
+<span id="cb93-3"><a href="#cb93-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb93-4"><a href="#cb93-4" aria-hidden="true" tabindex="-1"></a>KEEP <span class="ot">&lt;-</span> KEEP <span class="sc">|&gt;</span> <span class="fu">append</span>(<span class="fu">c</span>(<span class="st">'mal_x6_ref2'</span>, <span class="st">'msn_x6_ref2'</span>))</span>
+<span id="cb93-5"><a href="#cb93-5" aria-hidden="true" tabindex="-1"></a>KEEP <span class="ot">&lt;-</span> KEEP <span class="sc">|&gt;</span> <span class="fu">unique</span>() <span class="sc">|&gt;</span> <span class="fu">sort</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="rf-all-1" class="level4">
+<h4 class="anchored" data-anchor-id="rf-all-1">RF all</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Separating this because it takes a long time and I don't want to run in by accident. </span></span>
+<span id="cb94-2"><a href="#cb94-2" aria-hidden="true" tabindex="-1"></a><span class="co"># rf_all_ref2 &lt;- yai(x = x, y = yrf, method = "randomForest", k = k)</span></span>
+<span id="cb94-3"><a href="#cb94-3" aria-hidden="true" tabindex="-1"></a><span class="co"># save(rf_all_ref2, file = "imps_0402/rf_all_refs2.Rdata")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb95"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"imps_0402/rf_all_refs2.Rdata"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a><span class="co"># rf_all_ps_i &lt;- impute(rf_all_ps, ancillaryData = y)</span></span>
+<span id="cb96-2"><a href="#cb96-2" aria-hidden="true" tabindex="-1"></a>rf_all_ref2_i <span class="ot">&lt;-</span> <span class="fu">impute</span>(rf_all_ref2, <span class="at">ancillaryData =</span> y)</span>
+<span id="cb96-3"><a href="#cb96-3" aria-hidden="true" tabindex="-1"></a>mal_x6_i <span class="ot">&lt;-</span> <span class="fu">impute</span>(mal_x6_ps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb97"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a>t_ns <span class="ot">&lt;-</span> <span class="fu">compare.yai</span>(rf_all_ps_i, rf_all_ref2_i, mal_x6_ref2, mal_x6_i,  <span class="at">scale =</span> F)</span>
+<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="fu">compare.yai</span>(rf_all_ps_i, rf_all_ref2_i, mal_x6_ref2, mal_x6_i)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in compare.yai(rf_all_ps_i, rf_all_ref2_i, mal_x6_ref2, mal_x6_i): not
+all scale factors are the same.</code></pre>
+</div>
+</div>
+</section>
+<section id="eval" class="level3">
+<h3 class="anchored" data-anchor-id="eval">eval</h3>
+<div>
+<div class="sourceCode cell-code" id="cb99"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(t_ns, <span class="at">main =</span> <span class="st">"Not Scaled"</span>)</span>
+<span id="cb99-2"><a href="#cb99-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(t, <span class="at">main =</span> <span class="st">"Scaled"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="6_Model_Eval_2_files/figure-html/unnamed-chunk-51-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="6_Model_Eval_2_files/figure-html/unnamed-chunk-51-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb100"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a>t_ns<span class="sc">$</span>min <span class="ot">&lt;-</span> <span class="fu">names</span>(t_ns)[<span class="fu">apply</span>(t_ns, <span class="dv">1</span>, which.min)]</span>
+<span id="cb100-2"><a href="#cb100-2" aria-hidden="true" tabindex="-1"></a>t_ns<span class="sc">$</span>min <span class="ot">&lt;-</span> t_ns<span class="sc">$</span>min <span class="sc">|&gt;</span> <span class="fu">str_sub</span>(<span class="dv">1</span>, <span class="dv">9</span>)</span>
+<span id="cb100-3"><a href="#cb100-3" aria-hidden="true" tabindex="-1"></a>t_ns<span class="sc">|&gt;</span> <span class="fu">arrange</span>(min)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 20%">
+<col style="width: 22%">
+<col style="width: 20%">
+<col style="width: 16%">
+<col style="width: 11%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">rf_all_ps_i.rmsdS</th>
+<th style="text-align: right;">rf_all_ref2_i.rmsdS</th>
+<th style="text-align: right;">mal_x6_ref2.rmsdS</th>
+<th style="text-align: right;">mal_x6_i.rmsdS</th>
+<th style="text-align: left;">min</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">876.22994</td>
+<td style="text-align: right;">302.94122</td>
+<td style="text-align: right;">278.77710</td>
+<td style="text-align: right;">754.46481</td>
+<td style="text-align: left;">mal_x6_re</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ABGR_TD</td>
+<td style="text-align: right;">238.11462</td>
+<td style="text-align: right;">118.50571</td>
+<td style="text-align: right;">165.01598</td>
+<td style="text-align: right;">277.73063</td>
+<td style="text-align: left;">rf_all_re</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PIPO_TD</td>
+<td style="text-align: right;">94.80876</td>
+<td style="text-align: right;">64.25259</td>
+<td style="text-align: right;">74.33279</td>
+<td style="text-align: right;">125.99836</td>
+<td style="text-align: left;">rf_all_re</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">240.66058</td>
+<td style="text-align: right;">137.84547</td>
+<td style="text-align: right;">161.28575</td>
+<td style="text-align: right;">274.08248</td>
+<td style="text-align: left;">rf_all_re</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ABLA_TD</td>
+<td style="text-align: right;">262.60464</td>
+<td style="text-align: right;">145.62121</td>
+<td style="text-align: right;">174.54931</td>
+<td style="text-align: right;">261.73287</td>
+<td style="text-align: left;">rf_all_re</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">TSME_TD</td>
+<td style="text-align: right;">75.79003</td>
+<td style="text-align: right;">52.54523</td>
+<td style="text-align: right;">62.06037</td>
+<td style="text-align: right;">88.05078</td>
+<td style="text-align: left;">rf_all_re</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ABAM_TD</td>
+<td style="text-align: right;">262.97926</td>
+<td style="text-align: right;">138.25686</td>
+<td style="text-align: right;">182.11707</td>
+<td style="text-align: right;">289.84361</td>
+<td style="text-align: left;">rf_all_re</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">THPL_TD</td>
+<td style="text-align: right;">171.87645</td>
+<td style="text-align: right;">89.87215</td>
+<td style="text-align: right;">132.15119</td>
+<td style="text-align: right;">183.14742</td>
+<td style="text-align: left;">rf_all_re</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PIEN_TD</td>
+<td style="text-align: right;">276.55670</td>
+<td style="text-align: right;">54.79619</td>
+<td style="text-align: right;">63.74589</td>
+<td style="text-align: right;">300.22660</td>
+<td style="text-align: left;">rf_all_re</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">TSHE_TD</td>
+<td style="text-align: right;">482.13140</td>
+<td style="text-align: right;">99.85822</td>
+<td style="text-align: right;">124.85768</td>
+<td style="text-align: right;">508.01034</td>
+<td style="text-align: left;">rf_all_re</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PICO_TD</td>
+<td style="text-align: right;">262.50039</td>
+<td style="text-align: right;">92.23968</td>
+<td style="text-align: right;">134.09621</td>
+<td style="text-align: right;">315.22969</td>
+<td style="text-align: left;">rf_all_re</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PIMO3_TD</td>
+<td style="text-align: right;">50.60531</td>
+<td style="text-align: right;">39.86885</td>
+<td style="text-align: right;">48.00670</td>
+<td style="text-align: right;">51.02393</td>
+<td style="text-align: left;">rf_all_re</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">uncommon</td>
+<td style="text-align: right;">287.08426</td>
+<td style="text-align: right;">110.18565</td>
+<td style="text-align: right;">124.30876</td>
+<td style="text-align: right;">309.27698</td>
+<td style="text-align: left;">rf_all_re</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">rare</td>
+<td style="text-align: right;">152.75692</td>
+<td style="text-align: right;">82.92543</td>
+<td style="text-align: right;">102.16046</td>
+<td style="text-align: right;">190.10477</td>
+<td style="text-align: left;">rf_all_re</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb101"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a><span class="fu">qplot</span>(t_ns<span class="sc">$</span>min)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="6_Model_Eval_2_files/figure-html/unnamed-chunk-52-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>It’s not even close. It really looks like a good idea to trim the outliers.</p>
+</section>
+</section>
+<section id="now-what-does-it-mean." class="level2">
+<h2 class="anchored" data-anchor-id="now-what-does-it-mean.">Now what does it mean.</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb102"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a>all_dist <span class="ot">&lt;-</span> <span class="fu">rmsd</span>(rf_all_ref2_i)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb103"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a>observed <span class="ot">&lt;-</span> rf_all_ref2_i <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">ends_with</span>(<span class="st">".o"</span>)) <span class="sc">|&gt;</span> <span class="fu">drop_na</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb104"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a>all_dist<span class="sc">$</span>sd <span class="ot">&lt;-</span> <span class="fu">apply</span>(observed, <span class="dv">2</span>, sd)</span>
+<span id="cb104-2"><a href="#cb104-2" aria-hidden="true" tabindex="-1"></a>all_dist<span class="sc">$</span>mean <span class="ot">&lt;-</span> <span class="fu">apply</span>(observed, <span class="dv">2</span>, mean)</span>
+<span id="cb104-3"><a href="#cb104-3" aria-hidden="true" tabindex="-1"></a>all_dist<span class="sc">$</span>med <span class="ot">&lt;-</span> <span class="fu">apply</span>(observed, <span class="dv">2</span>, median)</span>
+<span id="cb104-4"><a href="#cb104-4" aria-hidden="true" tabindex="-1"></a>all_dist<span class="sc">$</span>iqr <span class="ot">&lt;-</span> <span class="fu">apply</span>(observed, <span class="dv">2</span>, IQR)</span>
+<span id="cb104-5"><a href="#cb104-5" aria-hidden="true" tabindex="-1"></a>all_dist</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">rmsd</th>
+<th style="text-align: right;">sd</th>
+<th style="text-align: right;">mean</th>
+<th style="text-align: right;">med</th>
+<th style="text-align: right;">iqr</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">ABGR_TD</td>
+<td style="text-align: right;">118.50571</td>
+<td style="text-align: right;">146.27163</td>
+<td style="text-align: right;">28.214524</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PIPO_TD</td>
+<td style="text-align: right;">64.25259</td>
+<td style="text-align: right;">64.72799</td>
+<td style="text-align: right;">7.912081</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PSME_TD</td>
+<td style="text-align: right;">137.84547</td>
+<td style="text-align: right;">141.46196</td>
+<td style="text-align: right;">36.400053</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ABLA_TD</td>
+<td style="text-align: right;">145.62121</td>
+<td style="text-align: right;">195.80255</td>
+<td style="text-align: right;">40.963508</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">TSME_TD</td>
+<td style="text-align: right;">52.54523</td>
+<td style="text-align: right;">51.19306</td>
+<td style="text-align: right;">4.523110</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ABAM_TD</td>
+<td style="text-align: right;">138.25686</td>
+<td style="text-align: right;">193.90993</td>
+<td style="text-align: right;">37.986952</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">THPL_TD</td>
+<td style="text-align: right;">89.87215</td>
+<td style="text-align: right;">118.11815</td>
+<td style="text-align: right;">18.307613</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PIEN_TD</td>
+<td style="text-align: right;">54.79619</td>
+<td style="text-align: right;">50.97825</td>
+<td style="text-align: right;">5.625870</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">TSHE_TD</td>
+<td style="text-align: right;">99.85822</td>
+<td style="text-align: right;">117.51366</td>
+<td style="text-align: right;">17.756233</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">PICO_TD</td>
+<td style="text-align: right;">92.23968</td>
+<td style="text-align: right;">114.58934</td>
+<td style="text-align: right;">13.995193</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PIMO3_TD</td>
+<td style="text-align: right;">39.86885</td>
+<td style="text-align: right;">36.79169</td>
+<td style="text-align: right;">2.967591</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">uncommon</td>
+<td style="text-align: right;">110.18565</td>
+<td style="text-align: right;">98.28547</td>
+<td style="text-align: right;">14.757263</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">rare</td>
+<td style="text-align: right;">82.92543</td>
+<td style="text-align: right;">84.99143</td>
+<td style="text-align: right;">9.328634</td>
+<td style="text-align: right;">0.00000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">total_TD</td>
+<td style="text-align: right;">302.94122</td>
+<td style="text-align: right;">444.63723</td>
+<td style="text-align: right;">238.738626</td>
+<td style="text-align: right;">74.96528</td>
+<td style="text-align: right;">299.8611</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb105"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(all_dist)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      rmsd              sd              mean              med        
+ Min.   : 39.87   Min.   : 36.79   Min.   :  2.968   Min.   : 0.000  
+ 1st Qu.: 68.92   1st Qu.: 69.79   1st Qu.:  8.266   1st Qu.: 0.000  
+ Median : 96.05   Median :116.05   Median : 16.257   Median : 0.000  
+ Mean   :109.27   Mean   :132.81   Mean   : 34.106   Mean   : 5.355  
+ 3rd Qu.:133.01   3rd Qu.:145.07   3rd Qu.: 34.354   3rd Qu.: 0.000  
+ Max.   :302.94   Max.   :444.64   Max.   :238.739   Max.   :74.965  
+      iqr        
+ Min.   :  0.00  
+ 1st Qu.:  0.00  
+ Median :  0.00  
+ Mean   : 21.42  
+ 3rd Qu.:  0.00  
+ Max.   :299.86  </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb107"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb107-1"><a href="#cb107-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>((rf_all_ref2_i<span class="sc">$</span>total_TD.o <span class="sc">-</span> rf_all_ref2_i<span class="sc">$</span>total_TD), <span class="at">breaks =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="6_Model_Eval_2_files/figure-html/unnamed-chunk-57-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb108"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb108-1"><a href="#cb108-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>((rf_all_ref2_i<span class="sc">$</span>total_TD.o <span class="sc">-</span> rf_all_ref2_i<span class="sc">$</span>total_TD), <span class="at">na.rm =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 37.35488</code></pre>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
