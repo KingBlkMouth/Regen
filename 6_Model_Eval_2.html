@@ -215,11 +215,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="summary" class="level2">
 <h2 class="anchored" data-anchor-id="summary">Summary</h2>
-<p>There were several peculiarities that popped up in the last Model Eval section.</p>
-<p>The rmsds between the distance matrices and the random forests didn’t make a lot of sense. There were NAs in the RF imputations that I didn’t think should have been there. The physical cd that I added a while back is being listed as a negatively important variable. I think that means that it is hurting the process. I am going to get all of these onto the same page. That should take care of the NAs and give me a better understanding of the rmsds.</p>
+<p>Random Forests with all the predictors on a dataset that has the largest 2.5% fo values clipped seems to be a pretty good model.</p>
+<p>The only other thing I can think to try is to subset it by FPAG and run them without any crossover.</p>
 </section>
 <section id="notes" class="level2">
 <h2 class="anchored" data-anchor-id="notes">Notes</h2>
+<p>There were several peculiarities that popped up in the last Model Eval section.</p>
+<p>The rmsds between the distance matrices and the random forests didn’t make a lot of sense. There were NAs in the RF imputations that I didn’t think should have been there. The physical cd that I added a while back is being listed as a negatively important variable. I think that means that it is hurting the process. I am going to get all of these onto the same page. That should take care of the NAs and give me a better understanding of the rmsds.</p>
 <p><a href="https://www.jstatsoft.org/article/view/v023i10">yaImpute Paper</a></p>
 <p><a href="https://rdrr.io/rforge/yaImpute/">yaImpute package info</a></p>
 <p>Breiman L (2001). “Random Forests.” Machine Learning, <a href="https://link.springer.com/article/10.1023/A:1010933404324">Breiman L 2001</a></p>
@@ -2818,6 +2820,13 @@ all scale factors are the same.</code></pre>
 </div>
 </div>
 <p>95% conf interval is between 33 and 42 more trees observed than imputed.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb105"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(fpas, <span class="at">file =</span> <span class="st">"dfs_0403/fpas.Rdata"</span>)</span>
+<span id="cb105-2"><a href="#cb105-2" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(rf_all_ref2_i, <span class="at">file =</span> <span class="st">"dfs_0403/rf_all_ref2_i.Rdata"</span>)</span>
+<span id="cb105-3"><a href="#cb105-3" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(imp_data, <span class="at">file =</span> <span class="st">"dfs_0403/imp_data.Rdata"</span>)</span>
+<span id="cb105-4"><a href="#cb105-4" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(fpas2, <span class="at">file =</span> <span class="st">"dfs_0403/fpas_TD2900.Rdata"</span>)</span>
+<span id="cb105-5"><a href="#cb105-5" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(KEEP, <span class="at">file =</span> <span class="st">"dfs_0403/KEEP.Rdata"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 
 
 </section>

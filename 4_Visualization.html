@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -126,11 +160,21 @@ ul.task-list li input[type="checkbox"] {
    
   <ul>
   <li><a href="#to-do" id="toc-to-do" class="nav-link active" data-scroll-target="#to-do">To-do</a></li>
+  <li><a href="#species-per-subplots-per-fpag" id="toc-species-per-subplots-per-fpag" class="nav-link" data-scroll-target="#species-per-subplots-per-fpag">Species per subplots per FPAG</a>
+  <ul class="collapse">
+  <li><a href="#plots-with-emtpy-subplots." id="toc-plots-with-emtpy-subplots." class="nav-link" data-scroll-target="#plots-with-emtpy-subplots.">Plots with emtpy subplots.</a></li>
+  <li><a href="#plots-without-empties" id="toc-plots-without-empties" class="nav-link" data-scroll-target="#plots-without-empties">Plots without empties</a></li>
+  </ul></li>
+  <li><a href="#tpa-per-species-per-fpag" id="toc-tpa-per-species-per-fpag" class="nav-link" data-scroll-target="#tpa-per-species-per-fpag">TPA per Species per FPAG</a>
+  <ul class="collapse">
+  <li><a href="#plots-with-rare-trees" id="toc-plots-with-rare-trees" class="nav-link" data-scroll-target="#plots-with-rare-trees">Plots with rare trees</a></li>
+  <li><a href="#plots-without-rare-trees." id="toc-plots-without-rare-trees." class="nav-link" data-scroll-target="#plots-without-rare-trees.">Plots without rare trees.</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content page-columns page-full" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
@@ -195,8 +239,1149 @@ ul.task-list li input[type="checkbox"] {
 <ol start="2" type="1">
 <li>The knn distribution is in the</li>
 </ol>
+</section>
+<section id="species-per-subplots-per-fpag" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="species-per-subplots-per-fpag">Species per subplots per FPAG</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Data tidying and access</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse, <span class="at">quietly =</span> T)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># library(readxl)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># library(writexl)</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># yaImpute and related </span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(yaImpute)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(vegan)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># plots and tables</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(esquisse)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co"># No sci-notation. </span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">scipen =</span> <span class="dv">999</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"dfs_0403/KEEP.Rdata"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>()[<span class="sc">!</span><span class="fu">ls</span>() <span class="sc">%in%</span> KEEP])</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"dfs_0403/fpas.Rdata"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"dfs_0403/rf_all_ref2_i.Rdata"</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"dfs_0403/imp_data.Rdata"</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"dfs_0403/fpas_TD2900.Rdata"</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"dfs_0403/sp_prev_df.Rdata"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(),  <span class="st">"./attempt_032524.db"</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># dbListTables(con)</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"select * from FVS_TREEINIT_PLOT"</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>seedling_densities <span class="ot">&lt;-</span> tree <span class="sc">|&gt;</span>  <span class="fu">filter</span>(<span class="fu">startsWith</span>(TREE_CN, <span class="st">"S"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(STANDPLOT_CN, SPECIES) <span class="sc">|&gt;</span> </span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">TPA =</span> <span class="fu">sum</span>(TREE_COUNT))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'STANDPLOT_CN'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>clean_na_cols <span class="ot">&lt;-</span> <span class="cf">function</span>(df){</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  df <span class="ot">&lt;-</span> df[, <span class="fu">colSums</span>(<span class="fu">is.na</span>(df)) <span class="sc">&lt;</span> <span class="fu">nrow</span>(df)]</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>KEEP <span class="ot">&lt;-</span> <span class="fu">append</span>(KEEP, <span class="st">"clean_na_cols"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> <span class="fu">clean_na_cols</span>(tree)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">"C:</span><span class="sc">\\</span><span class="st">RxFire</span><span class="sc">\\</span><span class="st">Data</span><span class="sc">\\</span><span class="st">_FIADB_WA.db"</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Pulling in the species reference table</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>plants_ref <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  con, <span class="st">"select SPECIES_SYMBOL, SPCD, COMMON_NAME, W_SPGRPCD from REF_SPECIES"</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>plant_gr_ref <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  con, <span class="st">"select SPGRPCD, NAME from REF_SPECIES_GROUP"</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Cleaning it up</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>plants_ref <span class="ot">&lt;-</span> plants_ref <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">SPGRPCD =</span> W_SPGRPCD, <span class="at">SYMBL =</span> SPECIES_SYMBOL)</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>plants_ref <span class="ot">&lt;-</span> <span class="fu">left_join</span>(plants_ref, plant_gr_ref, <span class="at">by =</span> <span class="fu">join_by</span>(SPGRPCD))</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>plants <span class="ot">&lt;-</span> plants_ref <span class="sc">|&gt;</span> <span class="fu">select</span>(SYMBL, SPCD)</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>seedling_densities <span class="ot">&lt;-</span> seedling_densities <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">SPECIES =</span> <span class="fu">as.numeric</span>(SPECIES))</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Getting plant codes for seedlings</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>seedling_densities <span class="ot">&lt;-</span> <span class="fu">left_join</span>(seedling_densities, plants, <span class="fu">join_by</span>(<span class="st">"SPECIES"</span> <span class="sc">==</span> <span class="st">"SPCD"</span>))</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Removing an extra col. </span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>seedling_densities <span class="ot">&lt;-</span> seedling_densities <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(SPECIES))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Look up the .groups argument. I always get that error when summarizing by two variables.</p>
+<p>This will be the number of species per fpag for the fpags that are in the first set used in RF. It’s the 50 FPAGs with the most subplots. Off the top of my head it’s about 60 subplots to 2400 subplots.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> fpas <span class="sc">|&gt;</span> <span class="fu">select</span>(STANDPLOT_CN, FPAG)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="fu">left_join</span>(t, seedling_densities, <span class="at">by =</span> <span class="fu">join_by</span>(STANDPLOT_CN))</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(t<span class="sc">$</span>TPA))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 11115</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>t1 <span class="ot">&lt;-</span> t <span class="sc">|&gt;</span> <span class="fu">mutate</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">TPA =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(TPA), <span class="dv">0</span>, TPA), </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">SYMBL =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(SYMBL), <span class="st">"EMTY"</span>, SYMBL)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>num_plts <span class="ot">&lt;-</span> t1</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>num_plts <span class="ot">&lt;-</span> num_plts <span class="sc">|&gt;</span> <span class="fu">group_by</span>(FPAG) <span class="sc">|&gt;</span> </span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n_plots =</span> <span class="fu">n_distinct</span>(STANDPLOT_CN))</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> t1 <span class="sc">|&gt;</span> <span class="fu">group_by</span>(FPAG, SYMBL) <span class="sc">|&gt;</span> </span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_plots_w_spp =</span> <span class="fu">n</span>()</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'FPAG'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> t2 <span class="sc">|&gt;</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(n_plots_w_spp))</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>fpags <span class="ot">&lt;-</span> t2<span class="sc">$</span>FPAG <span class="sc">|&gt;</span> <span class="fu">unique</span>()</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>t2 <span class="sc">|&gt;</span> <span class="fu">group_by</span>(FPAG) <span class="sc">|&gt;</span> </span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">num_spp_per_fpag =</span> <span class="fu">n_distinct</span>(SYMBL)) <span class="sc">|&gt;</span> </span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(num_spp_per_fpag)) <span class="sc">|&gt;</span> <span class="fu">head</span>(<span class="at">n =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">FPAG</th>
+<th style="text-align: right;">num_spp_per_fpag</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">CD</td>
+<td style="text-align: right;">23</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CHS1</td>
+<td style="text-align: right;">23</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CDS6</td>
+<td style="text-align: right;">22</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CES4</td>
+<td style="text-align: right;">21</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CH</td>
+<td style="text-align: right;">21</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> <span class="fu">left_join</span>(t2, sp_prev_df, <span class="fu">join_by</span>(SYMBL, FPAG)) <span class="sc">|&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>sum_TPA, <span class="sc">-</span>TPA_all_spp, <span class="sc">-</span> percent) <span class="sc">|&gt;</span> </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">prev =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(prev), <span class="st">"empty"</span>, prev),</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">color =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(color), <span class="st">"grey"</span>, color))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>11115 of 29124 rows in t are NAs. I think those are the rows where there are no seedlings.</p>
+<section id="plots-with-emtpy-subplots." class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="plots-with-emtpy-subplots.">Plots with emtpy subplots.</h3>
+<p>There are 50 graphs for 50 FPAGs with 22721 subplots in total. The bars represent the number of plots that have a given species in that FPAG. They’re small, but grey is for empty subplots, blue is for ubiquitous trees within that fpag, then green, orange, yellow, red for prevalent to rare. The cutoffs for these categories are 2.5, 10, 25, 55 percent of seedlings in the FPAG.</p>
+<p>These categories are for prevalence per FPAG. Some of the other plots I made are by overall prevalence in the whole set.</p>
+<div class="page-columns page-full">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">50</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># num_plts[num_plts$FPAG %in% fpags[m:n],] |&gt; arrange(desc(n_plots))</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> fpags[m<span class="sc">:</span>n]) {</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print(i)</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> t2[t2<span class="sc">$</span>FPAG <span class="sc">==</span> i,] <span class="sc">|&gt;</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(SYMBL, <span class="fu">desc</span>(n_plots_w_spp)), <span class="at">y =</span> n_plots_w_spp, <span class="at">fill =</span> color) <span class="sc">+</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_col</span>(<span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_identity</span>(<span class="at">labels =</span> <span class="fu">c</span>(<span class="st">'Ubiq'</span>, <span class="st">'Prev'</span>, <span class="st">'Com'</span>, <span class="st">'Uncom'</span>, <span class="st">'Rare'</span>, <span class="st">"Empty"</span>), <span class="at">guide =</span> <span class="st">"legend"</span>) <span class="sc">+</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">guides</span>(<span class="at">fill =</span> <span class="fu">guide_legend</span>(<span class="at">title =</span> <span class="st">"Prev"</span>)) <span class="sc">+</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_discrete</span>(<span class="at">guide =</span> <span class="fu">guide_axis</span>(<span class="at">angle =</span> <span class="dv">90</span>)) <span class="sc">+</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> i,</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>         <span class="at">subtitle =</span> <span class="fu">str_c</span>(<span class="st">"Total Num Plots = "</span>, num_plts[num_plts<span class="sc">$</span>FPAG <span class="sc">==</span> i, <span class="dv">2</span>])) <span class="sc">+</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlab</span>(<span class="st">"Species per FPAG"</span>)</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(p)</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell column-page quarto-layout-panel" data-fig.asp="0.618">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-3.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-4.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-5.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-6.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-7.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-8.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-9.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-10.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-11.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-12.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-13.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-14.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-15.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-16.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-17.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-18.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-19.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-20.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-21.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-22.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-23.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-24.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-25.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-26.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-27.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-28.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-29.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-30.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-31.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-32.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-33.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-34.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-35.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-36.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-37.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-38.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-39.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-40.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-41.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-42.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-43.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-44.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-45.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-46.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-47.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-48.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-49.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-5-50.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="plots-without-empties" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="plots-without-empties">Plots without empties</h3>
+<p>This is the same as before, but I removed the empty plots to see the actual species per fpag.</p>
+<div class="page-columns page-full">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">50</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># num_plts[num_plts$FPAG %in% fpags[m:n],] |&gt; arrange(desc(n_plots))</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> fpags[m<span class="sc">:</span>n]) {</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print(i)</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> t2[t2<span class="sc">$</span>FPAG <span class="sc">==</span> i,] <span class="sc">|&gt;</span> <span class="fu">filter</span>(SYMBL <span class="sc">!=</span> <span class="st">"EMTY"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(SYMBL, <span class="fu">desc</span>(n_plots_w_spp)), <span class="at">y =</span> n_plots_w_spp, <span class="at">fill =</span> color) <span class="sc">+</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_col</span>()  <span class="sc">+</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_identity</span>(<span class="at">labels =</span> <span class="fu">c</span>(<span class="st">'Ubiq'</span>, <span class="st">'Prev'</span>, <span class="st">'Com'</span>, <span class="st">'Uncom'</span>, <span class="st">'Rare'</span>, <span class="st">"Empty"</span>), <span class="at">guide =</span> <span class="st">"legend"</span>) <span class="sc">+</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">guides</span>(<span class="at">fill =</span> <span class="fu">guide_legend</span>(<span class="at">title =</span> <span class="st">"Prev"</span>)) <span class="sc">+</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_discrete</span>(<span class="at">guide =</span> <span class="fu">guide_axis</span>(<span class="at">angle =</span> <span class="dv">90</span>)) <span class="sc">+</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> i,</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>         <span class="at">subtitle =</span> <span class="fu">str_c</span>(<span class="st">"Total Num Plots = "</span>, num_plts[num_plts<span class="sc">$</span>FPAG <span class="sc">==</span> i, <span class="dv">2</span>])) <span class="sc">+</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlab</span>(<span class="st">"Species per FPAG"</span>)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(p)</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell column-page quarto-layout-panel" data-fig.asp="0.618">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-2.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-3.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-4.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-5.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-6.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-7.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-8.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-9.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-10.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-11.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-12.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-13.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-14.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-15.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-16.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-17.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-18.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-19.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-20.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-21.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-22.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-23.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-24.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-25.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-26.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-27.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-28.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-29.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-30.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-31.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-32.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-33.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-34.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-35.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-36.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-37.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-38.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-39.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-40.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-41.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-42.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-43.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-44.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-45.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-46.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-47.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-48.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-49.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-6-50.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="tpa-per-species-per-fpag" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="tpa-per-species-per-fpag">TPA per Species per FPAG</h2>
+<p>Summing all the TPAs per FPAG and Species.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>tt <span class="ot">&lt;-</span> t <span class="sc">|&gt;</span> <span class="fu">drop_na</span>() <span class="sc">|&gt;</span> <span class="fu">group_by</span>(FPAG, SYMBL) <span class="sc">|&gt;</span> </span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">sum_TPA =</span> <span class="fu">sum</span>(TPA))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'FPAG'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> sp_prev_df <span class="sc">|&gt;</span> <span class="fu">select</span>(FPAG, SYMBL, prev, color)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>tt <span class="ot">&lt;-</span> <span class="fu">left_join</span>(tt, s, <span class="fu">join_by</span>(FPAG, SYMBL))</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>tt <span class="sc">|&gt;</span> <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="kable-table">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">FPAG</th>
+<th style="text-align: left;">SYMBL</th>
+<th style="text-align: right;">sum_TPA</th>
+<th style="text-align: left;">prev</th>
+<th style="text-align: left;">color</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">CAC1</td>
+<td style="text-align: left;">ABAM</td>
+<td style="text-align: right;">2773.7155</td>
+<td style="text-align: left;">uncom</td>
+<td style="text-align: left;">orange</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CAC1</td>
+<td style="text-align: left;">ABLA</td>
+<td style="text-align: right;">43554.8291</td>
+<td style="text-align: left;">prev</td>
+<td style="text-align: left;">green</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CAC1</td>
+<td style="text-align: left;">LALY</td>
+<td style="text-align: right;">29011.5643</td>
+<td style="text-align: left;">prev</td>
+<td style="text-align: left;">green</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CAC1</td>
+<td style="text-align: left;">LAOC</td>
+<td style="text-align: right;">749.6528</td>
+<td style="text-align: left;">rare</td>
+<td style="text-align: left;">red</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CAC1</td>
+<td style="text-align: left;">PIAL</td>
+<td style="text-align: right;">4273.0211</td>
+<td style="text-align: left;">uncom</td>
+<td style="text-align: left;">orange</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CAC1</td>
+<td style="text-align: left;">PIEN</td>
+<td style="text-align: right;">2623.7849</td>
+<td style="text-align: left;">uncom</td>
+<td style="text-align: left;">orange</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<section id="plots-with-rare-trees" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="plots-with-rare-trees">Plots with rare trees</h3>
+<p>These will look almost identical to the Spp per subplot per FPAG ones, but now they show the total number of trees.</p>
+<div class="page-columns page-full">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">12</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co"># num_plts[num_plts$FPAG %in% fpags[m:n],] |&gt; arrange(desc(n_plots))</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> fpags[m<span class="sc">:</span>n]) {</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print(i)</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> tt[tt<span class="sc">$</span>FPAG <span class="sc">==</span> i,] <span class="sc">|&gt;</span> <span class="fu">filter</span>(SYMBL <span class="sc">!=</span> <span class="st">"EMTY"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(SYMBL, <span class="fu">desc</span>(sum_TPA)), <span class="at">y =</span> sum_TPA, <span class="at">fill =</span> color) <span class="sc">+</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_col</span>()  <span class="sc">+</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_identity</span>(<span class="at">labels =</span> <span class="fu">c</span>(<span class="st">'Ubiq'</span>, <span class="st">'Prev'</span>, <span class="st">'Com'</span>, <span class="st">'Uncom'</span>, <span class="st">'Rare'</span>, <span class="st">"Empty"</span>), <span class="at">guide =</span> <span class="st">"legend"</span>) <span class="sc">+</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">guides</span>(<span class="at">fill =</span> <span class="fu">guide_legend</span>(<span class="at">title =</span> <span class="st">"Prev"</span>)) <span class="sc">+</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_discrete</span>(<span class="at">guide =</span> <span class="fu">guide_axis</span>(<span class="at">angle =</span> <span class="dv">90</span>)) <span class="sc">+</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> i,</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>         <span class="at">subtitle =</span> <span class="fu">str_c</span>(<span class="st">"Total Num Plots = "</span>, <span class="fu">unique</span>(tt[tt<span class="sc">$</span>FPAG <span class="sc">==</span> i, <span class="dv">1</span>]))) <span class="sc">+</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlab</span>(<span class="st">"Species per FPAG"</span>)</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(p)</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell column-page quarto-layout-panel" data-fig.asp="0.618">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-8-2.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-8-3.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-8-4.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-8-5.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-8-6.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-8-7.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-8-8.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-8-9.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-8-10.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-8-11.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-8-12.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+</div>
+</div>
+<section id="spp-prevalence" class="level4">
+<h4 class="anchored" data-anchor-id="spp-prevalence">spp prevalence</h4>
+<p>This is not to be confused with what I did in a different document using quantiles. This is in an attempt to refine that, so that I am not adding garbage when/if I run the RF by FPAG. I want to know which species should be ignored in each FPAG.</p>
+<p>Here is the distribution of percent by all spp. Left to right, I am zooming in.</p>
+<div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>ttt <span class="ot">&lt;-</span> tt <span class="sc">|&gt;</span> <span class="fu">group_by</span>(FPAG) <span class="sc">|&gt;</span> <span class="fu">summarise</span>(<span class="at">TPA_all_spp =</span> <span class="fu">sum</span>(sum_TPA))</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>t4 <span class="ot">&lt;-</span> <span class="fu">left_join</span>(tt, ttt, <span class="at">by =</span> <span class="st">'FPAG'</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>t4 <span class="ot">&lt;-</span> t4 <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">percent =</span> (sum_TPA<span class="sc">/</span>TPA_all_spp)<span class="sc">*</span><span class="dv">100</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>t5 <span class="ot">&lt;-</span> t4 <span class="sc">|&gt;</span> <span class="fu">filter</span>(percent <span class="sc">&gt;</span> <span class="fl">2.5</span>)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(t4<span class="sc">$</span>percent, <span class="at">breaks =</span> <span class="dv">100</span>)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(t4<span class="sc">$</span>percent, <span class="at">breaks =</span> <span class="dv">100</span>,</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">10</span>))</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(t4<span class="sc">$</span>percent, <span class="at">breaks =</span> <span class="dv">100</span>,</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">50</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-9-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-9-3.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</div>
+</div>
+<p>Here is a list of species prevalence. The cutoffs are pretty arbitrary. Other than rare, I just wanted a nice amount in each list.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>r <span class="ot">&lt;-</span> <span class="fl">2.5</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>u <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="dv">25</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="dv">55</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>rare_spp_by_fpag <span class="ot">&lt;-</span> t4 <span class="sc">|&gt;</span> <span class="fu">filter</span>(percent <span class="sc">&lt;</span> <span class="fl">2.5</span>) <span class="sc">|&gt;</span> <span class="fu">group_by</span>(FPAG) <span class="sc">|&gt;</span> </span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">spp =</span> <span class="fu">list</span>(<span class="fu">unique</span>(SYMBL))) <span class="sc">|&gt;</span> </span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(<span class="at">cols =</span> <span class="fu">c</span>(spp))</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>uncommon <span class="ot">&lt;-</span> t4 <span class="sc">|&gt;</span> <span class="fu">filter</span>(percent <span class="sc">&gt;=</span> r <span class="sc">&amp;</span> percent <span class="sc">&lt;</span> u) <span class="sc">|&gt;</span> <span class="fu">group_by</span>(FPAG) <span class="sc">|&gt;</span> </span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">spp =</span> <span class="fu">list</span>(<span class="fu">unique</span>(SYMBL))) <span class="sc">|&gt;</span> </span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(<span class="at">cols =</span> <span class="fu">c</span>(spp))</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>common <span class="ot">&lt;-</span> t4 <span class="sc">|&gt;</span> <span class="fu">filter</span>(percent <span class="sc">&gt;=</span> u <span class="sc">&amp;</span> percent <span class="sc">&lt;</span> c) <span class="sc">|&gt;</span> <span class="fu">group_by</span>(FPAG) <span class="sc">|&gt;</span> </span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">spp =</span> <span class="fu">list</span>(<span class="fu">unique</span>(SYMBL))) <span class="sc">|&gt;</span> </span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(<span class="at">cols =</span> <span class="fu">c</span>(spp))</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>prevalent <span class="ot">&lt;-</span> t4 <span class="sc">|&gt;</span> <span class="fu">filter</span>(percent <span class="sc">&gt;=</span> c <span class="sc">&amp;</span> percent <span class="sc">&lt;</span> p) <span class="sc">|&gt;</span> <span class="fu">group_by</span>(FPAG) <span class="sc">|&gt;</span> </span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">spp =</span> <span class="fu">list</span>(<span class="fu">unique</span>(SYMBL))) <span class="sc">|&gt;</span> </span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(<span class="at">cols =</span> <span class="fu">c</span>(spp))</span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>ubiquitous <span class="ot">&lt;-</span> t4 <span class="sc">|&gt;</span> <span class="fu">filter</span>(percent <span class="sc">&gt;=</span> p) <span class="sc">|&gt;</span> <span class="fu">group_by</span>(FPAG) <span class="sc">|&gt;</span> </span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">spp =</span> <span class="fu">list</span>(<span class="fu">unique</span>(SYMBL))) <span class="sc">|&gt;</span> </span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(<span class="at">cols =</span> <span class="fu">c</span>(spp))</span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>rare <span class="ot">&lt;-</span> <span class="fu">unique</span>(rare_spp_by_fpag<span class="sc">$</span>spp) <span class="sc">|&gt;</span> <span class="fu">sort</span>()</span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>uncommon <span class="ot">&lt;-</span> <span class="fu">unique</span>(uncommon<span class="sc">$</span>spp) <span class="sc">|&gt;</span> <span class="fu">sort</span>()</span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>common <span class="ot">&lt;-</span> <span class="fu">unique</span>(common<span class="sc">$</span>spp) <span class="sc">|&gt;</span> <span class="fu">sort</span>()</span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>prevalent <span class="ot">&lt;-</span> <span class="fu">unique</span>(prevalent<span class="sc">$</span>spp) <span class="sc">|&gt;</span> <span class="fu">sort</span>()</span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>ubiquitous <span class="ot">&lt;-</span> <span class="fu">unique</span>(ubiquitous<span class="sc">$</span>spp) <span class="sc">|&gt;</span> <span class="fu">sort</span>()</span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>prevalent <span class="ot">&lt;-</span> prevalent[<span class="sc">!</span>prevalent <span class="sc">%in%</span> ubiquitous]</span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a>common <span class="ot">&lt;-</span> common[<span class="sc">!</span>common <span class="sc">%in%</span> ubiquitous]</span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a>common <span class="ot">&lt;-</span> common[<span class="sc">!</span>common <span class="sc">%in%</span> prevalent]</span>
+<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a>uncommon <span class="ot">&lt;-</span> uncommon[<span class="sc">!</span>uncommon <span class="sc">%in%</span> ubiquitous]</span>
+<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a>uncommon <span class="ot">&lt;-</span> uncommon[<span class="sc">!</span>uncommon <span class="sc">%in%</span> common]</span>
+<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>uncommon <span class="ot">&lt;-</span> uncommon[<span class="sc">!</span>uncommon <span class="sc">%in%</span> prevalent]</span>
+<span id="cb19-43"><a href="#cb19-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-44"><a href="#cb19-44" aria-hidden="true" tabindex="-1"></a>rare <span class="ot">&lt;-</span> rare[<span class="sc">!</span>rare <span class="sc">%in%</span> ubiquitous]</span>
+<span id="cb19-45"><a href="#cb19-45" aria-hidden="true" tabindex="-1"></a>rare <span class="ot">&lt;-</span> rare[<span class="sc">!</span>rare <span class="sc">%in%</span> uncommon]</span>
+<span id="cb19-46"><a href="#cb19-46" aria-hidden="true" tabindex="-1"></a>rare <span class="ot">&lt;-</span> rare[<span class="sc">!</span>rare <span class="sc">%in%</span> common]</span>
+<span id="cb19-47"><a href="#cb19-47" aria-hidden="true" tabindex="-1"></a>rare <span class="ot">&lt;-</span> rare[<span class="sc">!</span>rare <span class="sc">%in%</span> prevalent]</span>
+<span id="cb19-48"><a href="#cb19-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-49"><a href="#cb19-49" aria-hidden="true" tabindex="-1"></a>sp_prev2 <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb19-50"><a href="#cb19-50" aria-hidden="true" tabindex="-1"></a>  <span class="at">ubiquitous =</span> ubiquitous,</span>
+<span id="cb19-51"><a href="#cb19-51" aria-hidden="true" tabindex="-1"></a>  <span class="at">prevalent =</span> prevalent,</span>
+<span id="cb19-52"><a href="#cb19-52" aria-hidden="true" tabindex="-1"></a>  <span class="at">common =</span> common,</span>
+<span id="cb19-53"><a href="#cb19-53" aria-hidden="true" tabindex="-1"></a>  <span class="at">uncommon =</span> uncommon,</span>
+<span id="cb19-54"><a href="#cb19-54" aria-hidden="true" tabindex="-1"></a>  <span class="at">rare =</span> rare)</span>
+<span id="cb19-55"><a href="#cb19-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-56"><a href="#cb19-56" aria-hidden="true" tabindex="-1"></a>sp_prev2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$ubiquitous
+[1] "ABAM" "ABGR" "ABLA" "PIPO" "PSME" "TSHE"
+
+$prevalent
+[1] "ACGL"  "FRLA"  "LALY"  "PICO"  "PRVI"  "QUGA4" "THPL" 
+
+$common
+[1] "LAOC"  "PIAL"  "PIEN"  "POTR5" "TSME" 
+
+$uncommon
+[1] "ABPR"  "ACMA3" "ALRU2" "BEPA"  "CHNO"  "MAFU"  "PIMO3" "PREM"  "TABR2"
+
+$rare
+ [1] "2TB"   "ABCO"  "ALRH2" "ARME"  "BEOC2" "CONU4" "JUOC"  "PISI"  "POBAT"
+[10] "PRAV"  "PRPE2" "PSMA" </code></pre>
+</div>
+</div>
+<p>This is what I had for prevalence before. I added an extra level. Some stuff was moved around.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"sp_prevalence.Rdata"</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>sp_prevalence</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$prevalent
+[1] "PSME_TD" "ABAM_TD" "ABLA_TD" "TSHE_TD"
+
+$common
+[1] "PIPO_TD"  "TSME_TD"  "ABGR_TD"  "THPL_TD"  "PIEN_TD"  "PICO_TD"  "PIMO3_TD"
+
+$uncommon
+[1] "PIAL_TD"  "ACGL_TD"  "LAOC_TD"  "TABR2_TD" "CHNO_TD"  "POTR5_TD"
+
+$rare
+ [1] "LALY_TD"  "BEPA_TD"  "PREM_TD"  "ABPR_TD"  "PRVI_TD"  "ALRU2_TD"
+ [7] "QUGA4_TD" "CONU4_TD" "ACMA3_TD" "JUOC_TD"  "FRLA_TD"  "2TB_TD"  
+[13] "POBAT_TD" "MAFU_TD"  "ARME_TD"  "ABCO_TD"  "PISI_TD"  "PSMA_TD" 
+[19] "ALRH2_TD" "JUNI_TD"  "BEUT_TD"  "BEOC2_TD" "PRPE2_TD" "JUHI_TD" 
+[25] "CHLA_TD"  "PRAV_TD" </code></pre>
+</div>
+</div>
+<p>This is where I start to make a df, that I then add back in the beginning to color everything the same.</p>
+<p>sp_prev3 is prevalence across the whole dataset.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>sp_prev3 <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">SYMBL =</span> sp_prev2) <span class="sc">|&gt;</span> <span class="fu">unnest</span>(SYMBL) <span class="sc">|&gt;</span> </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">prev =</span> <span class="fu">ifelse</span>(SYMBL <span class="sc">%in%</span> ubiquitous, <span class="st">"Ubiq"</span>, <span class="st">"null"</span>),</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">prev =</span> <span class="fu">ifelse</span>(SYMBL <span class="sc">%in%</span> prevalent, <span class="st">"Prev"</span>, prev),</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">prev =</span> <span class="fu">ifelse</span>(SYMBL <span class="sc">%in%</span> common, <span class="st">"Comm"</span>, prev),</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">prev =</span> <span class="fu">ifelse</span>(SYMBL <span class="sc">%in%</span> uncommon, <span class="st">"Uncom"</span>, prev),</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">prev =</span> <span class="fu">ifelse</span>(SYMBL <span class="sc">%in%</span> rare, <span class="st">"Rare"</span>, prev)</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>sp_prev3 <span class="ot">&lt;-</span> sp_prev3 <span class="sc">|&gt;</span> <span class="fu">mutate</span>(</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">color =</span> <span class="fu">ifelse</span>(SYMBL <span class="sc">%in%</span> ubiquitous, <span class="st">"blue"</span>, <span class="st">"null"</span>),</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">color =</span> <span class="fu">ifelse</span>(SYMBL <span class="sc">%in%</span> prevalent, <span class="st">"green"</span>, color),</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">color =</span> <span class="fu">ifelse</span>(SYMBL <span class="sc">%in%</span> common, <span class="st">"yellow"</span>, color),</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">color =</span> <span class="fu">ifelse</span>(SYMBL <span class="sc">%in%</span> uncommon, <span class="st">"orange"</span>, color),</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">color =</span> <span class="fu">ifelse</span>(SYMBL <span class="sc">%in%</span> rare, <span class="st">"red"</span>, color)</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a><span class="co"># save(sp_prev3, file = "dfs_0403/sp_prev3.Rdata")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="plots-without-rare-trees." class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="plots-without-rare-trees.">Plots without rare trees.</h3>
+<p>These plots do not contain species that represent less than 2.5% of the total TPA for a given FPAG. They are arranged in order of decreasing number of plots per FPAG. Species are on the x axis and the sum of Trees per acre for that species is on the y.</p>
+<div class="page-columns page-full">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>t5 <span class="ot">&lt;-</span> t4 <span class="sc">|&gt;</span> <span class="fu">filter</span>(percent <span class="sc">&gt;</span> <span class="fl">2.5</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">50</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> fpags[m<span class="sc">:</span>n]) {</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print(i)</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> t5[t5<span class="sc">$</span>FPAG <span class="sc">==</span> i,] <span class="sc">|&gt;</span> <span class="fu">filter</span>(SYMBL <span class="sc">!=</span> <span class="st">"EMTY"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(SYMBL, <span class="fu">desc</span>(sum_TPA)), <span class="at">y =</span> sum_TPA, <span class="at">fill =</span> color) <span class="sc">+</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_col</span>()  <span class="sc">+</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_identity</span>(<span class="at">labels =</span> <span class="fu">c</span>(<span class="st">'Ubiq'</span>, <span class="st">'Prev'</span>, <span class="st">'Com'</span>, <span class="st">'Uncom'</span>, <span class="st">'Rare'</span>), <span class="at">guide =</span> <span class="st">"legend"</span>) <span class="sc">+</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_discrete</span>(<span class="at">guide =</span> <span class="fu">guide_axis</span>(<span class="at">angle =</span> <span class="dv">90</span>)) <span class="sc">+</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">guides</span>(<span class="at">fill =</span> <span class="fu">guide_legend</span>(<span class="at">title =</span> <span class="st">"Prev"</span>)) <span class="sc">+</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> i,</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">subtitle =</span> <span class="fu">str_c</span>(<span class="st">"Total Num Plots = "</span>, <span class="fu">unique</span>(t5[t5<span class="sc">$</span>FPAG <span class="sc">==</span> i, <span class="dv">1</span>]))) <span class="sc">+</span></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlab</span>(<span class="st">"Species per FPAG"</span>)</span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(p)</span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell column-page quarto-layout-panel" data-fig.asp="0.618">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-2.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-3.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-4.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-5.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-6.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-7.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-8.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-9.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-10.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-11.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-12.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-13.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-14.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-15.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-16.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-17.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-18.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-19.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-20.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-21.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-22.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-23.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-24.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-25.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-26.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-27.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-28.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-29.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-30.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-31.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-32.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-33.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-34.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-35.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-36.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-37.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-38.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-39.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-40.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-41.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-42.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-43.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-44.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-45.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-46.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-47.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-48.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-49.png" class="img-fluid" width="768"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 25.0%;justify-content: center;">
+<p><img src="4_Visualization_files/figure-html/unnamed-chunk-13-50.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+</div>
+</div>
+<section id="saving-prev-by-fpag" class="level4">
+<h4 class="anchored" data-anchor-id="saving-prev-by-fpag">saving prev by fpag</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>r <span class="ot">&lt;-</span> <span class="fl">2.5</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>u <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="dv">25</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="dv">55</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>sp_prev_df <span class="ot">&lt;-</span> t4 <span class="sc">|&gt;</span> <span class="fu">mutate</span>(</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">prev =</span> <span class="fu">ifelse</span>(percent <span class="sc">&lt;</span> r, <span class="st">"rare"</span>, <span class="st">"null"</span>),</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">prev =</span> <span class="fu">ifelse</span>(percent <span class="sc">&gt;=</span> r <span class="sc">&amp;</span> percent <span class="sc">&lt;</span> u, <span class="st">"uncom"</span>, prev),</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">prev =</span> <span class="fu">ifelse</span>(percent <span class="sc">&gt;=</span> u <span class="sc">&amp;</span> percent <span class="sc">&lt;</span> c, <span class="st">"com"</span>, prev),</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">prev =</span> <span class="fu">ifelse</span>(percent <span class="sc">&gt;=</span> c <span class="sc">&amp;</span> percent <span class="sc">&lt;</span> p, <span class="st">"prev"</span>, prev),</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">prev =</span> <span class="fu">ifelse</span>(percent <span class="sc">&gt;=</span> p, <span class="st">"ubiq"</span>, prev), </span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">color =</span> <span class="fu">ifelse</span>(percent <span class="sc">&lt;</span> r, <span class="st">"red"</span>, <span class="cn">NA</span>),</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">color =</span> <span class="fu">ifelse</span>(percent <span class="sc">&gt;=</span> r <span class="sc">&amp;</span> percent <span class="sc">&lt;</span> u , <span class="st">"orange"</span>, color),</span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">color =</span> <span class="fu">ifelse</span>(percent <span class="sc">&gt;=</span> u <span class="sc">&amp;</span> percent <span class="sc">&lt;</span> c , <span class="st">"yellow"</span>, color),</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">color =</span> <span class="fu">ifelse</span>(percent <span class="sc">&gt;=</span> c <span class="sc">&amp;</span> percent <span class="sc">&lt;</span> p , <span class="st">"green"</span>, color),</span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">color =</span> <span class="fu">ifelse</span>(percent <span class="sc">&gt;=</span> p, <span class="st">"blue"</span>, color)</span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a><span class="co"># save(sp_prev_df, file = "dfs_0403/sp_prev_df.Rdata")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 
 
+</section>
+</section>
 </section>
 
 </main> <!-- /main -->
