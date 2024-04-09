@@ -143,6 +143,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="nav-link" href="./4_Visualization.html" rel="" target="">
  <span class="menu-text">Visualization</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./7_Predictors.html" rel="" target="">
+ <span class="menu-text">Predictors</span></a>
+  </li>  
 </ul>
             <div class="quarto-navbar-tools ms-auto">
 </div>
@@ -215,8 +219,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="summary" class="level2">
 <h2 class="anchored" data-anchor-id="summary">Summary</h2>
-<p>Random Forests with all the predictors on a dataset that has the largest 2.5% fo values clipped seems to be a pretty good model.</p>
-<p>The only other thing I can think to try is to subset it by FPAG and run them without any crossover.</p>
+<p>Random Forests with all the predictors on a dataset that has the largest 2.5% fo values clipped seems to be a pretty good model. By good I mean that for a given species or species group, there is roughly as much variation from the imputation as there is within the species.</p>
+<p>The only other thing I can think to try is to subset it by FPAG and run them without any crossover. I can’t help but think that would reduce the variation. RF is saying that the FPAGs aren’t a good predictor though.</p>
+<p>I still haven’t added ecoregion as a factor.</p>
+<p>My options are:</p>
+<ol type="1">
+<li><p>To go ahead and see if I can now get this model to run in FVS (and maybe try and compare it against the inland empires full regen model),</p></li>
+<li><p>Add eco-region and see how that compares.</p></li>
+<li><p>Try to run it as a series of subsets.</p></li>
+</ol>
 </section>
 <section id="notes" class="level2">
 <h2 class="anchored" data-anchor-id="notes">Notes</h2>
